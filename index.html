@@ -96,8 +96,17 @@
                         </select>
                     </div>
                 </div>
+                
                 <label class="form-label">Personal Asignado</label>
-                <input type="text" class="form-control" id="personal" placeholder="Ej: Electricista + Ayudante">
+                <select class="form-select" id="personal" required>
+                    <option value="" disabled selected>Seleccione técnico...</option>
+                    <option value="Técnico Electricista">Técnico Electricista</option>
+                    <option value="Técnico Refrigeración">Técnico Refrigeración</option>
+                    <option value="Soldador">Soldador</option>
+                    <option value="Miguel (Conducción)">Miguel (Conducción)</option>
+                    <option value="Ing. HySL">Ing. HySL</option>
+                    <option value="Equipo Colaborativo">Equipo Colaborativo (Varios)</option>
+                </select>
 
                 <div class="section-title">4. Detalle Técnico</div>
                 <label class="form-label">Descripción del Trabajo</label>
@@ -115,66 +124,4 @@
                 </select>
                 
                 <label class="form-label">Observaciones</label>
-                <input type="text" class="form-control" id="observaciones">
-
-                <button type="submit" id="btnSubmit" class="btn btn-primary btn-enviar text-white">
-                    <span id="spinner" class="spinner-border spinner-border-sm d-none"></span>
-                    REGISTRAR ORDEN DE TRABAJO
-                </button>
-            </form>
-            <div id="mensaje" class="alert alert-success mt-3 d-none text-center">¡OT enviada correctamente!</div>
-        </div>
-    </div>
-</div>
-
-<script>
-    const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzK13KgMLa_6erzqonLaaLgUNjCv8F6H_sFOrVaQoFnBTyvrwRuzHROcsr03CjM3nM07Q/exec";
-
-    document.getElementById('otForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const btn = document.getElementById('btnSubmit');
-        const spinner = document.getElementById('spinner');
-        const mensaje = document.getElementById('mensaje');
-
-        btn.disabled = true;
-        spinner.classList.remove('d-none');
-
-        const datos = {
-            tipo: document.getElementById('tipo').value,
-            especialidad: document.getElementById('especialidad').value,
-            prioridad: document.getElementById('prioridad').value,
-            edificio: document.getElementById('edificio').value,
-            sector: document.getElementById('sector').value,
-            equipo: document.getElementById('equipo').value,
-            inventario: document.getElementById('inventario').value,
-            reportadoPor: document.getElementById('reportadoPor').value,
-            medio: document.getElementById('medio').value,
-            personal: document.getElementById('personal').value,
-            descripcion: document.getElementById('descripcion').value,
-            materiales: document.getElementById('materiales').value,
-            estado: document.getElementById('estado').value,
-            observaciones: document.getElementById('observaciones').value
-        };
-
-        fetch(URL_GOOGLE_SCRIPT, {
-            method: 'POST',
-            mode: 'no-cors',
-            cache: 'no-cache',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datos)
-        })
-        .then(() => {
-            mensaje.classList.remove('d-none');
-            document.getElementById('otForm').reset();
-            setTimeout(() => { mensaje.classList.add('d-none'); }, 4000);
-        })
-        .catch(err => alert('Error de conexión: ' + err))
-        .finally(() => {
-            btn.disabled = false;
-            spinner.classList.add('d-none');
-        });
-    });
-</script>
-
-</body>
-</html>
+                <input type="text" class="form-control" id="observaciones
