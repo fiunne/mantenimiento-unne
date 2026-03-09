@@ -3,123 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OT - Ingeniería UNNE</title>
+    <title>Mantenimiento FI-UNNE</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f0f2f5; padding: 10px; }
-        .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .section-title { background: #004a87; color: white; padding: 8px 15px; border-radius: 5px; font-size: 0.9rem; margin-top: 15px; }
-        .btn-enviar { background: #004a87; border: none; width: 100%; padding: 15px; font-weight: bold; margin-top: 20px; }
+        body { background-color: #f4f7f9; padding: 10px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .card { border-radius: 15px; border: none; box-shadow: 0 8px 16px rgba(0,0,0,0.1); overflow: hidden; }
+        .header-logo { background: linear-gradient(135deg, #004a87 0%, #00335e 100%); color: white; padding: 20px; text-align: center; }
+        .section-title { background: #e9ecef; color: #495057; padding: 8px 15px; font-weight: bold; font-size: 0.85rem; border-left: 4px solid #004a87; margin-top: 20px; text-transform: uppercase; }
+        .form-label { font-weight: 600; font-size: 0.9rem; color: #333; margin-top: 10px; }
+        .btn-enviar { background-color: #004a87; border: none; padding: 15px; font-weight: bold; width: 100%; margin-top: 25px; transition: 0.3s; }
+        .btn-enviar:hover { background-color: #002d52; transform: translateY(-2px); }
     </style>
 </head>
 <body>
 
-<div class="container pb-5">
-    <div class="card p-3">
-        <h4 class="text-center text-primary">Nueva Orden de Trabajo</h4>
-        <form id="otForm">
-            
-            <div class="section-title">CLASIFICACIÓN</div>
-            <div class="row g-2 mt-1">
-                <div class="col-6">
-                    <label class="form-label small">Tipo</label>
-                    <select class="form-select" id="tipo" required>
-                        <option value="Preventivo">Preventivo</option>
-                        <option value="Correctivo">Correctivo</option>
-                        <option value="Urgencia">Urgencia</option>
-                    </select>
+<div class="container d-flex justify-content-center mb-5">
+    <div class="card col-12 col-md-8 col-lg-6">
+        <div class="header-logo">
+            <h4 class="mb-0">Gestión de OT</h4>
+            <p class="small mb-0 opacity-75">Facultad de Ingeniería - UNNE</p>
+        </div>
+        
+        <div class="card-body p-4">
+            <form id="otForm">
+                
+                <div class="section-title">1. Clasificación del Trabajo</div>
+                <div class="row">
+                    <div class="col-6">
+                        <label class="form-label">Tipo</label>
+                        <select class="form-select" id="tipo" required>
+                            <option value="Preventivo">Preventivo</option>
+                            <option value="Correctivo">Correctivo</option>
+                            <option value="Mejora / Obra">Mejora / Obra</option>
+                            <option value="Emergencia">Emergencia</option>
+                        </select>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Especialidad (Rubro)</label>
+                        <select class="form-select" id="especialidad" required>
+                            <option value="Electricidad">Electricidad</option>
+                            <option value="Refrigeración">Refrigeración</option>
+                            <option value="Soldadura">Soldadura</option>
+                            <option value="Higiene y Seguridad">Higiene y Seguridad</option>
+                            <option value="Mantenimiento General">Mantenimiento Gral.</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="col-6">
-                    <label class="form-label small">Prioridad</label>
+                <div class="col-12">
+                    <label class="form-label">Prioridad</label>
                     <select class="form-select" id="prioridad">
                         <option value="Baja">Baja</option>
                         <option value="Media" selected>Media</option>
                         <option value="Alta">Alta</option>
                     </select>
                 </div>
-            </div>
 
-            <div class="section-title">UBICACIÓN Y ACTIVO</div>
-            <div class="mt-2">
-                <label class="form-label small">Edificio</label>
+                <div class="section-title">2. Ubicación y Activo</div>
+                <label class="form-label">Edificio</label>
                 <select class="form-select" id="edificio" required>
-                    <option value="Principal">Edificio Principal</option>
+                    <option value="Edificio Principal">Edificio Principal</option>
                     <option value="IEM">IEM</option>
                     <option value="Geociencias">Geociencias</option>
                     <option value="Hidráulica">Hidráulica</option>
                     <option value="Aerodinámica">Aerodinámica</option>
                 </select>
-            </div>
-            <div class="row g-2 mt-1">
-                <div class="col-6">
-                    <label class="form-label small">Sector/Local</label>
-                    <input type="text" class="form-control" id="sector" placeholder="Ej: Aula 5">
+                
+                <div class="row">
+                    <div class="col-6">
+                        <label class="form-label">Sector / Local</label>
+                        <input type="text" class="form-control" id="sector" placeholder="Ej: Aula 5" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Equipo / Activo</label>
+                        <input type="text" class="form-control" id="equipo" placeholder="Ej: Split 4500">
+                    </div>
                 </div>
-                <div class="col-6">
-                    <label class="form-label small">Equipo/Activo</label>
-                    <input type="text" class="form-control" id="equipo" placeholder="Ej: Split 4500">
-                </div>
-            </div>
-            <div class="mt-2">
-                <label class="form-label small">N° Inventario</label>
-                <input type="text" class="form-control" id="inventario">
-            </div>
+                <label class="form-label">N° Inventario</label>
+                <input type="text" class="form-control" id="inventario" placeholder="Si aplica">
 
-            <div class="section-title">DETALLES DEL REPORTE</div>
-            <div class="row g-2 mt-1">
-                <div class="col-6">
-                    <label class="form-label small">Reportado por</label>
-                    <input type="text" class="form-control" id="reportadoPor">
+                <div class="section-title">3. Reporte y Asignación</div>
+                <div class="row">
+                    <div class="col-6">
+                        <label class="form-label">Reportado por</label>
+                        <input type="text" class="form-control" id="reportadoPor" placeholder="Nombre">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label">Medio</label>
+                        <select class="form-select" id="medio">
+                            <option value="WhatsApp">WhatsApp</option>
+                            <option value="Personal / Verbal">Personal / Verbal</option>
+                            <option value="Nota / Exp.">Nota / Exp.</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="col-6">
-                    <label class="form-label small">Medio</label>
-                    <select class="form-select" id="medio">
-                        <option value="WhatsApp">WhatsApp</option>
-                        <option value="Personal">Personal</option>
-                        <option value="Nota">Nota</option>
-                    </select>
-                </div>
-            </div>
+                <label class="form-label">Personal Asignado</label>
+                <input type="text" class="form-control" id="personal" placeholder="Ej: Electricista + Ayudante">
 
-            <div class="section-title">EJECUCIÓN</div>
-            <div class="mt-2">
-                <label class="form-label small">Especialidad</label>
-                <select class="form-select" id="especialidad">
-                    <option value="Electricidad">Electricidad</option>
-                    <option value="Refrigeración">Refrigeración</option>
-                    <option value="Soldadura">Soldadura</option>
-                    <option value="Higiene y Seguridad">Higiene y Seguridad</option>
-                </select>
-            </div>
-            <div class="mt-2">
-                <label class="form-label small">Personal Asignado</label>
-                <input type="text" class="form-control" id="personal" placeholder="Nombres del equipo">
-            </div>
-            <div class="mt-2">
-                <label class="form-label small">Descripción del Trabajo</label>
+                <div class="section-title">4. Detalle Técnico</div>
+                <label class="form-label">Descripción del Trabajo</label>
                 <textarea class="form-control" id="descripcion" rows="3" required></textarea>
-            </div>
-            <div class="mt-2">
-                <label class="form-label small">Materiales Utilizados</label>
-                <textarea class="form-control" id="materiales" rows="2"></textarea>
-            </div>
+                
+                <label class="form-label">Materiales Utilizados</label>
+                <textarea class="form-control" id="materiales" rows="2" placeholder="Repuestos, cables, gas, etc."></textarea>
 
-            <div class="section-title">ESTADO Y CIERRE</div>
-            <div class="mt-2">
-                <label class="form-label small">Estado</label>
+                <div class="section-title">5. Cierre y Observaciones</div>
+                <label class="form-label">Estado Actual</label>
                 <select class="form-select" id="estado">
                     <option value="Operativo">OPERATIVO</option>
                     <option value="Pendiente">PENDIENTE</option>
                     <option value="En Reparación">EN REPARACIÓN</option>
                 </select>
-            </div>
-            <div class="mt-2">
-                <label class="form-label small">Observaciones</label>
+                
+                <label class="form-label">Observaciones</label>
                 <input type="text" class="form-control" id="observaciones">
-            </div>
 
-            <button type="submit" id="btnSubmit" class="btn btn-primary btn-enviar">REGISTRAR ORDEN</button>
-        </form>
+                <button type="submit" id="btnSubmit" class="btn btn-primary btn-enviar text-white">
+                    <span id="spinner" class="spinner-border spinner-border-sm d-none"></span>
+                    REGISTRAR ORDEN DE TRABAJO
+                </button>
+            </form>
+            <div id="mensaje" class="alert alert-success mt-3 d-none text-center">¡OT enviada correctamente!</div>
+        </div>
     </div>
 </div>
 
@@ -129,11 +133,15 @@
     document.getElementById('otForm').addEventListener('submit', function(e) {
         e.preventDefault();
         const btn = document.getElementById('btnSubmit');
+        const spinner = document.getElementById('spinner');
+        const mensaje = document.getElementById('mensaje');
+
         btn.disabled = true;
-        btn.innerText = "Enviando...";
+        spinner.classList.remove('d-none');
 
         const datos = {
             tipo: document.getElementById('tipo').value,
+            especialidad: document.getElementById('especialidad').value,
             prioridad: document.getElementById('prioridad').value,
             edificio: document.getElementById('edificio').value,
             sector: document.getElementById('sector').value,
@@ -141,7 +149,6 @@
             inventario: document.getElementById('inventario').value,
             reportadoPor: document.getElementById('reportadoPor').value,
             medio: document.getElementById('medio').value,
-            especialidad: document.getElementById('especialidad').value,
             personal: document.getElementById('personal').value,
             descripcion: document.getElementById('descripcion').value,
             materiales: document.getElementById('materiales').value,
@@ -152,19 +159,22 @@
         fetch(URL_GOOGLE_SCRIPT, {
             method: 'POST',
             mode: 'no-cors',
+            cache: 'no-cache',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datos)
         })
         .then(() => {
-            alert('¡Orden registrada con éxito!');
+            mensaje.classList.remove('d-none');
             document.getElementById('otForm').reset();
+            setTimeout(() => { mensaje.classList.add('d-none'); }, 4000);
         })
-        .catch(err => alert('Error: ' + err))
+        .catch(err => alert('Error de conexión: ' + err))
         .finally(() => {
             btn.disabled = false;
-            btn.innerText = "REGISTRAR ORDEN";
+            spinner.classList.add('d-none');
         });
     });
 </script>
+
 </body>
 </html>
