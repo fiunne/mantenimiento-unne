@@ -124,4 +124,66 @@
                 </select>
                 
                 <label class="form-label">Observaciones</label>
-                <input type="text" class="form-control" id="observaciones
+                <input type="text" class="form-control" id="observaciones">
+
+                <button type="submit" id="btnSubmit" class="btn btn-primary btn-enviar text-white">
+                    <span id="spinner" class="spinner-border spinner-border-sm d-none"></span>
+                    REGISTRAR ORDEN DE TRABAJO
+                </button>
+            </form>
+            <div id="mensaje" class="alert alert-success mt-3 d-none text-center">¡OT enviada correctamente!</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzK13KgMLa_6erzqonLaaLgUNjCv8F6H_sFOrVaQoFnBTyvrwRuzHROcsr03CjM3nM07Q/exec";
+
+    document.getElementById('otForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSubmit');
+        const spinner = document.getElementById('spinner');
+        const mensaje = document.getElementById('mensaje');
+
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+
+        const datos = {
+            tipo: document.getElementById('tipo').value,
+            especialidad: document.getElementById('especialidad').value,
+            prioridad: document.getElementById('prioridad').value,
+            edificio: document.getElementById('edificio').value,
+            sector: document.getElementById('sector').value,
+            equipo: document.getElementById('equipo').value,
+            inventario: document.getElementById('inventario').value,
+            reportadoPor: document.getElementById('reportadoPor').value,
+            medio: document.getElementById('medio').value,
+            personal: document.getElementById('personal').value,
+            descripcion: document.getElementById('descripcion').value,
+            materiales: document.getElementById('materiales').value,
+            estado: document.getElementById('estado').value,
+            observaciones: document.getElementById('observaciones').value
+        };
+
+        fetch(URL_GOOGLE_SCRIPT, {
+            method: 'POST',
+            mode: 'no-cors',
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(datos)
+        })
+        .then(() => {
+            mensaje.classList.remove('d-none');
+            document.getElementById('otForm').reset();
+            setTimeout(() => { mensaje.classList.add('d-none'); }, 4000);
+        })
+        .catch(err => alert('Error de conexión: ' + err))
+        .finally(() => {
+            btn.disabled = false;
+            spinner.classList.add('d-none');
+        });
+    });
+</script>
+
+</body>
+</html>
