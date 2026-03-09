@@ -3,115 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mantenimiento FI-UNNE</title>
+    <title>OT - Ingeniería UNNE</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background-color: #e9ecef; padding: 20px; font-family: sans-serif; }
-        .card { border-radius: 15px; border: none; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .header-logo { background-color: #004a87; color: white; border-radius: 15px 15px 0 0; padding: 20px; text-align: center; }
-        .btn-enviar { background-color: #004a87; border: none; padding: 12px; font-weight: bold; width: 100%; }
-        .btn-enviar:hover { background-color: #00335e; }
+        body { background-color: #f0f2f5; padding: 10px; }
+        .card { border-radius: 12px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .section-title { background: #004a87; color: white; padding: 8px 15px; border-radius: 5px; font-size: 0.9rem; margin-top: 15px; }
+        .btn-enviar { background: #004a87; border: none; width: 100%; padding: 15px; font-weight: bold; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="container d-flex justify-content-center">
-    <div class="card col-12 col-md-6">
-        <div class="header-logo">
-            <h4 class="mb-0">Gestión de OT</h4>
-            <small>Facultad de Ingeniería - UNNE</small>
-        </div>
-        <div class="card-body p-4">
-            <form id="otForm">
-                <div class="mb-3">
-                    <label class="form-label font-weight-bold">Edificio / Área</label>
-                    <select class="form-select form-select-lg" id="edificio" required>
-                        <option value="" disabled selected>Seleccionar...</option>
-                        <option value="Edificio Principal">Edificio Principal</option>
-                        <option value="IEM">IEM</option>
-                        <option value="Geociencias">Geociencias</option>
-                        <option value="Hidráulica">Hidráulica</option>
-                        <option value="Aerodinámica">Aerodinámica</option>
+<div class="container pb-5">
+    <div class="card p-3">
+        <h4 class="text-center text-primary">Nueva Orden de Trabajo</h4>
+        <form id="otForm">
+            
+            <div class="section-title">CLASIFICACIÓN</div>
+            <div class="row g-2 mt-1">
+                <div class="col-6">
+                    <label class="form-label small">Tipo</label>
+                    <select class="form-select" id="tipo" required>
+                        <option value="Preventivo">Preventivo</option>
+                        <option value="Correctivo">Correctivo</option>
+                        <option value="Urgencia">Urgencia</option>
                     </select>
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label font-weight-bold">Técnico</label>
-                    <select class="form-select form-select-lg" id="tecnico" required>
-                        <option value="" disabled selected>¿Quién realizó la tarea?</option>
-                        <option value="Electricista">Electricista</option>
-                        <option value="Refrigeración">Refrigeración</option>
-                        <option value="Soldador">Soldador</option>
-                        <option value="Miguel">Miguel (Conducción)</option>
+                <div class="col-6">
+                    <label class="form-label small">Prioridad</label>
+                    <select class="form-select" id="prioridad">
+                        <option value="Baja">Baja</option>
+                        <option value="Media" selected>Media</option>
+                        <option value="Alta">Alta</option>
                     </select>
                 </div>
+            </div>
 
-                <div class="mb-3">
-                    <label class="form-label font-weight-bold">Descripción del Trabajo</label>
-                    <textarea class="form-control" id="descripcion" rows="4" placeholder="Ej: Cambio de capacitor en AA Aula 5" required></textarea>
+            <div class="section-title">UBICACIÓN Y ACTIVO</div>
+            <div class="mt-2">
+                <label class="form-label small">Edificio</label>
+                <select class="form-select" id="edificio" required>
+                    <option value="Principal">Edificio Principal</option>
+                    <option value="IEM">IEM</option>
+                    <option value="Geociencias">Geociencias</option>
+                    <option value="Hidráulica">Hidráulica</option>
+                    <option value="Aerodinámica">Aerodinámica</option>
+                </select>
+            </div>
+            <div class="row g-2 mt-1">
+                <div class="col-6">
+                    <label class="form-label small">Sector/Local</label>
+                    <input type="text" class="form-control" id="sector" placeholder="Ej: Aula 5">
                 </div>
-
-                <div class="mb-4">
-                    <label class="form-label d-block font-weight-bold">Estado Final</label>
-                    <div class="btn-group w-100" role="group">
-                        <input type="radio" class="btn-check" name="estado" id="est1" value="Operativo" checked>
-                        <label class="btn btn-outline-success p-3" for="est1">OPERATIVO</label>
-
-                        <input type="radio" class="btn-check" name="estado" id="est2" value="Pendiente">
-                        <label class="btn btn-outline-warning p-3" for="est2">PENDIENTE</label>
-                    </div>
+                <div class="col-6">
+                    <label class="form-label small">Equipo/Activo</label>
+                    <input type="text" class="form-control" id="equipo" placeholder="Ej: Split 4500">
                 </div>
+            </div>
+            <div class="mt-2">
+                <label class="form-label small">N° Inventario</label>
+                <input type="text" class="form-control" id="inventario">
+            </div>
 
-                <button type="submit" id="btnSubmit" class="btn btn-primary btn-enviar text-white">
-                    <span id="spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
-                    REGISTRAR ORDEN
-                </button>
-            </form>
-            <div id="mensajeExito" class="alert alert-success mt-3 d-none">¡OT enviada correctamente!</div>
-        </div>
+            <div class="section-title">DETALLES DEL REPORTE</div>
+            <div class="row g-2 mt-1">
+                <div class="col-6">
+                    <label class="form-label small">Reportado por</label>
+                    <input type="text" class="form-control" id="reportadoPor">
+                </div>
+                <div class="col-6">
+                    <label class="form-label small">Medio</label>
+                    <select class="form-select" id="medio">
+                        <option value="WhatsApp">WhatsApp</option>
+                        <option value="Personal">Personal</option>
+                        <option value="Nota">Nota</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="section-title">EJECUCIÓN</div>
+            <div class="mt-2">
+                <label class="form-label small">Especialidad</label>
+                <select class="form-select" id="especialidad">
+                    <option value="Electricidad">Electricidad</option>
+                    <option value="Refrigeración">Refrigeración</option>
+                    <option value="Soldadura">Soldadura</option>
+                    <option value="Higiene y Seguridad">Higiene y Seguridad</option>
+                </select>
+            </div>
+            <div class="mt-2">
+                <label class="form-label small">Personal Asignado</label>
+                <input type="text" class="form-control" id="personal" placeholder="Nombres del equipo">
+            </div>
+            <div class="mt-2">
+                <label class="form-label small">Descripción del Trabajo</label>
+                <textarea class="form-control" id="descripcion" rows="3" required></textarea>
+            </div>
+            <div class="mt-2">
+                <label class="form-label small">Materiales Utilizados</label>
+                <textarea class="form-control" id="materiales" rows="2"></textarea>
+            </div>
+
+            <div class="section-title">ESTADO Y CIERRE</div>
+            <div class="mt-2">
+                <label class="form-label small">Estado</label>
+                <select class="form-select" id="estado">
+                    <option value="Operativo">OPERATIVO</option>
+                    <option value="Pendiente">PENDIENTE</option>
+                    <option value="En Reparación">EN REPARACIÓN</option>
+                </select>
+            </div>
+            <div class="mt-2">
+                <label class="form-label small">Observaciones</label>
+                <input type="text" class="form-control" id="observaciones">
+            </div>
+
+            <button type="submit" id="btnSubmit" class="btn btn-primary btn-enviar">REGISTRAR ORDEN</button>
+        </form>
     </div>
 </div>
 
 <script>
-    const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzK13KgMLa_6erzqonLaaLgUNjCv8F6H_sFOrVaQoFnBTyvrwRuzHROcsr03CjM3nM07Q/exec"; // REEMPLAZA ESTO CON TU URL DE APPS SCRIPT
+    const URL_GOOGLE_SCRIPT = "https://script.google.com/macros/s/AKfycbzK13KgMLa_6erzqonLaaLgUNjCv8F6H_sFOrVaQoFnBTyvrwRuzHROcsr03CjM3nM07Q/exec";
 
     document.getElementById('otForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        
         const btn = document.getElementById('btnSubmit');
-        const spinner = document.getElementById('spinner');
-        const alertMsg = document.getElementById('mensajeExito');
-
-        // Bloquear botón para evitar doble click
         btn.disabled = true;
-        spinner.classList.remove('d-none');
+        btn.innerText = "Enviando...";
 
         const datos = {
+            tipo: document.getElementById('tipo').value,
+            prioridad: document.getElementById('prioridad').value,
             edificio: document.getElementById('edificio').value,
-            tecnico: document.getElementById('tecnico').value,
+            sector: document.getElementById('sector').value,
+            equipo: document.getElementById('equipo').value,
+            inventario: document.getElementById('inventario').value,
+            reportadoPor: document.getElementById('reportadoPor').value,
+            medio: document.getElementById('medio').value,
+            especialidad: document.getElementById('especialidad').value,
+            personal: document.getElementById('personal').value,
             descripcion: document.getElementById('descripcion').value,
-            estado: document.querySelector('input[name="estado"]:checked').value
+            materiales: document.getElementById('materiales').value,
+            estado: document.getElementById('estado').value,
+            observaciones: document.getElementById('observaciones').value
         };
 
         fetch(URL_GOOGLE_SCRIPT, {
             method: 'POST',
-            mode: 'no-cors', // Necesario para Google Apps Script
-            cache: 'no-cache',
+            mode: 'no-cors',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datos)
         })
         .then(() => {
-            alertMsg.classList.remove('d-none');
+            alert('¡Orden registrada con éxito!');
             document.getElementById('otForm').reset();
-            setTimeout(() => { alertMsg.classList.add('d-none'); }, 3000);
         })
-        .catch(err => alert('Error al enviar: ' + err))
+        .catch(err => alert('Error: ' + err))
         .finally(() => {
             btn.disabled = false;
-            spinner.classList.add('d-none');
+            btn.innerText = "REGISTRAR ORDEN";
         });
     });
 </script>
-
 </body>
-</html>              
+</html>
