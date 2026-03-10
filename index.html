@@ -2,25 +2,54 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Gestión de OT - Facultad de Ingeniería</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión OT 2026 - Facultad de Ingeniería</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-        .container { background: white; padding: 20px; border-radius: 8px; max-width: 600px; margin: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        :root { --primary: #0056b3; --secondary: #6c757d; --bg: #f4f4f4; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 12px; max-width: 800px; margin: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { color: var(--primary); border-bottom: 2px solid var(--primary); padding-bottom: 10px; text-align: center; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; }
-        button { background: #0056b3; color: white; padding: 10px; border: none; width: 100%; cursor: pointer; }
-        @media print { .no-print { display: none; } }
+        label { display: block; margin-bottom: 5px; font-weight: 600; color: #333; font-size: 0.9em; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        textarea { grid-column: span 2; }
+        .full-width { grid-column: span 2; }
+        .btn-container { display: flex; gap: 10px; margin-top: 20px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-save { background: var(--primary); color: white; }
+        .btn-save:hover { background: #004494; }
+        .btn-print { background: var(--secondary); color: white; }
+        
+        @media print {
+            .no-print { display: none; }
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border: 1px solid #eee; max-width: 100%; }
+            h2 { font-size: 1.5em; }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Nueva Orden de Trabajo</h2>
-        <form id="otForm">
+
+<div class="container">
+    <h2>ORDEN DE TRABAJO - MANTENIMIENTO</h2>
+    
+    <form id="otForm">
+        <div class="grid">
             <div class="form-group">
                 <label>N° OT</label>
-                <input type="text" id="numOt" required>
+                <input type="text" id="numOt" placeholder="Ej: 001/2026" required>
             </div>
+            <div class="form-group">
+                <label>Tipo de Trabajo</label>
+                <select id="tipo">
+                    <option value="Preventivo">Preventivo</option>
+                    <option value="Correctivo">Correctivo</option>
+                    <option value="Mejora">Mejora</option>
+                    <option value="Emergencia">Emergencia</option>
+                </select>
+            </div>
+
             <div class="form-group">
                 <label>Especialidad</label>
                 <select id="especialidad">
@@ -31,51 +60,116 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>Personal Asignado</label>
-                <select id="personal">
-                    <option value="GLA">GLA (Electricista)</option>
-                    <option value="DSF">DSF (Refrigeración)</option>
-                    <option value="RRG">RRG (Reparador Gral)</option>
-                    <option value="MAP">MAP (Conducción)</option>
-                    <option value="SDB">SDB (HySL)</option>
+                <label>Prioridad</label>
+                <select id="prioridad">
+                    <option value="Baja">Baja</option>
+                    <option value="Media">Media</option>
+                    <option value="Alta">Alta</option>
+                    <option value="Urgente">Urgente</option>
                 </select>
             </div>
+
             <div class="form-group">
-                <label>Equipo / N° Inventario</label>
-                <input type="text" id="nInventario" placeholder="Ej: AA-001">
+                <label>Edificio</label>
+                <input type="text" id="edificio" placeholder="Ej: Central / Anexo">
             </div>
             <div class="form-group">
-                <label>Descripción</label>
+                <label>Sector / Local</label>
+                <input type="text" id="sector" placeholder="Ej: Aula 1 / Laboratorio">
+            </div>
+
+            <div class="form-group">
+                <label>Equipo / Activo</label>
+                <input type="text" id="equipo" placeholder="Nombre del equipo">
+            </div>
+            <div class="form-group">
+                <label>N° Inventario</label>
+                <input type="text" id="nInventario" placeholder="Ej: 25438">
+            </div>
+
+            <div class="form-group">
+                <label>Reportado por</label>
+                <input type="text" id="reportadoPor">
+            </div>
+            <div class="form-group">
+                <label>Medio de Reporte</label>
+                <select id="medio">
+                    <option value="WhatsApp">WhatsApp</option>
+                    <option value="Correo">Correo</option>
+                    <option value="Personalmente">Personalmente</option>
+                    <option value="Nota">Nota</option>
+                </select>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Personal Asignado</label>
+                <select id="personal">
+                    <option value="GLA">GLA (Electricista y apoyo)</option>
+                    <option value="DSF">DSF (Refrigeración y apoyo)</option>
+                    <option value="RRG">RRG (Reparador general y apoyo)</option>
+                    <option value="MAP">MAP (Conducción y apoyo)</option>
+                    <option value="SDB">SDB (Especialista HySL)</option>
+                </select>
+            </div>
+
+            <div class="form-group full-width">
+                <label>Descripción del Trabajo</label>
                 <textarea id="descripcion" rows="3"></textarea>
             </div>
-            <button type="submit" class="no-print">Generar y Guardar OT</button>
-            <button type="button" onclick="window.print()" class="no-print" style="margin-top:5px; background:#6c757d;">Imprimir OT</button>
-        </form>
-    </div>
+            <div class="form-group full-width">
+                <label>Materiales Necesarios / Utilizados</label>
+                <textarea id="materiales" rows="2"></textarea>
+            </div>
+        </div>
 
-    <script>
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxioAiUShyYVEWiN7bugeuwxr-R_gYdTq-Qol46Oyepfwl5I-4ReDBZ3PF8ZMTPE0vkZw/exec';
+        <div class="btn-container no-print">
+            <button type="submit" class="btn-save">GUARDAR EN SISTEMA</button>
+            <button type="button" class="btn-print" onclick="window.print()">IMPRIMIR PDF</button>
+        </div>
+    </form>
+</div>
 
-        document.getElementById('otForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const data = {
-                numOt: document.getElementById('numOt').value,
-                fecha: new Date().toLocaleDateString(),
-                hora: new Date().toLocaleTimeString(),
-                especialidad: document.getElementById('especialidad').value,
-                personal: document.getElementById('personal').value,
-                nInventario: document.getElementById('nInventario').value,
-                descripcion: document.getElementById('descripcion').value,
-                // Completar los demás campos según necesites...
-            };
+<script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzcS2Uytg1NtOsN8I40x18yE95rgbrvT4k_GbqenUMMcOoalsxILexckhiGky-PFbFmnA/exec';
 
-            const response = await fetch(WEB_APP_URL, {
+    document.getElementById('otForm').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = document.querySelector('.btn-save');
+        btn.innerText = 'Enviando...';
+        btn.disabled = true;
+
+        const data = {
+            numOt: document.getElementById('numOt').value,
+            tipo: document.getElementById('tipo').value,
+            especialidad: document.getElementById('especialidad').value,
+            prioridad: document.getElementById('prioridad').value,
+            edificio: document.getElementById('edificio').value,
+            sector: document.getElementById('sector').value,
+            equipo: document.getElementById('equipo').value,
+            nInventario: document.getElementById('nInventario').value,
+            reportadoPor: document.getElementById('reportadoPor').value,
+            medio: document.getElementById('medio').value,
+            personal: document.getElementById('personal').value,
+            descripcion: document.getElementById('descripcion').value,
+            materiales: document.getElementById('materiales').value
+        };
+
+        try {
+            await fetch(WEB_APP_URL, {
                 method: 'POST',
+                mode: 'no-cors',
                 body: JSON.stringify(data)
             });
-            
-            if(response.ok) alert('OT Registrada correctamente');
-        };
-    </script>
+            alert('¡OT Guardada con éxito!');
+            // Opcional: limpiar formulario o window.print()
+        } catch (error) {
+            alert('Error al guardar. Revisa la conexión.');
+        } finally {
+            btn.innerText = 'GUARDAR EN SISTEMA';
+            btn.disabled = false;
+        }
+    };
+</script>
+
 </body>
 </html>
