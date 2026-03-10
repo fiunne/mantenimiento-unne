@@ -2,92 +2,80 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mantenimiento FI-UNNE</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Gestión de OT - Facultad de Ingeniería</title>
     <style>
-        body { background-color: #f4f7f9; padding: 10px; font-family: 'Segoe UI', sans-serif; }
-        .card { border-radius: 15px; border: none; box-shadow: 0 8px 16px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 30px; }
-        .header-logo { background: linear-gradient(135deg, #004a87 0%, #00335e 100%); color: white; padding: 20px; text-align: center; }
-        .section-title { background: #e9ecef; color: #495057; padding: 8px 15px; font-weight: bold; font-size: 0.85rem; border-left: 4px solid #004a87; margin-top: 20px; text-transform: uppercase; }
-        .form-label { font-weight: 600; font-size: 0.9rem; color: #333; margin-top: 10px; }
-        .btn-enviar { background-color: #004a87; border: none; padding: 18px; font-size: 1.1rem; font-weight: bold; width: 100%; margin-top: 25px; box-shadow: 0 4px 10px rgba(0,74,135,0.3); }
-        .btn-enviar:active { transform: scale(0.98); }
+        body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+        .container { background: white; padding: 20px; border-radius: 8px; max-width: 600px; margin: auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { background: #0056b3; color: white; padding: 10px; border: none; width: 100%; cursor: pointer; }
+        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h2>Nueva Orden de Trabajo</h2>
+        <form id="otForm">
+            <div class="form-group">
+                <label>N° OT</label>
+                <input type="text" id="numOt" required>
+            </div>
+            <div class="form-group">
+                <label>Especialidad</label>
+                <select id="especialidad">
+                    <option value="Electricidad">Electricidad</option>
+                    <option value="Refrigeración">Refrigeración</option>
+                    <option value="Herrería y Gral">Herrería y Gral</option>
+                    <option value="HySL">HySL</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Personal Asignado</label>
+                <select id="personal">
+                    <option value="GLA">GLA (Electricista)</option>
+                    <option value="DSF">DSF (Refrigeración)</option>
+                    <option value="RRG">RRG (Reparador Gral)</option>
+                    <option value="MAP">MAP (Conducción)</option>
+                    <option value="SDB">SDB (HySL)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Equipo / N° Inventario</label>
+                <input type="text" id="nInventario" placeholder="Ej: AA-001">
+            </div>
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea id="descripcion" rows="3"></textarea>
+            </div>
+            <button type="submit" class="no-print">Generar y Guardar OT</button>
+            <button type="button" onclick="window.print()" class="no-print" style="margin-top:5px; background:#6c757d;">Imprimir OT</button>
+        </form>
+    </div>
 
-<div class="container d-flex justify-content-center">
-    <div class="card col-12 col-md-8 col-lg-6">
-        <div class="header-logo">
-            <h4 class="mb-0">Gestión de OT</h4>
-            <p class="small mb-0 opacity-75">Facultad de Ingeniería - UNNE</p>
-        </div>
-        
-        <div class="card-body p-4">
-            <div id="mensaje" class="alert alert-success d-none text-center fw-bold">¡OT enviada correctamente!</div>
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxioAiUShyYVEWiN7bugeuwxr-R_gYdTq-Qol46Oyepfwl5I-4ReDBZ3PF8ZMTPE0vkZw/exec';
+
+        document.getElementById('otForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const data = {
+                numOt: document.getElementById('numOt').value,
+                fecha: new Date().toLocaleDateString(),
+                hora: new Date().toLocaleTimeString(),
+                especialidad: document.getElementById('especialidad').value,
+                personal: document.getElementById('personal').value,
+                nInventario: document.getElementById('nInventario').value,
+                descripcion: document.getElementById('descripcion').value,
+                // Completar los demás campos según necesites...
+            };
+
+            const response = await fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
             
-            <form id="otForm">
-                <div class="section-title">1. Clasificación</div>
-                <div class="row">
-                    <div class="col-6">
-                        <label class="form-label">Tipo</label>
-                        <select class="form-select" id="tipo" required>
-                            <option value="Preventivo">Preventivo</option>
-                            <option value="Correctivo">Correctivo</option>
-                            <option value="Mejora / Obra">Mejora / Obra</option>
-                            <option value="Emergencia">Emergencia</option>
-                        </select>
-                    </div>
-                    <div class="col-6">
-                        <label class="form-label">Especialidad</label>
-                        <select class="form-select" id="especialidad" required>
-                            <option value="Electricidad">Electricidad</option>
-                            <option value="Refrigeración">Refrigeración</option>
-                            <option value="Soldadura">Soldadura</option>
-                            <option value="Higiene y Seguridad">Higiene y Seguridad</option>
-                            <option value="Mantenimiento General">Mantenimiento Gral.</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="section-title">2. Ubicación y Activo</div>
-                <label class="form-label">Edificio</label>
-                <select class="form-select" id="edificio" required>
-                    <option value="Edificio Principal">Edificio Principal</option>
-                    <option value="IEM">IEM</option>
-                    <option value="Geociencias">Geociencias</option>
-                    <option value="Hidráulica">Hidráulica</option>
-                    <option value="Aerodinámica">Aerodinámica</option>
-                </select>
-                
-                <div class="row">
-                    <div class="col-7">
-                        <label class="form-label">Sector / Local</label>
-                        <input type="text" class="form-control" id="sector" placeholder="Ej: Aula 5" required>
-                    </div>
-                    <div class="col-5">
-                        <label class="form-label">N° Inventario</label>
-                        <input type="text" class="form-control" id="inventario">
-                    </div>
-                </div>
-                <label class="form-label">Equipo / Activo</label>
-                <input type="text" class="form-control" id="equipo" placeholder="Ej: Split 4500">
-
-                <div class="section-title">3. Ejecución y Reporte</div>
-                <label class="form-label">Personal Asignado</label>
-                <select class="form-select" id="personal" required>
-                    <option value="" disabled selected>Seleccione técnico...</option>
-                    <option value="Técnico Electricista">Técnico Electricista</option>
-                    <option value="Técnico Refrigeración">Técnico Refrigeración</option>
-                    <option value="Soldador">Soldador</option>
-                    <option value="Miguel (Conducción)">Miguel (Conducción)</option>
-                    <option value="Ing. HySL">Ing. HySL</option>
-                    <option value="Equipo Colaborativo">Equipo Colaborativo</option>
-                </select>
-
-                <div class="row">
-                    <div class="col-6">
-                        <label class="form-label">Reportado por</label>
-                        <input type="text" class="form-control" id="reportadoPor">
-                    </div>
+            if(response.ok) alert('OT Registrada correctamente');
+        };
+    </script>
+</body>
+</html>
