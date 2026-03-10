@@ -126,8 +126,8 @@
         <div class="grid">
             <div class="form-group">
                 <label>N° DE ORDEN (OT)</label>
-                <input type="text" id="numOt" placeholder="Ej: 105/2026" required>
-            </div>
+        <input type="text" id="numOt" value="AUTO-GENERADO" disabled style="background:#e9ecef; font-weight:bold; color:#0056b3;">
+    </div>
             <div class="form-group">
                 <label>TIPO DE TRABAJO</label>
                 <select id="tipo">
@@ -159,23 +159,29 @@
             </div>
 
             <div class="form-group">
-                <label>EDIFICIO</label>
-                <select id="edificio" onchange="actualizarSectores()" required>
-                    <option value="">-- Seleccione Edificio --</option>
-                    <option value="Edificio Principal">Edificio Principal</option>
-                    <option value="Edificio IEM">Edificio IEM</option>
-                    <option value="Lab de Aerodinamica">Lab de Aerodinamica</option>
-                    <option value="Departamento de Geociencias">Departamento de Geociencias</option>
-                    <option value="Departamento de Hidraulica">Departamento de Hidraulica</option>
-                    <option value="Edificio de Labs Integrados">Edificio de Labs Integrados</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>SECTOR / LOCAL</label>
-                <select id="sector" required>
-                    <option value="">-- Seleccione primero edificio --</option>
-                </select>
-            </div>
+        <label>EDIFICIO</label>
+        <select id="edificio" onchange="actualizarSectores()" required>
+            <option value="">-- Seleccione Edificio --</option>
+            <option value="Edificio Principal">Edificio Principal</option>
+            <option value="Edificio IEM">Edificio IEM</option>
+            <option value="Lab de Aerodinamica">Lab de Aerodinamica</option>
+            <option value="Departamento de Geociencias">Departamento de Geociencias</option>
+            <option value="Departamento de Hidraulica">Departamento de Hidraulica</option>
+            <option value="Edificio de Labs Integrados">Edificio de Labs Integrados</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label>SECTOR / LOCAL</label>
+        <select id="sector" required>
+            <option value="">-- Seleccione primero edificio --</option>
+        </select>
+    </div>
+    
+    <div class="form-group full-width">
+        <label>ESPECIFICACIÓN ADICIONAL DE UBICACIÓN</label>
+        <input type="text" id="ubicacionDetalle" placeholder="Ej: Oficina interna, pasillo fondo, junto al tablero, etc.">
+    </div>
+</div>
 
             <div class="form-group">
                 <label>EQUIPO / ACTIVO</label>
