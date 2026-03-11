@@ -18,7 +18,7 @@
         button { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em; }
         .btn-save { background: var(--primary); color: white; }
         .btn-print { background: var(--secondary); color: white; }
-        .loading-text { color: var(--primary); font-size: 0.8em; font-style: italic; display: none; }
+        .loading-text { color: var(--primary); font-size: 0.85em; font-weight: bold; display: none; margin-top: 5px; }
         @media print { .no-print { display: none !important; } .container { box-shadow: none; border: 1px solid #ddd; } }
     </style>
 </head>
@@ -31,7 +31,7 @@
         <div class="grid">
             <div class="form-group">
                 <label>N° DE ORDEN (OT)</label>
-                <input type="text" value="AUTO-GENERADO" disabled style="background:#eee; font-weight:bold;">
+                <input type="text" value="ASIGNADO POR SISTEMA" disabled style="background:#eee; font-weight:bold;">
             </div>
 
             <div class="form-group">
@@ -66,14 +66,14 @@
             <div class="form-group">
                 <label>EDIFICIO</label>
                 <select id="edificio" onchange="cargarEdificio()" required>
-                    <option value="">-- Seleccione --</option>
+                    <option value="">-- Seleccione Edificio --</option>
                     <option value="Edificio Principal">Edificio Principal</option>
                     <option value="Edificio IEM">Edificio IEM</option>
                     <option value="Lab de Aerodinamica">Lab de Aerodinamica</option>
                     <option value="Departamento de Geociencias">Departamento de Geociencias</option>
                     <option value="Departamento de Hidraulica">Departamento de Hidraulica</option>
                 </select>
-                <div id="loader" class="loading-text">Cargando sectores...</div>
+                <div id="loader" class="loading-text">⌛ Conectando con Google Sheets...</div>
             </div>
 
             <div class="form-group">
@@ -93,18 +93,18 @@
             <div class="form-group">
                 <label>EQUIPO / ACTIVO</label>
                 <select id="equipo" onchange="actualizarInventario()">
-                    <option value="">-- Seleccione --</option>
+                    <option value="">-- Seleccione Aire --</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label>N° INVENTARIO</label>
-                <input type="text" id="nInventario" readonly style="background:#f9f9f9;">
+                <input type="text" id="nInventario" readonly style="background:#f9f9f9;" placeholder="Automático">
             </div>
 
             <div class="form-group">
                 <label>REPORTADO POR</label>
-                <input type="text" id="reportadoPor" placeholder="Nombre de quien solicita">
+                <input type="text" id="reportadoPor" placeholder="Nombre del solicitante">
             </div>
 
             <div class="form-group">
@@ -112,9 +112,8 @@
                 <select id="medioReporte">
                     <option value="WhatsApp">WhatsApp</option>
                     <option value="Personalmente">Personalmente</option>
-                    <option value="Teléfono">Teléfono</option>
-                    <option value="Email">Email</option>
                     <option value="App" selected>App Digital</option>
+                    <option value="Teléfono">Teléfono</option>
                 </select>
             </div>
 
@@ -131,21 +130,21 @@
 
             <div class="form-group full-width">
                 <label>DESCRIPCIÓN DEL TRABAJO</label>
-                <textarea id="descripcion" rows="3" required placeholder="Detalle de la falla o tarea"></textarea>
+                <textarea id="descripcion" rows="3" required placeholder="Detalle del problema o tarea..."></textarea>
             </div>
 
             <div class="form-group full-width">
                 <label>MATERIALES UTILIZADOS</label>
-                <textarea id="materiales" rows="2" placeholder="Listado de repuestos o materiales"></textarea>
+                <textarea id="materiales" rows="2" placeholder="Repuestos, cables, gas, etc."></textarea>
             </div>
 
             <div class="form-group full-width">
-                <label>OBSERVACIONES / REFERENCIAS DE UBICACIÓN</label>
-                <input type="text" id="observaciones" placeholder="Datos adicionales">
+                <label>OBSERVACIONES / REFERENCIAS ADICIONALES</label>
+                <input type="text" id="observaciones" placeholder="Ej: Piso 2, oficina fondo derecha">
             </div>
 
             <div class="form-group">
-                <label>ESTADO ACTUAL</label>
+                <label>ESTADO</label>
                 <select id="estado">
                     <option value="Abierta">Abierta / Pendiente</option>
                     <option value="Cerrada">Cerrada / Finalizada</option>
@@ -161,19 +160,34 @@
 </div>
 
 <script>
+    // URL de tu aplicación web de Google Apps Script
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby8Yql5BCUxgceqybSlzueSncIHc3m4z1MB_xbQgtH288q7NiwIhwhxyMfVx--wCJV6SQ/exec'; 
+
     let baseDeDatos = [];
 
+    // PASO 1: Al elegir edificio, traemos los datos
     async function cargarEdificio() {
         const edif = document.getElementById('edificio').value;
         const secSelect = document.getElementById('sector');
         const loader = document.getElementById('loader');
+        
         if(!edif) return;
+        
         loader.style.display = 'block';
+        secSelect.disabled = true;
+
         try {
             const res = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edif)}`);
             baseDeDatos = await res.json();
+            
+            if(baseDeDatos.error) {
+                alert("Error: " + baseDeDatos.error);
+                return;
+            }
+
+            // Extraer SECTORES únicos (Columna A)
             const sectoresUnicos = [...new Set(baseDeDatos.map(item => item.sector))];
+            
             secSelect.innerHTML = '<option value="">-- Seleccione Sector --</option>';
             sectoresUnicos.forEach(s => {
                 let op = document.createElement('option');
@@ -181,16 +195,22 @@
                 secSelect.appendChild(op);
             });
             secSelect.disabled = false;
-        } catch(e) { alert("Error de conexión"); }
-        loader.style.display = 'none';
+        } catch(e) { 
+            alert("Error de conexión. Asegúrate de que el Apps Script esté implementado para 'Cualquiera'."); 
+        } finally {
+            loader.style.display = 'none';
+        }
     }
 
+    // PASO 2: Filtrar UBICACIONES (Col B) según el SECTOR (Col A)
     function filtrarUbicaciones() {
         const sectorElegido = document.getElementById('sector').value;
         const subSelect = document.getElementById('subarea');
         subSelect.innerHTML = '<option value="">-- Seleccione Ubicación --</option>';
+        
         const filasFiltradas = baseDeDatos.filter(item => item.sector === sectorElegido);
         const ubicacionesUnicas = [...new Set(filasFiltradas.map(item => item.ubicacion))];
+        
         ubicacionesUnicas.forEach(u => {
             let op = document.createElement('option');
             op.value = u; op.text = u;
@@ -199,27 +219,39 @@
         subSelect.disabled = false;
     }
 
+    // PASO 3: Cargar EQUIPOS según Sector + Ubicación
     function cargarEquipos() {
         const sectorElegido = document.getElementById('sector').value;
         const ubicacionElegida = document.getElementById('subarea').value;
         const eqSelect = document.getElementById('equipo');
-        eqSelect.innerHTML = '<option value=\"\">-- Seleccione Equipo --</option>';
+        eqSelect.innerHTML = '<option value="">-- Seleccione Aire --</option>';
+
         const equipos = baseDeDatos.filter(item => item.sector === sectorElegido && item.ubicacion === ubicacionElegida);
+        
         equipos.forEach(e => {
             if(e.equipo && e.equipo !== "n/c") {
                 let op = document.createElement('option');
-                op.value = e.equipo; op.text = e.equipo;
+                op.value = e.equipo;
+                op.text = e.equipo;
                 op.dataset.inv = e.inventario;
                 eqSelect.appendChild(op);
             }
         });
+        
+        if(eqSelect.options.length === 1) {
+            let op = document.createElement('option');
+            op.value = "General"; op.text = "Sin equipo específico";
+            eqSelect.appendChild(op);
+        }
     }
 
     function actualizarInventario() {
         const eq = document.getElementById('equipo');
-        document.getElementById('nInventario').value = eq.options[eq.selectedIndex].dataset.inv || "";
+        const inv = document.getElementById('nInventario');
+        inv.value = eq.options[eq.selectedIndex].dataset.inv || "";
     }
 
+    // GUARDAR DATOS (doPost)
     document.getElementById('otForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnSave');
@@ -244,10 +276,18 @@
         };
 
         try {
-            await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) });
-            alert("¡ORDEN REGISTRADA EXITOSAMENTE!");
+            await fetch(WEB_APP_URL, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                body: JSON.stringify(data) 
+            });
+            alert("¡ORDEN DE TRABAJO REGISTRADA CON ÉXITO EN EL EXCEL!");
             location.reload();
-        } catch(e) { alert("Error al guardar"); btn.disabled = false; }
+        } catch(e) { 
+            alert("Error al guardar en el sistema."); 
+            btn.disabled = false; 
+            btn.innerText = "GUARDAR EN SISTEMA";
+        }
     };
 </script>
 </body>
