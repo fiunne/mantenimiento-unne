@@ -3,269 +3,194 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestión OT 2026</title>
+    <title>Gestión OT 2026</title>
     <style>
-        :root { --primary: #0056b3; --secondary: #6c757d; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #333; }
-        .container { background: white; padding: 30px; border-radius: 12px; max-width: 900px; margin: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        h2 { color: var(--primary); text-align: center; border-bottom: 3px solid var(--primary); padding-bottom: 15px; text-transform: uppercase; margin-top:0; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px; }
+        :root { --primary: #0056b3; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 12px; max-width: 800px; margin: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .form-group { margin-bottom: 10px; }
-        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.85em; color: #444; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        .full-width { grid-column: span 2; }
-        .btn-container { display: flex; gap: 15px; margin-top: 25px; }
-        button { flex: 1; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1em; }
+        label { display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+        .full { grid-column: span 2; }
+        button { width: 100%; padding: 15px; margin-top: 10px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; }
         .btn-save { background: var(--primary); color: white; }
-        .btn-print { background: var(--secondary); color: white; }
-        .loading-text { color: var(--primary); font-size: 0.85em; font-weight: bold; display: none; margin-top: 5px; }
-        @media print { .no-print { display: none !important; } .container { box-shadow: none; border: 1px solid #ddd; } }
+        #loader { color: blue; font-weight: bold; display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 class="no-print">Orden de Trabajo 2026</h2>
+    <h2>Orden de Trabajo 2026</h2>
+    <div id="loader">⌛ Conectando con la base de datos...</div>
     
     <form id="otForm">
         <div class="grid">
             <div class="form-group">
-                <label>N° DE ORDEN (OT)</label>
-                <input type="text" value="ASIGNADO POR SISTEMA" disabled style="background:#eee; font-weight:bold;">
+                <label>N° OT</label>
+                <input type="text" value="AUTO" disabled>
             </div>
-
             <div class="form-group">
                 <label>PRIORIDAD</label>
                 <select id="prioridad">
-                    <option value="Baja">Baja</option>
-                    <option value="Media" selected>Media</option>
-                    <option value="Alta">Alta</option>
-                    <option value="Urgente">Urgente</option>
+                    <option>Baja</option>
+                    <option selected>Media</option>
+                    <option>Alta</option>
+                    <option>Urgente</option>
                 </select>
             </div>
-
-            <div class="form-group">
-                <label>ESPECIALIDAD</label>
-                <select id="especialidad">
-                    <option value="Electricidad">Electricidad</option>
-                    <option value="Refrigeración">Refrigeración</option>
-                    <option value="Herrería y Gral">Herrería y Gral</option>
-                    <option value="HySL">HySL</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>TIPO DE TRABAJO</label>
-                <select id="tipo">
-                    <option value="Correctivo">Correctivo</option>
-                    <option value="Preventivo">Preventivo</option>
-                    <option value="Mejora">Mejora</option>
-                </select>
-            </div>
-
             <div class="form-group">
                 <label>EDIFICIO</label>
-                <select id="edificio" onchange="cargarEdificio()" required>
-                    <option value="">-- Seleccione Edificio --</option>
-                    <option value="Edificio Principal">Edificio Principal</option>
-                    <option value="Edificio IEM">Edificio IEM</option>
-                    <option value="Lab de Aerodinamica">Lab de Aerodinamica</option>
-                    <option value="Departamento de Geociencias">Departamento de Geociencias</option>
-                    <option value="Departamento de Hidraulica">Departamento de Hidraulica</option>
+                <select id="edificio" onchange="getSectores()" required>
+                    <option value="">-- Seleccione --</option>
+                    <option>Edificio Principal</option>
+                    <option>Edificio IEM</option>
+                    <option>Lab de Aerodinamica</option>
+                    <option>Departamento de Geociencias</option>
+                    <option>Departamento de Hidraulica</option>
                 </select>
-                <div id="loader" class="loading-text">⌛ Conectando con Google Sheets...</div>
             </div>
-
             <div class="form-group">
-                <label>SECTOR / LOCAL (Nivel 2)</label>
-                <select id="sector" onchange="filtrarUbicaciones()" disabled>
+                <label>SECTOR / LOCAL (Col A)</label>
+                <select id="sector" onchange="getUbicaciones()" disabled required>
                     <option value="">Primero elija edificio</option>
                 </select>
             </div>
-
             <div class="form-group">
-                <label>UBICACIÓN / PISO (Nivel 3)</label>
-                <select id="subarea" onchange="cargarEquipos()" disabled>
+                <label>UBICACIÓN / PISO (Col B)</label>
+                <select id="subarea" onchange="getEquipos()" disabled required>
                     <option value="">Primero elija sector</option>
                 </select>
             </div>
-
             <div class="form-group">
-                <label>EQUIPO / ACTIVO</label>
-                <select id="equipo" onchange="actualizarInventario()">
-                    <option value="">-- Seleccione Aire --</option>
+                <label>EQUIPO</label>
+                <select id="equipo" onchange="setInventario()">
+                    <option value="">-- Seleccione --</option>
                 </select>
             </div>
-
             <div class="form-group">
                 <label>N° INVENTARIO</label>
-                <input type="text" id="nInventario" readonly style="background:#f9f9f9;" placeholder="Automático">
+                <input type="text" id="nInventario" readonly>
             </div>
-
+            <div class="form-group">
+                <label>ESPECIALIDAD</label>
+                <select id="especialidad">
+                    <option>Refrigeración</option>
+                    <option>Electricidad</option>
+                    <option>Herrería y Gral</option>
+                    <option>HySL</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>TIPO</label>
+                <select id="tipo">
+                    <option>Correctivo</option>
+                    <option>Preventivo</option>
+                </select>
+            </div>
             <div class="form-group">
                 <label>REPORTADO POR</label>
-                <input type="text" id="reportadoPor" placeholder="Nombre del solicitante">
+                <input type="text" id="reportadoPor">
             </div>
-
             <div class="form-group">
-                <label>MEDIO DE REPORTE</label>
+                <label>MEDIO</label>
                 <select id="medioReporte">
-                    <option value="WhatsApp">WhatsApp</option>
-                    <option value="Personalmente">Personalmente</option>
-                    <option value="App" selected>App Digital</option>
-                    <option value="Teléfono">Teléfono</option>
+                    <option>App Digital</option>
+                    <option>WhatsApp</option>
+                    <option>Personalmente</option>
                 </select>
             </div>
-
             <div class="form-group">
-                <label>PERSONAL ASIGNADO</label>
+                <label>PERSONAL</label>
                 <select id="personal">
-                    <option value="GLA">GLA</option>
-                    <option value="DSF">DSF</option>
-                    <option value="RRG">RRG</option>
-                    <option value="MAP">MAP</option>
-                    <option value="SDB">SDB</option>
+                    <option>GLA</option><option>DSF</option><option>RRG</option><option>MAP</option><option>SDB</option>
                 </select>
             </div>
-
-            <div class="form-group full-width">
-                <label>DESCRIPCIÓN DEL TRABAJO</label>
-                <textarea id="descripcion" rows="3" required placeholder="Detalle del problema o tarea..."></textarea>
+            <div class="form-group full">
+                <label>DESCRIPCIÓN</label>
+                <textarea id="descripcion" required></textarea>
             </div>
-
-            <div class="form-group full-width">
-                <label>MATERIALES UTILIZADOS</label>
-                <textarea id="materiales" rows="2" placeholder="Repuestos, cables, gas, etc."></textarea>
+            <div class="form-group full">
+                <label>MATERIALES</label>
+                <input type="text" id="materiales">
             </div>
-
-            <div class="form-group full-width">
-                <label>OBSERVACIONES / REFERENCIAS ADICIONALES</label>
-                <input type="text" id="observaciones" placeholder="Ej: Piso 2, oficina fondo derecha">
+            <div class="form-group full">
+                <label>OBSERVACIONES</label>
+                <input type="text" id="observaciones">
             </div>
-
             <div class="form-group">
                 <label>ESTADO</label>
                 <select id="estado">
-                    <option value="Abierta">Abierta / Pendiente</option>
-                    <option value="Cerrada">Cerrada / Finalizada</option>
+                    <option>Abierta</option>
+                    <option>Cerrada</option>
                 </select>
             </div>
         </div>
-
-        <div class="btn-container no-print">
-            <button type="submit" id="btnSave" class="btn-save">GUARDAR EN SISTEMA</button>
-            <button type="button" class="btn-print" onclick="window.print()">IMPRIMIR PDF</button>
-        </div>
+        <button type="submit" id="btnSave" class="btn-save">GUARDAR EN SISTEMA</button>
+        <button type="button" onclick="window.print()">IMPRIMIR PDF</button>
     </form>
 </div>
 
 <script>
-    // URL de tu aplicación web de Google Apps Script
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby8Yql5BCUxgceqybSlzueSncIHc3m4z1MB_xbQgtH288q7NiwIhwhxyMfVx--wCJV6SQ/exec'; 
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzYEJnB7L5qtF5DZo0l1SrkQIi0ekHsw7uj9GxKebLg5Gv1sfHqDZk-nNlTx10qInOxaw/exec';
+    let rawData = [];
 
-    let baseDeDatos = [];
-
-    // PASO 1: Al elegir edificio, traemos los datos
-    async function cargarEdificio() {
+    async function getSectores() {
         const edif = document.getElementById('edificio').value;
-        const secSelect = document.getElementById('sector');
         const loader = document.getElementById('loader');
-        
-        if(!edif) return;
-        
         loader.style.display = 'block';
-        secSelect.disabled = true;
-
         try {
-            const res = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edif)}`);
-            baseDeDatos = await res.json();
-            
-            if(baseDeDatos.error) {
-                alert("Error: " + baseDeDatos.error);
-                return;
-            }
-
-            // Extraer SECTORES únicos (Columna A)
-            const sectoresUnicos = [...new Set(baseDeDatos.map(item => item.sector))];
-            
-            secSelect.innerHTML = '<option value="">-- Seleccione Sector --</option>';
-            sectoresUnicos.forEach(s => {
-                let op = document.createElement('option');
-                op.value = s; op.text = s;
-                secSelect.appendChild(op);
-            });
-            secSelect.disabled = false;
-        } catch(e) { 
-            alert("Error de conexión. Asegúrate de que el Apps Script esté implementado para 'Cualquiera'."); 
-        } finally {
-            loader.style.display = 'none';
-        }
+            const r = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edif)}`);
+            rawData = await r.json();
+            const sectores = [...new Set(rawData.map(d => d.sector))];
+            const sel = document.getElementById('sector');
+            sel.innerHTML = '<option value="">-- Seleccione --</option>';
+            sectores.forEach(s => sel.innerHTML += `<option>${s}</option>`);
+            sel.disabled = false;
+        } catch(e) { alert("Error de conexión"); }
+        loader.style.display = 'none';
     }
 
-    // PASO 2: Filtrar UBICACIONES (Col B) según el SECTOR (Col A)
-    function filtrarUbicaciones() {
-        const sectorElegido = document.getElementById('sector').value;
-        const subSelect = document.getElementById('subarea');
-        subSelect.innerHTML = '<option value="">-- Seleccione Ubicación --</option>';
-        
-        const filasFiltradas = baseDeDatos.filter(item => item.sector === sectorElegido);
-        const ubicacionesUnicas = [...new Set(filasFiltradas.map(item => item.ubicacion))];
-        
-        ubicacionesUnicas.forEach(u => {
-            let op = document.createElement('option');
-            op.value = u; op.text = u;
-            subSelect.appendChild(op);
+    function getUbicaciones() {
+        const sec = document.getElementById('sector').value;
+        const filtered = rawData.filter(d => d.sector === sec);
+        const ubics = [...new Set(filtered.map(d => d.ubicacion))];
+        const sel = document.getElementById('subarea');
+        sel.innerHTML = '<option value="">-- Seleccione --</option>';
+        ubics.forEach(u => sel.innerHTML += `<option>${u}</option>`);
+        sel.disabled = false;
+    }
+
+    function getEquipos() {
+        const sec = document.getElementById('sector').value;
+        const ubi = document.getElementById('subarea').value;
+        const filtered = rawData.filter(d => d.sector === sec && d.ubicacion === ubi);
+        const sel = document.getElementById('equipo');
+        sel.innerHTML = '<option value="">-- Seleccione --</option>';
+        filtered.forEach(d => {
+            if(d.equipo) sel.innerHTML += `<option data-inv="${d.inventario}">${d.equipo}</option>`;
         });
-        subSelect.disabled = false;
     }
 
-    // PASO 3: Cargar EQUIPOS según Sector + Ubicación
-    function cargarEquipos() {
-        const sectorElegido = document.getElementById('sector').value;
-        const ubicacionElegida = document.getElementById('subarea').value;
-        const eqSelect = document.getElementById('equipo');
-        eqSelect.innerHTML = '<option value="">-- Seleccione Aire --</option>';
-
-        const equipos = baseDeDatos.filter(item => item.sector === sectorElegido && item.ubicacion === ubicacionElegida);
-        
-        equipos.forEach(e => {
-            if(e.equipo && e.equipo !== "n/c") {
-                let op = document.createElement('option');
-                op.value = e.equipo;
-                op.text = e.equipo;
-                op.dataset.inv = e.inventario;
-                eqSelect.appendChild(op);
-            }
-        });
-        
-        if(eqSelect.options.length === 1) {
-            let op = document.createElement('option');
-            op.value = "General"; op.text = "Sin equipo específico";
-            eqSelect.appendChild(op);
-        }
+    function setInventario() {
+        const sel = document.getElementById('equipo');
+        document.getElementById('nInventario').value = sel.options[sel.selectedIndex].dataset.inv || "";
     }
 
-    function actualizarInventario() {
-        const eq = document.getElementById('equipo');
-        const inv = document.getElementById('nInventario');
-        inv.value = eq.options[eq.selectedIndex].dataset.inv || "";
-    }
-
-    // GUARDAR DATOS (doPost)
     document.getElementById('otForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnSave');
-        btn.disabled = true; btn.innerText = "REGISTRANDO...";
+        btn.innerText = "REGISTRANDO..."; btn.disabled = true;
         
-        const data = {
-            prioridad: document.getElementById('prioridad').value,
-            especialidad: document.getElementById('especialidad').value,
-            tipo: document.getElementById('tipo').value,
+        const payload = {
             edificio: document.getElementById('edificio').value,
             sector: document.getElementById('sector').value,
             ubicacion: document.getElementById('subarea').value,
             equipo: document.getElementById('equipo').value,
             nInventario: document.getElementById('nInventario').value,
+            prioridad: document.getElementById('prioridad').value,
+            especialidad: document.getElementById('especialidad').value,
+            tipo: document.getElementById('tipo').value,
             reportadoPor: document.getElementById('reportadoPor').value,
             medioReporte: document.getElementById('medioReporte').value,
             personal: document.getElementById('personal').value,
@@ -276,18 +201,10 @@
         };
 
         try {
-            await fetch(WEB_APP_URL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                body: JSON.stringify(data) 
-            });
-            alert("¡ORDEN DE TRABAJO REGISTRADA CON ÉXITO EN EL EXCEL!");
+            await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            alert("¡OT REGISTRADA!");
             location.reload();
-        } catch(e) { 
-            alert("Error al guardar en el sistema."); 
-            btn.disabled = false; 
-            btn.innerText = "GUARDAR EN SISTEMA";
-        }
+        } catch(e) { alert("Error"); btn.disabled = false; }
     };
 </script>
 </body>
