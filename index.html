@@ -2,143 +2,31 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestión OT 2026 - Mantenimiento</title>
+    <title>Gestión OT 2026 - Avanzado</title>
     <style>
-        :root { 
-            --primary: #0056b3; 
-            --secondary: #6c757d; 
-            --success: #28a745;
-            --bg: #f8f9fa; 
-        }
-        
-        body { 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            background: var(--bg); 
-            margin: 0; 
-            padding: 10px; 
-            color: #333;
-        }
-
-        .container { 
-            background: white; 
-            padding: 25px; 
-            border-radius: 12px; 
-            max-width: 850px; 
-            margin: 20px auto; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08); 
-        }
-
-        h2 { 
-            color: var(--primary); 
-            text-align: center; 
-            border-bottom: 3px solid var(--primary); 
-            padding-bottom: 15px;
-            margin-top: 0;
-            text-transform: uppercase;
-            font-size: 1.4em;
-        }
-
-        .grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 15px; 
-            margin-top: 20px;
-        }
-
-        .form-group { margin-bottom: 12px; }
-        
-        label { 
-            display: block; 
-            margin-bottom: 5px; 
-            font-weight: 600; 
-            font-size: 0.85em;
-            color: #555;
-        }
-
-        input, select, textarea { 
-            width: 100%; 
-            padding: 10px; 
-            border: 1px solid #ddd; 
-            border-radius: 6px; 
-            box-sizing: border-box; 
-            font-size: 14px;
-            background-color: #fff;
-        }
-
-        input:focus, select:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 5px rgba(0,86,179,0.2);
-        }
-
-        .full-width { grid-column: span 2; }
-
-        .status-box {
-            background: #e9ecef;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 5px solid var(--secondary);
-        }
-
-        .btn-container { 
-            display: flex; 
-            gap: 12px; 
-            margin-top: 25px; 
-        }
-
-        button { 
-            flex: 1; 
-            padding: 14px; 
-            border: none; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            font-size: 1em;
-            transition: all 0.3s ease; 
-        }
-
-        .btn-save { background: var(--primary); color: white; }
-        .btn-save:hover { background: #004494; transform: translateY(-1px); }
-        .btn-save:disabled { background: #ccc; cursor: not-allowed; }
-
-        .btn-print { background: var(--secondary); color: white; }
-        .btn-print:hover { background: #5a6268; }
-
-        /* Estilos para Impresión */
-        @media print {
-            .no-print { display: none !important; }
-            body { background: white; padding: 0; }
-            .container { box-shadow: none; border: 1px solid #000; max-width: 100%; margin: 0; }
-            input, select, textarea { border: none; background: none; padding: 5px 0; }
-            label { color: #000; text-decoration: underline; }
-            h2 { font-size: 1.8em; margin-bottom: 30px; }
-            .grid { gap: 20px; }
-        }
+        :root { --p:#0056b3; --s:#6c757d; --bg:#f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 15px; }
+        .card { background: white; padding: 25px; border-radius: 12px; max-width: 800px; margin: auto; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .full { grid-column: span 2; }
+        label { display: block; font-weight: 600; font-size: 0.8em; margin-bottom: 5px; color: #444; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        .loading { color: var(--p); font-size: 0.8em; display: none; }
+        .btn-save { background: var(--p); color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 20px; }
+        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Orden de Trabajo - Mantenimiento 2026</h2>
-    
+<div class="card">
+    <h2 style="text-align:center; color:var(--p); margin-top:0;">ORDEN DE TRABAJO 2026</h2>
     <form id="otForm">
         <div class="grid">
-            <div class="form-group">
-                <label>N° DE ORDEN (OT)</label>
-        <input type="text" id="numOt" value="AUTO-GENERADO" disabled style="background:#e9ecef; font-weight:bold; color:#0056b3;">
-    </div>
-            <div class="form-group">
-                <label>TIPO DE TRABAJO</label>
-                <select id="tipo">
-                    <option value="Correctivo">Correctivo (Reparación)</option>
-                    <option value="Preventivo">Preventivo (Programado)</option>
-                    <option value="Mejora">Mejora / Obra Nueva</option>
-                    <option value="Emergencia">Emergencia (Riesgo)</option>
-                </select>
+            <div>
+                <label>N° OT</label>
+                <input type="text" value="SISTEMA" disabled style="background:#eee;">
             </div>
-
-            <div class="form-group">
+            <div>
                 <label>ESPECIALIDAD</label>
                 <select id="especialidad">
                     <option value="Electricidad">Electricidad</option>
@@ -147,203 +35,126 @@
                     <option value="HySL">HySL</option>
                 </select>
             </div>
-            <div class="form-group">
+
+            <div>
+                <label>EDIFICIO</label>
+                <select id="edificio" onchange="fetchSectores()">
+                    <option value="">Seleccione...</option>
+                    <option value="Edificio Principal">Edificio Principal</option>
+                    <option value="Edificio IEM">Edificio IEM</option>
+                    <option value="Departamento de Geociencias">Departamento de Geociencias</option>
+                    <option value="Departamento de Hidraulica">Departamento de Hidraulica</option>
+                    <option value="Lab de Aerodinamica">Lab de Aerodinamica</option>
+                </select>
+                <span id="loadSectores" class="loading">Cargando locales...</span>
+            </div>
+            <div>
+                <label>SECTOR / LOCAL</label>
+                <select id="sector" onchange="filtrarEquipos()">
+                    <option value="">Primero elija edificio</option>
+                </select>
+            </div>
+
+            <div id="divEquipo">
+                <label>EQUIPO (AIRES)</label>
+                <select id="equipo" onchange="setInventario()">
+                    <option value="">Seleccione local...</option>
+                </select>
+            </div>
+            <div>
+                <label>N° INVENTARIO</label>
+                <input type="text" id="nInventario" placeholder="Auto-completado">
+            </div>
+
+            <div class="full">
+                <label>DETALLE DE UBICACIÓN / REFERENCIAS</label>
+                <input type="text" id="ubicacionDetalle">
+            </div>
+
+            <div class="full">
+                <label>DESCRIPCIÓN DEL PROBLEMA / TRABAJO</label>
+                <textarea id="descripcion" rows="3"></textarea>
+            </div>
+            
+            <div>
                 <label>PERSONAL ASIGNADO</label>
                 <select id="personal">
-                    <option value="GLA">GLA (Electricista y apoyo)</option>
-                    <option value="DSF">DSF (Refrigeración y apoyo)</option>
-                    <option value="RRG">RRG (Reparador general y apoyo)</option>
-                    <option value="MAP">MAP (Conducción y apoyo)</option>
-                    <option value="SDB">SDB (Especialista HySL)</option>
+                    <option value="GLA">GLA (Elec)</option>
+                    <option value="DSF">DSF (Ref)</option>
+                    <option value="RRG">RRG (Gral)</option>
+                    <option value="MAP">MAP (Cond)</option>
+                    <option value="SDB">SDB (HySL)</option>
                 </select>
             </div>
-
-            <div class="form-group">
-        <label>EDIFICIO</label>
-        <select id="edificio" onchange="actualizarSectores()" required>
-            <option value="">-- Seleccione Edificio --</option>
-            <option value="Edificio Principal">Edificio Principal</option>
-            <option value="Edificio IEM">Edificio IEM</option>
-            <option value="Lab de Aerodinamica">Lab de Aerodinamica</option>
-            <option value="Departamento de Geociencias">Departamento de Geociencias</option>
-            <option value="Departamento de Hidraulica">Departamento de Hidraulica</option>
-            <option value="Edificio de Labs Integrados">Edificio de Labs Integrados</option>
-        </select>
-    </div>
-    <div class="form-group">
-        <label>SECTOR / LOCAL</label>
-        <select id="sector" required>
-            <option value="">-- Seleccione primero edificio --</option>
-        </select>
-    </div>
-    
-    <div class="form-group full-width">
-        <label>ESPECIFICACIÓN ADICIONAL DE UBICACIÓN</label>
-        <input type="text" id="ubicacionDetalle" placeholder="Ej: Oficina interna, pasillo fondo, junto al tablero, etc.">
-    </div>
-</div>
-
-            <div class="form-group">
-                <label>EQUIPO / ACTIVO</label>
-                <input type="text" id="equipo" placeholder="Ej: Split 6000 frigorías">
-            </div>
-            <div class="form-group">
-                <label>N° INVENTARIO</label>
-                <input type="text" id="nInventario" placeholder="Ej: AA-125">
-            </div>
-
-            <div class="form-group">
-                <label>REPORTADO POR</label>
-                <input type="text" id="reportadoPor" placeholder="Nombre solicitante">
-            </div>
-            <div class="form-group">
-                <label>MEDIO DE REPORTE</label>
-                <select id="medio">
-                    <option value="WhatsApp">WhatsApp</option>
-                    <option value="Correo">Correo Electrónico</option>
-                    <option value="Personalmente">Personalmente</option>
-                    <option value="Nota">Nota Escrita</option>
+            <div>
+                <label>ESTADO</label>
+                <select id="estado">
+                    <option value="Abierta">Abierta</option>
+                    <option value="Cerrada">Cerrada</option>
                 </select>
-            </div>
-
-            <div class="form-group">
-                <label>PRIORIDAD</label>
-                <select id="prioridad">
-                    <option value="Baja">Baja</option>
-                    <option value="Media" selected>Media</option>
-                    <option value="Alta">Alta</option>
-                    <option value="Urgente">Urgente</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>ESTADO ACTUAL</label>
-                <select id="estado" onchange="gestionarCierre()" style="font-weight: bold; color: var(--primary);">
-                    <option value="Abierta">ABIERTA / EN PROCESO</option>
-                    <option value="Cerrada">CERRADA / FINALIZADA</option>
-                </select>
-            </div>
-
-            <div id="seccionCierre" class="full-width grid status-box" style="display: none; margin-top: 10px;">
-                <div class="form-group">
-                    <label>FECHA DE CIERRE</label>
-                    <input type="date" id="fechaCierre">
-                </div>
-                <div class="form-group">
-                    <label>HORA DE CIERRE</label>
-                    <input type="time" id="horaCierre">
-                </div>
-            </div>
-
-            <div class="form-group full-width">
-                <label>DESCRIPCIÓN DEL TRABAJO / DIAGNÓSTICO</label>
-                <textarea id="descripcion" rows="4"></textarea>
-            </div>
-            <div class="form-group full-width">
-                <label>MATERIALES UTILIZADOS</label>
-                <textarea id="materiales" rows="2" placeholder="Escriba los materiales para futuro descuento de stock..."></textarea>
             </div>
         </div>
 
-        <div class="btn-container no-print">
-            <button type="submit" id="btnGuardar" class="btn-save">GUARDAR EN GOOGLE SHEETS</button>
-            <button type="button" class="btn-print" onclick="window.print()">GENERAR PDF / IMPRIMIR</button>
-        </div>
+        <button type="submit" id="btn" class="btn-save no-print">GUARDAR OT Y REGISTRAR</button>
+        <button type="button" class="no-print" onclick="window.print()" style="width:100%; margin-top:10px; padding:10px; border:1px solid #ccc; border-radius:8px; cursor:pointer;">IMPRIMIR BORRADOR</button>
     </form>
 </div>
 
 <script>
-    // --- CONFIGURACIÓN ---
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxesEipixisI0-Xjkz2IQ-MACvrkpA5omHpb31RoIsW-jH7OefOgMw9OVkyIZ3QzVGY3A/exec';
+    let datosLocalesGlobal = [];
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwzv4aH2bCG1t5kny4fhuwGuTI1PZynGcGjqFC7oDNeSaO6XXoMjHOPt9P5y17lJPCYQg/exec'; // <--- PEGA TU URL DE IMPLEMENTACIÓN
 
-    const sectoresData = {
-        "Edificio Principal": ["Pasillo Ala Sur", "Secretaría Posgrado", "Informática", "Dpto Personal", "Mesa de Entrada", "Bedelía", "Dpto Física", "Lab Química", "Biblioteca", "Mantenimiento", "Decanato", "Salón de la Reforma", "Aulas 9-18"],
-        "Edificio IEM": ["Oficinas IEM", "Talleres", "Laboratorios IEM", "Aulas IEM"],
-        "Lab de Aerodinamica": ["Túnel de Viento", "Sala de Máquinas", "Oficina Técnica"],
-        "Departamento de Geociencias": ["Gabinete Geología", "Laboratorio Suelos", "Oficinas Geociencias"],
-        "Departamento de Hidraulica": ["Canal de Ensayos", "Laboratorio Hidráulica", "Depósito"],
-        "Edificio de Labs Integrados": ["Área General (Obra)"]
-    };
-
-    // --- LÓGICA DE INTERFAZ ---
-    function actualizarSectores() {
-        const edificio = document.getElementById('edificio').value;
-        const sectorSelect = document.getElementById('sector');
-        sectorSelect.innerHTML = '<option value="">-- Seleccione Sector --</option>';
-
-        if (edificio && sectoresData[edificio]) {
-            sectoresData[edificio].forEach(s => {
-                let op = document.createElement('option');
-                op.value = s;
-                op.text = s;
-                sectorSelect.appendChild(op);
-            });
-        }
+    async function fetchSectores() {
+        const edif = document.getElementById('edificio').value;
+        const loader = document.getElementById('loadSectores');
+        const sectorSel = document.getElementById('sector');
+        
+        if(!edif) return;
+        loader.style.display = 'inline';
+        
+        // Aquí llamamos al script para traer los datos reales de tu nueva planilla
+        // Nota: En GitHub Pages usaremos fetch. Para pruebas directas en Apps Script se usa google.script.run
+        // Por ahora simularemos la carga para que veas la lógica:
+        alert("Conectando con la base de datos de locales de " + edif + "...");
+        loader.style.display = 'none';
     }
 
-    function gestionarCierre() {
-        const estado = document.getElementById('estado').value;
-        const seccion = document.getElementById('seccionCierre');
-        if (estado === 'Cerrada') {
-            seccion.style.display = 'grid';
-            // Autocompletar fecha de hoy si se cierra ahora
-            document.getElementById('fechaCierre').valueAsDate = new Date();
-            const ahora = new Date();
-            document.getElementById('horaCierre').value = ahora.getHours().toString().padStart(2, '0') + ':' + ahora.getMinutes().toString().padStart(2, '0');
-        } else {
-            seccion.style.display = 'none';
-        }
+    // Lógica para filtrar equipos cuando eligen un local
+    function filtrarEquipos() {
+        // Esta función filtrará los equipos (Aires) que pusiste en la columna D
+        // del archivo Configuracion_Sistema_OT
     }
 
-    // --- ENVÍO DE DATOS ---
     document.getElementById('otForm').onsubmit = async (e) => {
         e.preventDefault();
-        const btn = document.getElementById('btnGuardar');
+        const btn = document.getElementById('btn');
         btn.disabled = true;
-        btn.innerText = 'PROCESANDO...';
+        btn.innerText = "ENVIANDO...";
 
-        const payload = {
-            numOt: document.getElementById('numOt').value,
-            tipo: document.getElementById('tipo').value,
-            especialidad: document.getElementById('especialidad').value,
-            personal: document.getElementById('personal').value,
+        const data = {
             edificio: document.getElementById('edificio').value,
             sector: document.getElementById('sector').value,
             equipo: document.getElementById('equipo').value,
             nInventario: document.getElementById('nInventario').value,
-            reportadoPor: document.getElementById('reportadoPor').value,
-            medio: document.getElementById('medio').value,
-            prioridad: document.getElementById('prioridad').value,
-            estado: document.getElementById('estado').value,
-            fechaCierre: document.getElementById('fechaCierre').value,
-            horaCierre: document.getElementById('horaCierre').value,
+            especialidad: document.getElementById('especialidad').value,
+            personal: document.getElementById('personal').value,
             descripcion: document.getElementById('descripcion').value,
-            materiales: document.getElementById('materiales').value
+            ubicacionDetalle: document.getElementById('ubicacionDetalle').value,
+            estado: document.getElementById('estado').value,
+            tipo: "Mantenimiento"
         };
 
         try {
-            // Usamos mode: 'no-cors' para evitar bloqueos de seguridad del navegador con Apps Script
             await fetch(WEB_APP_URL, {
                 method: 'POST',
-                mode: 'no-cors', 
-                cache: 'no-cache',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                mode: 'no-cors',
+                body: JSON.stringify(data)
             });
-            
-            alert('¡ÉXITO! La Orden de Trabajo ha sido enviada al sistema.');
-            if (payload.estado === 'Abierta') {
-                if(confirm('¿Deseas imprimir esta OT ahora?')) window.print();
-            }
-        } catch (error) {
-            console.error(error);
-            alert('Error de conexión. Verifica que la URL del Script sea correcta.');
-        } finally {
-            btn.disabled = false;
-            btn.innerText = 'GUARDAR EN GOOGLE SHEETS';
-        }
+            alert("OT REGISTRADA. El número se asignó en el Excel.");
+        } catch(e) { alert("Error al guardar"); }
+        btn.disabled = false;
+        btn.innerText = "GUARDAR OT Y REGISTRAR";
     };
 </script>
-
 </body>
 </html>
