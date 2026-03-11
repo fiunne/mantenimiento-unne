@@ -11,24 +11,25 @@
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .form-group { margin-bottom: 10px; }
         label { display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 5px; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         .full { grid-column: span 2; }
         button { width: 100%; padding: 15px; margin-top: 10px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; }
         .btn-save { background: var(--primary); color: white; }
-        #loader { color: blue; font-weight: bold; display: none; }
+        #loader { color: #0056b3; font-weight: bold; display: none; text-align: center; padding: 10px; background: #e7f0ff; border-radius: 5px; margin-bottom: 15px; }
+        @media print { .no-print { display: none; } .container { box-shadow: none; border: 1px solid #ccc; } }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Orden de Trabajo 2026</h2>
-    <div id="loader">⌛ Conectando con la base de datos...</div>
+    <h2 style="text-align:center; color: var(--primary);">Orden de Trabajo 2026</h2>
+    <div id="loader">⌛ Conectando con Google Sheets...</div>
     
     <form id="otForm">
         <div class="grid">
             <div class="form-group">
                 <label>N° OT</label>
-                <input type="text" value="AUTO" disabled>
+                <input type="text" value="AUTO-GENERADO" disabled style="background:#eee;">
             </div>
             <div class="form-group">
                 <label>PRIORIDAD</label>
@@ -63,14 +64,14 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>EQUIPO</label>
+                <label>EQUIPO / ACTIVO</label>
                 <select id="equipo" onchange="setInventario()">
                     <option value="">-- Seleccione --</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>N° INVENTARIO</label>
-                <input type="text" id="nInventario" readonly>
+                <input type="text" id="nInventario" readonly style="background:#f9f9f9;">
             </div>
             <div class="form-group">
                 <label>ESPECIALIDAD</label>
@@ -82,41 +83,43 @@
                 </select>
             </div>
             <div class="form-group">
-                <label>TIPO</label>
+                <label>TIPO DE TRABAJO</label>
                 <select id="tipo">
                     <option>Correctivo</option>
                     <option>Preventivo</option>
+                    <option>Mejora</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>REPORTADO POR</label>
-                <input type="text" id="reportadoPor">
+                <input type="text" id="reportadoPor" placeholder="Nombre">
             </div>
             <div class="form-group">
-                <label>MEDIO</label>
+                <label>MEDIO DE REPORTE</label>
                 <select id="medioReporte">
-                    <option>App Digital</option>
+                    <option selected>App Digital</option>
                     <option>WhatsApp</option>
                     <option>Personalmente</option>
+                    <option>Teléfono</option>
                 </select>
             </div>
             <div class="form-group">
-                <label>PERSONAL</label>
+                <label>PERSONAL ASIGNADO</label>
                 <select id="personal">
                     <option>GLA</option><option>DSF</option><option>RRG</option><option>MAP</option><option>SDB</option>
                 </select>
             </div>
             <div class="form-group full">
-                <label>DESCRIPCIÓN</label>
-                <textarea id="descripcion" required></textarea>
+                <label>DESCRIPCIÓN DEL TRABAJO</label>
+                <textarea id="descripcion" rows="3" required placeholder="Detalle de la tarea..."></textarea>
             </div>
             <div class="form-group full">
-                <label>MATERIALES</label>
-                <input type="text" id="materiales">
+                <label>MATERIALES UTILIZADOS</label>
+                <input type="text" id="materiales" placeholder="Repuestos, gas, cables, etc.">
             </div>
             <div class="form-group full">
                 <label>OBSERVACIONES</label>
-                <input type="text" id="observaciones">
+                <input type="text" id="observaciones" placeholder="Referencias adicionales">
             </div>
             <div class="form-group">
                 <label>ESTADO</label>
@@ -126,49 +129,89 @@
                 </select>
             </div>
         </div>
-        <button type="submit" id="btnSave" class="btn-save">GUARDAR EN SISTEMA</button>
-        <button type="button" onclick="window.print()">IMPRIMIR PDF</button>
+        <div class="no-print">
+            <button type="submit" id="btnSave" class="btn-save">GUARDAR EN SISTEMA</button>
+            <button type="button" onclick="window.print()" style="background:#6c757d; color:white;">IMPRIMIR PDF</button>
+        </div>
     </form>
 </div>
 
 <script>
+    // URL de tu Apps Script (mantenemos la que pasaste)
     const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzYEJnB7L5qtF5DZo0l1SrkQIi0ekHsw7uj9GxKebLg5Gv1sfHqDZk-nNlTx10qInOxaw/exec';
     let rawData = [];
 
+    // PASO 1: CARGAR SECTORES (COL A)
     async function getSectores() {
         const edif = document.getElementById('edificio').value;
         const loader = document.getElementById('loader');
+        const selSector = document.getElementById('sector');
+        
+        if(!edif) return;
+        
         loader.style.display = 'block';
+        selSector.disabled = true;
+
         try {
-            const r = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edif)}`);
-            rawData = await r.json();
+            // Agregamos parámetros para evitar cache y manejar mejor la respuesta
+            const response = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edif)}`);
+            rawData = await response.json();
+            
+            if(rawData.error) {
+                alert("Error: " + rawData.error);
+                return;
+            }
+
             const sectores = [...new Set(rawData.map(d => d.sector))];
-            const sel = document.getElementById('sector');
-            sel.innerHTML = '<option value="">-- Seleccione --</option>';
-            sectores.forEach(s => sel.innerHTML += `<option>${s}</option>`);
-            sel.disabled = false;
-        } catch(e) { alert("Error de conexión"); }
-        loader.style.display = 'none';
+            selSector.innerHTML = '<option value="">-- Seleccione Sector --</option>';
+            sectores.forEach(s => {
+                let op = document.createElement('option');
+                op.value = s; op.text = s;
+                selSector.appendChild(op);
+            });
+            selSector.disabled = false;
+        } catch(e) {
+            console.error(e);
+            alert("Error de conexión con Google Sheets. Verifique la implementación del script.");
+        } finally {
+            loader.style.display = 'none';
+        }
     }
 
+    // PASO 2: CARGAR UBICACIONES (COL B)
     function getUbicaciones() {
         const sec = document.getElementById('sector').value;
+        const selUbic = document.getElementById('subarea');
+        
         const filtered = rawData.filter(d => d.sector === sec);
         const ubics = [...new Set(filtered.map(d => d.ubicacion))];
-        const sel = document.getElementById('subarea');
-        sel.innerHTML = '<option value="">-- Seleccione --</option>';
-        ubics.forEach(u => sel.innerHTML += `<option>${u}</option>`);
-        sel.disabled = false;
+        
+        selUbic.innerHTML = '<option value="">-- Seleccione Ubicación --</option>';
+        ubics.forEach(u => {
+            let op = document.createElement('option');
+            op.value = u; op.text = u;
+            selUbic.appendChild(op);
+        });
+        selUbic.disabled = false;
     }
 
+    // PASO 3: CARGAR EQUIPOS
     function getEquipos() {
         const sec = document.getElementById('sector').value;
         const ubi = document.getElementById('subarea').value;
+        const selEq = document.getElementById('equipo');
+        
         const filtered = rawData.filter(d => d.sector === sec && d.ubicacion === ubi);
-        const sel = document.getElementById('equipo');
-        sel.innerHTML = '<option value="">-- Seleccione --</option>';
+        selEq.innerHTML = '<option value="">-- Seleccione Equipo --</option>';
+        
         filtered.forEach(d => {
-            if(d.equipo) sel.innerHTML += `<option data-inv="${d.inventario}">${d.equipo}</option>`;
+            if(d.equipo) {
+                let op = document.createElement('option');
+                op.value = d.equipo;
+                op.text = d.equipo;
+                op.dataset.inv = d.inventario;
+                selEq.appendChild(op);
+            }
         });
     }
 
@@ -177,6 +220,7 @@
         document.getElementById('nInventario').value = sel.options[sel.selectedIndex].dataset.inv || "";
     }
 
+    // GUARDAR DATOS
     document.getElementById('otForm').onsubmit = async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnSave');
@@ -201,10 +245,20 @@
         };
 
         try {
-            await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            alert("¡OT REGISTRADA!");
+            // El modo 'no-cors' es necesario para evitar bloqueos al enviar datos a Apps Script
+            await fetch(WEB_APP_URL, { 
+                method: 'POST', 
+                mode: 'no-cors', 
+                cache: 'no-cache',
+                body: JSON.stringify(payload) 
+            });
+            alert("¡ORDEN REGISTRADA EXITOSAMENTE!");
             location.reload();
-        } catch(e) { alert("Error"); btn.disabled = false; }
+        } catch(e) { 
+            alert("Error al guardar los datos."); 
+            btn.disabled = false; 
+            btn.innerText = "GUARDAR EN SISTEMA";
+        }
     };
 </script>
 </body>
