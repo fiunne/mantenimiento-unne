@@ -5,8 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Gestión OT - Facultad de Ingeniería</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loading-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.8);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen p-4">
+    <div id="loader" class="loading-overlay italic text-blue-600 font-bold text-lg">Procesando...</div>
+
     <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
         <h1 class="text-2xl font-bold text-blue-800 mb-6 text-center border-b pb-4">Carga de Orden de Trabajo (OT)</h1>
         
@@ -42,35 +53,32 @@
                 </div>
             </div>
 
-            <div class="space-y-4 bg-blue-50 p-4 rounded-lg">
+            <div class="space-y-4 bg-blue-50 p-4 rounded-lg border border-blue-100">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700">Edificio</label>
-                    <select id="edificio" onchange="cargarSectores()" class="w-full border p-2 rounded" required>
-                        <option value="">Seleccione edificio...</option>
-                        <option value="Edificio Principal">Edificio Principal</option>
-                        <option value="Edificio IEM">Edificio IEM</option>
-                        <option value="Edificio Laboratorios">Edificio Laboratorios</option>
+                    <label class="block text-sm font-semibold text-gray-700">Edificio / Departamento</label>
+                    <select id="edificio" onchange="cargarSectores()" class="w-full border p-2 rounded bg-white" required>
+                        <option value="">Cargando edificios...</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700">Sector / Aula</label>
-                    <select id="sector" onchange="actualizarDetalles()" class="w-full border p-2 rounded" disabled required>
+                    <select id="sector" onchange="actualizarDetalles()" class="w-full border p-2 rounded bg-white" disabled required>
                         <option value="">Primero elija edificio...</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <div>
-                        <label class="block text-xs font-bold text-gray-500">Ubicación Precisa</label>
-                        <input type="text" id="ubicacion" class="w-full bg-gray-100 p-2 text-sm rounded border" readonly>
+                        <label class="block text-xs font-bold text-gray-500 uppercase">Ubicación Precisa</label>
+                        <input type="text" id="ubicacion" class="w-full bg-gray-50 p-2 text-sm rounded border border-gray-200" readonly>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-500">N° Inventario</label>
-                        <input type="text" id="nInventario" class="w-full bg-gray-100 p-2 text-sm rounded font-mono border" readonly>
+                        <label class="block text-xs font-bold text-gray-500 uppercase">N° Inventario</label>
+                        <input type="text" id="nInventario" class="w-full bg-gray-50 p-2 text-sm rounded font-mono border border-gray-200" readonly>
                     </div>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-500">Equipo Identificado</label>
-                    <input type="text" id="equipo" class="w-full bg-gray-100 p-2 text-sm rounded border" readonly>
+                    <label class="block text-xs font-bold text-gray-500 uppercase">Equipo Identificado</label>
+                    <input type="text" id="equipo" class="w-full bg-gray-50 p-2 text-sm rounded border border-gray-200" readonly>
                 </div>
             </div>
 
@@ -96,83 +104,147 @@
 
             <div class="md:col-span-2">
                 <label class="block text-sm font-semibold text-gray-700">Descripción del Problema/Tarea</label>
-                <textarea id="descripcion" rows="3" class="w-full border p-2 rounded" required></textarea>
+                <textarea id="descripcion" rows="3" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500" required></textarea>
             </div>
             
             <div class="md:col-span-2">
                 <label class="block text-sm font-semibold text-gray-700">Materiales Utilizados</label>
-                <input type="text" id="materiales" class="w-full border p-2 rounded" placeholder="Separar por comas">
+                <input type="text" id="materiales" class="w-full border p-2 rounded" placeholder="Ej: 2 tubos led, cinta aisladora...">
             </div>
 
-            <div class="md:col-span-2 flex justify-between items-center bg-gray-50 p-4 rounded">
+            <div class="md:col-span-2 flex flex-col md:flex-row justify-between items-center bg-gray-50 p-4 rounded border gap-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700">Estado Inicial</label>
-                    <select id="estado" class="border p-2 rounded">
+                    <label class="block text-sm font-semibold text-gray-700">Estado de la OT</label>
+                    <select id="estado" class="border p-2 rounded bg-white">
                         <option value="Abierta">Abierta (Pendiente)</option>
                         <option value="En Proceso">En Proceso</option>
                         <option value="Finalizada">Finalizada</option>
                     </select>
                 </div>
-                <button type="submit" id="btnGuardar" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all">
-                    GUARDAR ORDEN DE TRABAJO
+                <button type="submit" id="btnGuardar" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-4 px-10 rounded-lg shadow-xl transition-all active:scale-95">
+                    REGISTRAR ORDEN DE TRABAJO
                 </button>
             </div>
         </form>
     </div>
 
     <script>
-        // --- CONFIGURACIÓN ---
-        // Asegúrate de que esta URL sea la de la implementación hecha desde la hoja "Configuracion_Sistema_OT"
-       const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx5pw0Iwhudg7zFa4YXUVz2y-btG1YUSD83cs0hqQi2WOPc7OuKMRCWjd8q0YqOw40D/exec"; // RECUERDA ACTUALIZAR ESTO
-const TOKEN = "MANTENIMIENTO_FI_2026";
-let sectoresData = [];
+        // ==========================================
+        // CONFIGURACIÓN - ACTUALIZAR AQUÍ
+        // ==========================================
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx5pw0Iwhudg7zFa4YXUVz2y-btG1YUSD83cs0hqQi2WOPc7OuKMRCWjd8q0YqOw40D/exec"; 
+        const TOKEN = "MANTENIMIENTO_FI_2026";
+        let sectoresData = [];
 
-// 1. Al cargar la página, traer los nombres de las pestañas (Edificios)
-window.onload = async () => {
-    const edificioSelect = document.getElementById('edificio');
-    try {
-        const res = await fetch(`${WEB_APP_URL}?action=getEdificios&token=${TOKEN}`);
-        const edificios = await res.json();
-        edificios.forEach(nombre => {
-            const opt = document.createElement('option');
-            opt.value = nombre;
-            opt.textContent = nombre;
-            edificioSelect.appendChild(opt);
-        });
-    } catch (e) { alert("Error al conectar con la base de datos de edificios."); }
-};
+        // 1. CARGAR EDIFICIOS (PESTAÑAS) AL INICIAR
+        window.onload = async () => {
+            const edificioSelect = document.getElementById('edificio');
+            try {
+                const response = await fetch(`${WEB_APP_URL}?action=getEdificios&token=${TOKEN}`);
+                const edificios = await response.json();
+                
+                edificioSelect.innerHTML = '<option value="">Seleccione Edificio...</option>';
+                edificios.forEach(nombre => {
+                    const opt = document.createElement('option');
+                    opt.value = nombre;
+                    opt.textContent = nombre;
+                    edificioSelect.appendChild(opt);
+                });
+            } catch (error) {
+                alert("Error crítico: No se pudo conectar con la base de datos de edificios.");
+                console.error(error);
+            }
+        };
 
-// 2. Al elegir edificio, traer sectores
-async function cargarSectores() {
-    const edificio = document.getElementById('edificio').value;
-    const sectorSelect = document.getElementById('sector');
-    
-    if (!edificio) { sectorSelect.disabled = true; return; }
-    
-    sectorSelect.innerHTML = '<option>Cargando...</option>';
-    try {
-        const res = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edificio)}&token=${TOKEN}`);
-        sectoresData = await res.json();
-        sectorSelect.innerHTML = '<option value="">Seleccione sector...</option>';
-        sectoresData.forEach((item, index) => {
-            const opt = document.createElement('option');
-            opt.value = index;
-            opt.textContent = item.sector;
-            sectorSelect.appendChild(opt);
-        });
-        sectorSelect.disabled = false;
-    } catch (e) { alert("Error cargando sectores."); }
-}
+        // 2. CARGAR SECTORES SEGÚN EDIFICIO
+        async function cargarSectores() {
+            const edificio = document.getElementById('edificio').value;
+            const sectorSelect = document.getElementById('sector');
+            
+            // Reset de campos
+            document.getElementById('ubicacion').value = "";
+            document.getElementById('nInventario').value = "";
+            document.getElementById('equipo').value = "";
 
-function actualizarDetalles() {
-    const index = document.getElementById('sector').value;
-    if (index !== "") {
-        const info = sectoresData[index];
-        document.getElementById('ubicacion').value = info.ubicacion;
-        document.getElementById('nInventario').value = info.inventario;
-        document.getElementById('equipo').value = info.equipo;
-    }
-}
+            if (!edificio) {
+                sectorSelect.disabled = true;
+                sectorSelect.innerHTML = '<option value="">Primero elija edificio...</option>';
+                return;
+            }
+
+            sectorSelect.innerHTML = '<option>Cargando sectores...</option>';
+            sectorSelect.disabled = true;
+            
+            try {
+                const response = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edificio)}&token=${TOKEN}`);
+                sectoresData = await response.json();
+                
+                sectorSelect.innerHTML = '<option value="">Seleccione sector...</option>';
+                sectoresData.forEach((item, index) => {
+                    const opt = document.createElement('option');
+                    opt.value = index;
+                    opt.textContent = item.sector;
+                    sectorSelect.appendChild(opt);
+                });
+                sectorSelect.disabled = false;
+            } catch (error) {
+                alert("Error cargando sectores.");
+            }
+        }
+
+        // 3. ACTUALIZAR DETALLES AUTOMÁTICOS
+        function actualizarDetalles() {
+            const index = document.getElementById('sector').value;
+            if (index !== "") {
+                const info = sectoresData[index];
+                document.getElementById('ubicacion').value = info.ubicacion || "n/c";
+                document.getElementById('nInventario').value = info.inventario || "n/c";
+                document.getElementById('equipo').value = info.equipo || "n/c";
+            }
+        }
+
+        // 4. ENVIAR FORMULARIO (POST)
+        document.getElementById('otForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const loader = document.getElementById('loader');
+            const btn = document.getElementById('btnGuardar');
+            
+            loader.style.display = "flex";
+            btn.disabled = true;
+
+            const payload = {
+                token: TOKEN,
+                tipo: document.getElementById('tipo').value,
+                especialidad: document.getElementById('especialidad').value,
+                prioridad: document.getElementById('prioridad').value,
+                edificio: document.getElementById('edificio').value,
+                sector: sectoresData[document.getElementById('sector').value].sector,
+                ubicacion: document.getElementById('ubicacion').value,
+                nInventario: document.getElementById('nInventario').value,
+                equipo: document.getElementById('equipo').value,
+                reportadoPor: document.getElementById('reportadoPor').value,
+                medioReporte: document.getElementById('medioReporte').value,
+                personal: document.getElementById('personal').value,
+                descripcion: document.getElementById('descripcion').value,
+                materiales: document.getElementById('materiales').value,
+                estado: document.getElementById('estado').value,
+                observaciones: ""
+            };
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(payload)
+                });
+                
+                alert("¡ÉXITO! La Orden de Trabajo ha sido enviada al Registro.");
+                location.reload();
+            } catch (error) {
+                alert("Error al guardar. Revise su conexión.");
+                btn.disabled = false;
+                loader.style.display = "none";
+            }
         };
     </script>
 </body>
