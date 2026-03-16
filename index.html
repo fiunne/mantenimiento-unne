@@ -3,263 +3,206 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión OT 2026</title>
-    <style>
-        :root { --primary: #0056b3; --bg: #f4f7f6; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); padding: 20px; }
-        .container { background: white; padding: 30px; border-radius: 12px; max-width: 800px; margin: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .form-group { margin-bottom: 10px; }
-        label { display: block; font-weight: bold; font-size: 0.8em; margin-bottom: 5px; }
-        input, select, textarea { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        .full { grid-column: span 2; }
-        button { width: 100%; padding: 15px; margin-top: 10px; cursor: pointer; border: none; border-radius: 6px; font-weight: bold; }
-        .btn-save { background: var(--primary); color: white; }
-        #loader { color: #0056b3; font-weight: bold; display: none; text-align: center; padding: 10px; background: #e7f0ff; border-radius: 5px; margin-bottom: 15px; }
-        @media print { .no-print { display: none; } .container { box-shadow: none; border: 1px solid #ccc; } }
-    </style>
+    <title>Sistema Gestión OT - Facultad de Ingeniería</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-
-<div class="container">
-    <h2 style="text-align:center; color: var(--primary);">Orden de Trabajo 2026</h2>
-    <div id="loader">⌛ Conectando con Google Sheets...</div>
-    
-    <form id="otForm">
-        <div class="grid">
-            <div class="form-group">
-                <label>N° OT</label>
-                <input type="text" value="AUTO-GENERADO" disabled style="background:#eee;">
-            </div>
-            <div class="form-group">
-                <label>PRIORIDAD</label>
-                <select id="prioridad">
-                    <option>Baja</option>
-                    <option selected>Media</option>
-                    <option>Alta</option>
-                    <option>Urgente</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>EDIFICIO</label>
-                <select id="edificio" onchange="getSectores()" required>
-                    <option value="">-- Seleccione --</option>
-                    <option>Edificio Principal</option>
-                    <option>Edificio IEM</option>
-                    <option>Lab de Aerodinamica</option>
-                    <option>Departamento de Geociencias</option>
-                    <option>Departamento de Hidraulica</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>SECTOR / LOCAL (Col A)</label>
-                <select id="sector" onchange="getUbicaciones()" disabled required>
-                    <option value="">Primero elija edificio</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>UBICACIÓN / PISO (Col B)</label>
-                <select id="subarea" onchange="getEquipos()" disabled required>
-                    <option value="">Primero elija sector</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>EQUIPO / ACTIVO</label>
-                <select id="equipo" onchange="setInventario()">
-                    <option value="">-- Seleccione --</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>N° INVENTARIO</label>
-                <input type="text" id="nInventario" readonly style="background:#f9f9f9;">
-            </div>
-            <div class="form-group">
-                <label>ESPECIALIDAD</label>
-                <select id="especialidad">
-                    <option>Refrigeración</option>
-                    <option>Electricidad</option>
-                    <option>Herrería y Gral</option>
-                    <option>HySL</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>TIPO DE TRABAJO</label>
-                <select id="tipo">
-                    <option>Correctivo</option>
-                    <option>Preventivo</option>
-                    <option>Mejora</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>REPORTADO POR</label>
-                <input type="text" id="reportadoPor" placeholder="Nombre">
-            </div>
-            <div class="form-group">
-                <label>MEDIO DE REPORTE</label>
-                <select id="medioReporte">
-                    <option selected>App Digital</option>
-                    <option>WhatsApp</option>
-                    <option>Personalmente</option>
-                    <option>Teléfono</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label>PERSONAL ASIGNADO</label>
-                <select id="personal">
-                    <option>GLA</option><option>DSF</option><option>RRG</option><option>MAP</option><option>SDB</option>
-                </select>
-            </div>
-            <div class="form-group full">
-                <label>DESCRIPCIÓN DEL TRABAJO</label>
-                <textarea id="descripcion" rows="3" required placeholder="Detalle de la tarea..."></textarea>
-            </div>
-            <div class="form-group full">
-                <label>MATERIALES UTILIZADOS</label>
-                <input type="text" id="materiales" placeholder="Repuestos, gas, cables, etc.">
-            </div>
-            <div class="form-group full">
-                <label>OBSERVACIONES</label>
-                <input type="text" id="observaciones" placeholder="Referencias adicionales">
-            </div>
-            <div class="form-group">
-                <label>ESTADO</label>
-                <select id="estado">
-                    <option>Abierta</option>
-                    <option>Cerrada</option>
-                </select>
-            </div>
-        </div>
-        <div class="no-print">
-            <button type="submit" id="btnSave" class="btn-save">GUARDAR EN SISTEMA</button>
-            <button type="button" onclick="window.print()" style="background:#6c757d; color:white;">IMPRIMIR PDF</button>
-        </div>
-    </form>
-</div>
-
-<script>
-    // URL de tu Apps Script (mantenemos la que pasaste)
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzs5lMhWEGleUrS9cMe-di3mpk2f1-gYYtEJWmsCIPA-WRFQR45mBr-kb7VbUmqy_I7/exec';
-    let rawData = [];
-
-    // PASO 1: CARGAR SECTORES (COL A)
-    async function getSectores() {
-        const edif = document.getElementById('edificio').value;
-        const loader = document.getElementById('loader');
-        const selSector = document.getElementById('sector');
+<body class="bg-gray-100 min-h-screen p-4">
+    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
+        <h1 class="text-2xl font-bold text-blue-800 mb-6 text-center border-b pb-4">Carga de Orden de Trabajo (OT)</h1>
         
-        if(!edif) return;
-        
-        loader.style.display = 'block';
-        selSector.disabled = true;
+        <form id="otForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Tipo de Trabajo</label>
+                    <select id="tipo" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Preventivo">Preventivo</option>
+                        <option value="Correctivo">Correctivo</option>
+                        <option value="Mejora">Mejora</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Especialidad</label>
+                    <select id="especialidad" class="w-full border p-2 rounded" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Electricidad">Electricidad</option>
+                        <option value="Refrigeración">Refrigeración</option>
+                        <option value="Ferretería">Ferretería</option>
+                        <option value="Herrería">Herrería</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Prioridad</label>
+                    <select id="prioridad" class="w-full border p-2 rounded" required>
+                        <option value="Baja">Baja</option>
+                        <option value="Media" selected>Media</option>
+                        <option value="Alta">Alta</option>
+                        <option value="Urgente">Urgente</option>
+                    </select>
+                </div>
+            </div>
 
-        try {
-            // Agregamos parámetros para evitar cache y manejar mejor la respuesta
-            const response = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edif)}`);
-            rawData = await response.json();
+            <div class="space-y-4 bg-blue-50 p-4 rounded-lg">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Edificio</label>
+                    <select id="edificio" onchange="cargarSectores()" class="w-full border p-2 rounded" required>
+                        <option value="">Seleccione edificio...</option>
+                        <option value="Edificio Principal">Edificio Principal</option>
+                        <option value="Edificio IEM">Edificio IEM</option>
+                        <option value="Edificio Laboratorios">Edificio Laboratorios</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Sector / Aula</label>
+                    <select id="sector" onchange="actualizarDetalles()" class="w-full border p-2 rounded" disabled required>
+                        <option value="">Primero elija edificio...</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500">Ubicación Precisa</label>
+                        <input type="text" id="ubicacion" class="w-full bg-gray-100 p-2 text-sm rounded" readonly>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500">N° Inventario</label>
+                        <input type="text" id="nInventario" class="w-full bg-gray-100 p-2 text-sm rounded font-mono" readonly>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500">Equipo Identificado</label>
+                    <input type="text" id="equipo" class="w-full bg-gray-100 p-2 text-sm rounded" readonly>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4 border-t pt-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Reportado Por</label>
+                    <input type="text" id="reportadoPor" class="w-full border p-2 rounded" placeholder="Nombre completo" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Medio de Reporte</label>
+                    <select id="medioReporte" class="w-full border p-2 rounded">
+                        <option value="WhatsApp">WhatsApp</option>
+                        <option value="Personalmente">Personalmente</option>
+                        <option value="Email">Email</option>
+                        <option value="Teléfono">Teléfono</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Personal Asignado</label>
+                    <input type="text" id="personal" class="w-full border p-2 rounded" placeholder="Técnicos" required>
+                </div>
+            </div>
+
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700">Descripción del Problema/Tarea</label>
+                <textarea id="descripcion" rows="3" class="w-full border p-2 rounded" required></textarea>
+            </div>
             
-            if(rawData.error) {
-                alert("Error: " + rawData.error);
+            <div class="md:col-span-2">
+                <label class="block text-sm font-semibold text-gray-700">Materiales Utilizados</label>
+                <input type="text" id="materiales" class="w-full border p-2 rounded" placeholder="Separar por comas">
+            </div>
+
+            <div class="md:col-span-2 flex justify-between items-center bg-gray-50 p-4 rounded">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Estado Inicial</label>
+                    <select id="estado" class="border p-2 rounded">
+                        <option value="Abierta">Abierta (Pendiente)</option>
+                        <option value="En Proceso">En Proceso</option>
+                        <option value="Finalizada">Finalizada</option>
+                    </select>
+                </div>
+                <button type="submit" id="btnGuardar" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-md transition-all">
+                    GUARDAR ORDEN DE TRABAJO
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // CONFIGURACIÓN (REEMPLAZA CON TU URL)
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyFWSrGSZlV8nXEEowXRduOluerI_Y2xPZwzgeEliRE880dM-FdVh_RYU5vnv2NYVaNMg/exec";
+        const TOKEN = "MANTENIMIENTO_FI_2026";
+        let sectoresData = [];
+
+        async function cargarSectores() {
+            const edificio = document.getElementById('edificio').value;
+            const sectorSelect = document.getElementById('sector');
+            
+            if (!edificio) {
+                sectorSelect.disabled = true;
                 return;
             }
 
-            const sectores = [...new Set(rawData.map(d => d.sector))];
-            selSector.innerHTML = '<option value="">-- Seleccione Sector --</option>';
-            sectores.forEach(s => {
-                let op = document.createElement('option');
-                op.value = s; op.text = s;
-                selSector.appendChild(op);
-            });
-            selSector.disabled = false;
-        } catch(e) {
-            console.error(e);
-            alert("Error de conexión con Google Sheets. Verifique la implementación del script.");
-        } finally {
-            loader.style.display = 'none';
-        }
-    }
-
-    // PASO 2: CARGAR UBICACIONES (COL B)
-    function getUbicaciones() {
-        const sec = document.getElementById('sector').value;
-        const selUbic = document.getElementById('subarea');
-        
-        const filtered = rawData.filter(d => d.sector === sec);
-        const ubics = [...new Set(filtered.map(d => d.ubicacion))];
-        
-        selUbic.innerHTML = '<option value="">-- Seleccione Ubicación --</option>';
-        ubics.forEach(u => {
-            let op = document.createElement('option');
-            op.value = u; op.text = u;
-            selUbic.appendChild(op);
-        });
-        selUbic.disabled = false;
-    }
-
-    // PASO 3: CARGAR EQUIPOS
-    function getEquipos() {
-        const sec = document.getElementById('sector').value;
-        const ubi = document.getElementById('subarea').value;
-        const selEq = document.getElementById('equipo');
-        
-        const filtered = rawData.filter(d => d.sector === sec && d.ubicacion === ubi);
-        selEq.innerHTML = '<option value="">-- Seleccione Equipo --</option>';
-        
-        filtered.forEach(d => {
-            if(d.equipo) {
-                let op = document.createElement('option');
-                op.value = d.equipo;
-                op.text = d.equipo;
-                op.dataset.inv = d.inventario;
-                selEq.appendChild(op);
+            sectorSelect.innerHTML = '<option>Cargando...</option>';
+            
+            try {
+                const response = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${edificio}&token=${TOKEN}`);
+                sectoresData = await response.json();
+                
+                sectorSelect.innerHTML = '<option value="">Seleccione sector...</option>';
+                sectoresData.forEach((item, index) => {
+                    const opt = document.createElement('option');
+                    opt.value = index;
+                    opt.textContent = item.sector;
+                    sectorSelect.appendChild(opt);
+                });
+                sectorSelect.disabled = false;
+            } catch (error) {
+                alert("Error cargando sectores. Verifique la conexión.");
             }
-        });
-    }
-
-    function setInventario() {
-        const sel = document.getElementById('equipo');
-        document.getElementById('nInventario').value = sel.options[sel.selectedIndex].dataset.inv || "";
-    }
-
-    // GUARDAR DATOS
-    document.getElementById('otForm').onsubmit = async (e) => {
-        e.preventDefault();
-        const btn = document.getElementById('btnSave');
-        btn.innerText = "REGISTRANDO..."; btn.disabled = true;
-        
-        const payload = {
-            edificio: document.getElementById('edificio').value,
-            sector: document.getElementById('sector').value,
-            ubicacion: document.getElementById('subarea').value,
-            equipo: document.getElementById('equipo').value,
-            nInventario: document.getElementById('nInventario').value,
-            prioridad: document.getElementById('prioridad').value,
-            especialidad: document.getElementById('especialidad').value,
-            tipo: document.getElementById('tipo').value,
-            reportadoPor: document.getElementById('reportadoPor').value,
-            medioReporte: document.getElementById('medioReporte').value,
-            personal: document.getElementById('personal').value,
-            descripcion: document.getElementById('descripcion').value,
-            materiales: document.getElementById('materiales').value,
-            observaciones: document.getElementById('observaciones').value,
-            estado: document.getElementById('estado').value
-        };
-
-        try {
-            // El modo 'no-cors' es necesario para evitar bloqueos al enviar datos a Apps Script
-            await fetch(WEB_APP_URL, { 
-                method: 'POST', 
-                mode: 'no-cors', 
-                cache: 'no-cache',
-                body: JSON.stringify(payload) 
-            });
-            alert("¡ORDEN REGISTRADA EXITOSAMENTE!");
-            location.reload();
-        } catch(e) { 
-            alert("Error al guardar los datos."); 
-            btn.disabled = false; 
-            btn.innerText = "GUARDAR EN SISTEMA";
         }
-    };
-</script>
+
+        function actualizarDetalles() {
+            const index = document.getElementById('sector').value;
+            if (index !== "") {
+                const info = sectoresData[index];
+                document.getElementById('ubicacion').value = info.ubicacion;
+                document.getElementById('nInventario').value = info.inventario;
+                document.getElementById('equipo').value = info.equipo;
+            }
+        }
+
+        document.getElementById('otForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnGuardar');
+            btn.disabled = true;
+            btn.innerText = "PROCESANDO...";
+
+            const payload = {
+                token: TOKEN,
+                tipo: document.getElementById('tipo').value,
+                especialidad: document.getElementById('especialidad').value,
+                prioridad: document.getElementById('prioridad').value,
+                edificio: document.getElementById('edificio').value,
+                sector: sectoresData[document.getElementById('sector').value].sector,
+                ubicacion: document.getElementById('ubicacion').value,
+                nInventario: document.getElementById('nInventario').value,
+                equipo: document.getElementById('equipo').value,
+                reportadoPor: document.getElementById('reportadoPor').value,
+                medioReporte: document.getElementById('medioReporte').value,
+                personal: document.getElementById('personal').value,
+                descripcion: document.getElementById('descripcion').value,
+                materiales: document.getElementById('materiales').value,
+                estado: document.getElementById('estado').value,
+                observaciones: ""
+            };
+
+            try {
+                const response = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(payload)
+                });
+                alert("OT REGISTRADA CON ÉXITO");
+                location.reload();
+            } catch (error) {
+                alert("Error al guardar. Intente nuevamente.");
+                btn.disabled = false;
+                btn.innerText = "GUARDAR ORDEN DE TRABAJO";
+            }
+        };
+    </script>
 </body>
 </html>
