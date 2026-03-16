@@ -61,16 +61,16 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block text-xs font-bold text-gray-500">Ubicación Precisa</label>
-                        <input type="text" id="ubicacion" class="w-full bg-gray-100 p-2 text-sm rounded" readonly>
+                        <input type="text" id="ubicacion" class="w-full bg-gray-100 p-2 text-sm rounded border" readonly>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500">N° Inventario</label>
-                        <input type="text" id="nInventario" class="w-full bg-gray-100 p-2 text-sm rounded font-mono" readonly>
+                        <input type="text" id="nInventario" class="w-full bg-gray-100 p-2 text-sm rounded font-mono border" readonly>
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500">Equipo Identificado</label>
-                    <input type="text" id="equipo" class="w-full bg-gray-100 p-2 text-sm rounded" readonly>
+                    <input type="text" id="equipo" class="w-full bg-gray-100 p-2 text-sm rounded border" readonly>
                 </div>
             </div>
 
@@ -121,87 +121,58 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN (REEMPLAZA CON TU URL)
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby8P3v85oezcUz7U7STl4ZaIpzbzt8vKgZxrtxqDIp73C_uBXxx1-AMXNj-ZhcxirT-/exec";
-        const TOKEN = "MANTENIMIENTO_FI_2026";
-        let sectoresData = [];
+        // --- CONFIGURACIÓN ---
+        // Asegúrate de que esta URL sea la de la implementación hecha desde la hoja "Configuracion_Sistema_OT"
+       const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx5pw0Iwhudg7zFa4YXUVz2y-btG1YUSD83cs0hqQi2WOPc7OuKMRCWjd8q0YqOw40D/exec"; // RECUERDA ACTUALIZAR ESTO
+const TOKEN = "MANTENIMIENTO_FI_2026";
+let sectoresData = [];
 
-        async function cargarSectores() {
-            const edificio = document.getElementById('edificio').value;
-            const sectorSelect = document.getElementById('sector');
-            
-            if (!edificio) {
-                sectorSelect.disabled = true;
-                return;
-            }
+// 1. Al cargar la página, traer los nombres de las pestañas (Edificios)
+window.onload = async () => {
+    const edificioSelect = document.getElementById('edificio');
+    try {
+        const res = await fetch(`${WEB_APP_URL}?action=getEdificios&token=${TOKEN}`);
+        const edificios = await res.json();
+        edificios.forEach(nombre => {
+            const opt = document.createElement('option');
+            opt.value = nombre;
+            opt.textContent = nombre;
+            edificioSelect.appendChild(opt);
+        });
+    } catch (e) { alert("Error al conectar con la base de datos de edificios."); }
+};
 
-            sectorSelect.innerHTML = '<option>Cargando...</option>';
-            
-            try {
-                const response = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${edificio}&token=${TOKEN}`);
-                sectoresData = await response.json();
-                
-                sectorSelect.innerHTML = '<option value="">Seleccione sector...</option>';
-                sectoresData.forEach((item, index) => {
-                    const opt = document.createElement('option');
-                    opt.value = index;
-                    opt.textContent = item.sector;
-                    sectorSelect.appendChild(opt);
-                });
-                sectorSelect.disabled = false;
-            } catch (error) {
-                alert("Error cargando sectores. Verifique la conexión.");
-            }
-        }
+// 2. Al elegir edificio, traer sectores
+async function cargarSectores() {
+    const edificio = document.getElementById('edificio').value;
+    const sectorSelect = document.getElementById('sector');
+    
+    if (!edificio) { sectorSelect.disabled = true; return; }
+    
+    sectorSelect.innerHTML = '<option>Cargando...</option>';
+    try {
+        const res = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edificio)}&token=${TOKEN}`);
+        sectoresData = await res.json();
+        sectorSelect.innerHTML = '<option value="">Seleccione sector...</option>';
+        sectoresData.forEach((item, index) => {
+            const opt = document.createElement('option');
+            opt.value = index;
+            opt.textContent = item.sector;
+            sectorSelect.appendChild(opt);
+        });
+        sectorSelect.disabled = false;
+    } catch (e) { alert("Error cargando sectores."); }
+}
 
-        function actualizarDetalles() {
-            const index = document.getElementById('sector').value;
-            if (index !== "") {
-                const info = sectoresData[index];
-                document.getElementById('ubicacion').value = info.ubicacion;
-                document.getElementById('nInventario').value = info.inventario;
-                document.getElementById('equipo').value = info.equipo;
-            }
-        }
-
-        document.getElementById('otForm').onsubmit = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnGuardar');
-            btn.disabled = true;
-            btn.innerText = "PROCESANDO...";
-
-            const payload = {
-                token: TOKEN,
-                tipo: document.getElementById('tipo').value,
-                especialidad: document.getElementById('especialidad').value,
-                prioridad: document.getElementById('prioridad').value,
-                edificio: document.getElementById('edificio').value,
-                sector: sectoresData[document.getElementById('sector').value].sector,
-                ubicacion: document.getElementById('ubicacion').value,
-                nInventario: document.getElementById('nInventario').value,
-                equipo: document.getElementById('equipo').value,
-                reportadoPor: document.getElementById('reportadoPor').value,
-                medioReporte: document.getElementById('medioReporte').value,
-                personal: document.getElementById('personal').value,
-                descripcion: document.getElementById('descripcion').value,
-                materiales: document.getElementById('materiales').value,
-                estado: document.getElementById('estado').value,
-                observaciones: ""
-            };
-
-            try {
-                const response = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    body: JSON.stringify(payload)
-                });
-                alert("OT REGISTRADA CON ÉXITO");
-                location.reload();
-            } catch (error) {
-                alert("Error al guardar. Intente nuevamente.");
-                btn.disabled = false;
-                btn.innerText = "GUARDAR ORDEN DE TRABAJO";
-            }
+function actualizarDetalles() {
+    const index = document.getElementById('sector').value;
+    if (index !== "") {
+        const info = sectoresData[index];
+        document.getElementById('ubicacion').value = info.ubicacion;
+        document.getElementById('nInventario').value = info.inventario;
+        document.getElementById('equipo').value = info.equipo;
+    }
+}
         };
     </script>
 </body>
