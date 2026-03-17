@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <div id="loader" class="loading-overlay italic text-blue-600 font-bold italic">Procesando...</div>
+    <div id="loader" class="loading-overlay italic text-blue-600 font-bold">Procesando...</div>
 
     <div id="main-content" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-4 md:p-6 hidden">
         
@@ -54,10 +54,18 @@
                         <option value="Cerrada">🟢 CERRADA (Finalizada)</option>
                     </select>
                     <div class="bg-blue-50 p-3 rounded-lg space-y-2">
-                        <select id="edificio" onchange="cargarSectores()" class="w-full border p-2 rounded text-sm" required><option value="">Edificio...</option></select>
-                        <select id="sector" onchange="filtrarUbicaciones()" class="w-full border p-2 rounded text-sm" disabled required><option value="">Sector...</option></select>
-                        <select id="ubicacionSelect" onchange="actualizarDetalles()" class="w-full border p-2 rounded text-sm" disabled required><option value="">Ubicación...</option></select>
-                        <input type="hidden" id="ubicacion_text"><input type="hidden" id="nInventario"><input type="hidden" id="equipo">
+                        <select id="edificio" onchange="cargarSectores()" class="w-full border p-2 rounded text-sm" required>
+                            <option value="">Seleccione Edificio...</option>
+                        </select>
+                        <select id="sector" onchange="filtrarUbicaciones()" class="w-full border p-2 rounded text-sm" disabled required>
+                            <option value="">Seleccione Sector...</option>
+                        </select>
+                        <select id="ubicacionSelect" onchange="actualizarDetalles()" class="w-full border p-2 rounded text-sm" disabled required>
+                            <option value="">Seleccione Ubicación...</option>
+                        </select>
+                        <input type="hidden" id="ubicacion_text">
+                        <input type="hidden" id="nInventario">
+                        <input type="hidden" id="equipo">
                     </div>
                 </div>
 
@@ -68,8 +76,8 @@
                         <option value="DSG">DSG</option><option value="MAP">MAP</option>
                         <option value="AGL">AGL</option><option value="RRG">RRG</option>
                     </select>
-                    <textarea id="descripcion" rows="3" class="w-full border p-2 rounded text-sm" required placeholder="Descripción del problema inicial..."></textarea>
-                    <textarea id="observaciones" rows="2" class="w-full border p-2 rounded text-sm bg-yellow-50" placeholder="Observaciones / Repuestos solicitados..."></textarea>
+                    <textarea id="descripcion" rows="3" class="w-full border p-2 rounded text-sm" required placeholder="Descripción de la tarea..."></textarea>
+                    <textarea id="observaciones" rows="2" class="w-full border p-2 rounded text-sm bg-yellow-50" placeholder="Observaciones / Faltantes..."></textarea>
                 </div>
 
                 <div class="md:col-span-2 flex justify-between gap-4 no-print mt-2">
@@ -80,34 +88,26 @@
         </div>
 
         <div id="sec-pendientes" class="hidden">
-            <h1 class="text-xl font-bold text-orange-700 mb-4 text-center border-b pb-2">Cierre y Consumo de Stock</h1>
-            
+            <h1 class="text-xl font-bold text-orange-700 mb-4 text-center border-b pb-2">Cierre de Órdenes</h1>
             <div class="space-y-4">
                 <select id="listaAbiertas" class="w-full border p-3 rounded-lg bg-white shadow-sm font-bold text-blue-900 border-blue-200">
                     <option value="">Cargando órdenes abiertas...</option>
                 </select>
 
                 <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <h3 class="font-bold text-sm mb-2 text-gray-700">Añadir Materiales Usados:</h3>
+                    <h3 class="font-bold text-sm mb-2">Añadir Insumos:</h3>
                     <div class="flex gap-2 mb-3">
                         <select id="selectMaterial" class="flex-1 border p-2 rounded text-sm">
-                            <option value="">Cargando lista de stock...</option>
+                            <option value="">Cargando stock...</option>
                         </select>
                         <input type="number" id="cantMaterial" value="1" min="1" class="w-16 border p-2 rounded text-center font-bold">
-                        <button onclick="agregarMaterialALista()" class="bg-blue-600 text-white px-4 rounded font-bold text-xl">+</button>
+                        <button type="button" onclick="agregarMaterialALista()" class="bg-blue-600 text-white px-4 rounded font-bold text-xl">+</button>
                     </div>
-                    <div id="listaTemporalMateriales" class="space-y-1">
-                        </div>
+                    <div id="listaTemporalMateriales" class="space-y-1"></div>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-bold mb-1">Comentario Final del Trabajo:</label>
-                    <textarea id="comentarioCierre" rows="2" class="w-full border p-2 rounded-lg" placeholder="Ej: Se reemplazaron componentes, queda operativo."></textarea>
-                </div>
-
-                <button onclick="finalizarOrdenConStock()" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-md hover:bg-green-700 transition-colors mt-4">
-                    ✅ FINALIZAR Y DESCONTAR STOCK
-                </button>
+                <textarea id="comentarioCierre" rows="2" class="w-full border p-2 rounded-lg" placeholder="Comentario final..."></textarea>
+                <button onclick="finalizarOrdenConStock()" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-md">✅ CERRAR Y DESCONTAR</button>
             </div>
         </div>
     </div>
@@ -117,9 +117,9 @@
         const TOKEN = "MANTENIMIENTO_FI_2026";
         const PIN_CORRECTO = "2026";
         
-        let rawData = []; // Para edificios/sectores
-        let listaStockCompleta = []; // Para materiales
-        let carritoMateriales = []; // Materiales a descontar en la OT actual
+        let rawDataUbicaciones = []; 
+        let listaStockCompleta = []; 
+        let carritoMateriales = []; 
 
         function verificarPIN() {
             if (document.getElementById('pin-input').value === PIN_CORRECTO) {
@@ -133,7 +133,7 @@
         function mostrarApp() {
             document.getElementById('auth-screen').style.display='none';
             document.getElementById('main-content').classList.remove('hidden');
-            inicializarDatos();
+            inicializarEdificios();
             cargarMaterialesStock();
         }
 
@@ -145,14 +145,56 @@
             if(tab === 'pendientes') cargarPendientes();
         }
 
-        // CARGA INICIAL
-        async function inicializarDatos() {
+        // --- LÓGICA DE UBICACIONES (CASCADA) ---
+        async function inicializarEdificios() {
             const res = await fetch(`${WEB_APP_URL}?action=getEdificios&token=${TOKEN}`);
             const edificios = await res.json();
             const select = document.getElementById('edificio');
+            select.innerHTML = '<option value="">Seleccione Edificio...</option>';
             edificios.forEach(n => { let opt = document.createElement('option'); opt.value = n; opt.textContent = n; select.appendChild(opt); });
         }
 
+        async function cargarSectores() {
+            const edif = document.getElementById('edificio').value;
+            if (!edif) return;
+            document.getElementById('loader').style.display = "flex";
+            const res = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edif)}&token=${TOKEN}`);
+            rawDataUbicaciones = await res.json();
+            
+            const secSel = document.getElementById('sector');
+            secSel.innerHTML = '<option value="">Seleccione Sector...</option>';
+            const sectoresUnicos = [...new Set(rawDataUbicaciones.map(i => i.sector))];
+            sectoresUnicos.forEach(s => { let opt = document.createElement('option'); opt.value = s; opt.textContent = s; secSel.appendChild(opt); });
+            
+            secSel.disabled = false;
+            document.getElementById('ubicacionSelect').disabled = true;
+            document.getElementById('loader').style.display = "none";
+        }
+
+        function filtrarUbicaciones() {
+            const sectorElegido = document.getElementById('sector').value;
+            const ubiSel = document.getElementById('ubicacionSelect');
+            ubiSel.innerHTML = '<option value="">Seleccione Ubicación...</option>';
+            
+            rawDataUbicaciones.filter(i => i.sector === sectorElegido).forEach(item => {
+                let opt = document.createElement('option');
+                opt.value = JSON.stringify(item); // Guardamos el objeto completo
+                opt.textContent = item.ubicacion;
+                ubiSel.appendChild(opt);
+            });
+            ubiSel.disabled = false;
+        }
+
+        function actualizarDetalles() {
+            const val = document.getElementById('ubicacionSelect').value;
+            if (!val) return;
+            const info = JSON.parse(val);
+            document.getElementById('ubicacion_text').value = info.ubicacion;
+            document.getElementById('nInventario').value = info.inventario;
+            document.getElementById('equipo').value = info.equipo;
+        }
+
+        // --- LÓGICA DE STOCK ---
         async function cargarMaterialesStock() {
             const res = await fetch(`${WEB_APP_URL}?action=getMateriales&token=${TOKEN}`);
             listaStockCompleta = await res.json();
@@ -166,12 +208,10 @@
             });
         }
 
-        // GESTIÓN DE CARRITO DE MATERIALES
         function agregarMaterialALista() {
             const index = document.getElementById('selectMaterial').value;
             const cant = parseInt(document.getElementById('cantMaterial').value);
             if (index === "" || cant < 1) return;
-
             const mat = listaStockCompleta[index];
             carritoMateriales.push({ ...mat, cantidad: cant });
             actualizarVistaCarrito();
@@ -181,19 +221,12 @@
             const div = document.getElementById('listaTemporalMateriales');
             div.innerHTML = "";
             carritoMateriales.forEach((m, i) => {
-                div.innerHTML += `<div class="material-item text-xs">
-                    <span><b>${m.cantidad}</b> x ${m.nombre}</span>
-                    <button onclick="eliminarDelCarrito(${i})" class="text-red-500 font-bold px-2">X</button>
-                </div>`;
+                div.innerHTML += `<div class="material-item text-xs"><span><b>${m.cantidad}</b> x ${m.nombre}</span><button onclick="eliminarDelCarrito(${i})" class="text-red-500 font-bold px-2">X</button></div>`;
             });
         }
 
-        function eliminarDelCarrito(index) {
-            carritoMateriales.splice(index, 1);
-            actualizarVistaCarrito();
-        }
+        function eliminarDelCarrito(i) { carritoMateriales.splice(i, 1); actualizarVistaCarrito(); }
 
-        // GESTIÓN DE ÓRDENES
         async function cargarPendientes() {
             const select = document.getElementById('listaAbiertas');
             select.innerHTML = '<option>Cargando pendientes...</option>';
@@ -211,54 +244,17 @@
         async function finalizarOrdenConStock() {
             const idOT = document.getElementById('listaAbiertas').value;
             if (!idOT) return alert("Seleccione una orden");
-            
             document.getElementById('loader').style.display = "flex";
-
-            // Formatear texto para la columna O (Materiales)
             const resumenTexto = carritoMateriales.map(m => `${m.cantidad} ${m.nombre}`).join(", ");
-
             const payload = {
-                token: TOKEN,
-                action: 'cerrarOT',
-                idOT: idOT,
+                token: TOKEN, action: 'cerrarOT', idOT: idOT,
                 comentarioFinal: document.getElementById('comentarioCierre').value,
                 materialesUsados: resumenTexto,
-                listaParaDescontar: carritoMateriales // Este es el array que usa el script para restar stock
+                listaParaDescontar: carritoMateriales
             };
-
-            const resp = await fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            });
-            
-            alert("¡Orden " + idOT + " cerrada y stock actualizado!");
+            await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
+            alert("Orden cerrada y stock actualizado.");
             location.reload();
-        }
-
-        // FUNCIONES DE SOPORTE (UBICACIÓN)
-        async function cargarSectores() {
-            const edif = document.getElementById('edificio').value;
-            const res = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edif)}&token=${TOKEN}`);
-            rawData = await res.json();
-            const secSel = document.getElementById('sector');
-            secSel.innerHTML = '<option value="">Sector...</option>';
-            [...new Set(rawData.map(i => i.sector))].forEach(s => { let opt = document.createElement('option'); opt.value = s; opt.textContent = s; secSel.appendChild(opt); });
-            secSel.disabled = false;
-        }
-
-        function filtrarUbicaciones() {
-            const sector = document.getElementById('sector').value;
-            const ubiSel = document.getElementById('ubicacionSelect');
-            ubiSel.innerHTML = '<option value="">Ubicación...</option>';
-            rawData.filter(i => i.sector === sector).forEach(item => { let opt = document.createElement('option'); opt.value = rawData.indexOf(item); opt.textContent = item.ubicacion; ubiSel.appendChild(opt); });
-            ubiSel.disabled = false;
-        }
-
-        function actualizarDetalles() {
-            const info = rawData[document.getElementById('ubicacionSelect').value];
-            document.getElementById('ubicacion_text').value = info.ubicacion;
-            document.getElementById('nInventario').value = info.inventario;
-            document.getElementById('equipo').value = info.equipo;
         }
 
         document.getElementById('otForm').onsubmit = async (e) => {
@@ -282,7 +278,7 @@
                 estado: document.getElementById('estado').value
             };
             await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
-            alert("¡Orden Guardada!");
+            alert("Orden Guardada!");
             location.reload();
         };
     </script>
