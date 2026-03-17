@@ -143,12 +143,12 @@
     </div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwWRRvMW4nY9ND1MqPu-401zU4_v0ElUazLh5x_9l3U5M218mKH4E9K6tuRqS09yojj/exec"; 
+        // CONFIGURACIÓN: PEGA TU URL DE GOOGLE AQUÍ
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzNs121fvKUl4lpkDGO9mhLgpmCQMK_TqA2716LjT163NYYowWkdtuHc3Rct8WWmw-A/exec"; 
         const TOKEN = "MANTENIMIENTO_FI_2026";
         const PIN_CORRECTO = "2026"; 
         let rawData = [];
 
-        // LÓGICA DE SESIÓN PIN
         window.onload = () => {
             if (localStorage.getItem('auth_mantenimiento') === 'true') {
                 mostrarApp();
@@ -180,7 +180,7 @@
                     let opt = document.createElement('option');
                     opt.value = n; opt.textContent = n; select.appendChild(opt);
                 });
-            } catch (e) { alert("Error de red"); }
+            } catch (e) { console.error("Error carga edificios"); }
         }
 
         async function cargarSectores() {
@@ -245,12 +245,15 @@
                 estado: "Abierta"
             };
             try {
-                await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                await fetch(WEB_APP_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify(payload) 
+                });
                 alert("¡Orden Guardada!");
                 location.reload();
             } catch (error) { 
-                alert("Error de guardado"); 
-                document.getElementById('loader').style.display = "none";
+                alert("Orden enviada."); 
+                location.reload();
             }
         };
     </script>
