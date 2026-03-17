@@ -6,18 +6,51 @@
     <title>Sistema Gestión OT - Facultad de Ingeniería</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @media print {
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .print-area { border: 1px solid black; padding: 20px; width: 100%; }
+        }
         .loading-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255,255,255,0.8); display: none; 
             justify-content: center; align-items: center; z-index: 1000;
         }
+        /* Estilos para el bloqueo por PIN */
+        #auth-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #1e3a8a; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 2000;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen p-4">
+    
+    <div id="auth-screen">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full">
+            <div class="mb-4 inline-block p-3 bg-blue-100 rounded-full text-blue-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+            </div>
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Acceso Restringido</h2>
+            <p class="text-sm text-gray-500 mb-6">Ingrese el PIN de 4 dígitos para continuar</p>
+            <input type="password" id="pin-input" maxlength="4" placeholder="••••" 
+                   class="w-full text-center text-3xl tracking-[1rem] border-2 border-blue-200 rounded-lg p-3 mb-4 focus:outline-none focus:border-blue-500">
+            <button onclick="verificarPIN()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors">
+                ACCEDER
+            </button>
+            <p id="pin-error" class="text-red-500 text-sm mt-3 hidden italic">PIN Incorrecto. Intente de nuevo.</p>
+        </div>
+    </div>
+
     <div id="loader" class="loading-overlay italic text-blue-600 font-bold text-lg">Procesando...</div>
 
-    <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6">
-        <h1 class="text-2xl font-bold text-blue-800 mb-6 text-center border-b pb-4">Carga de Orden de Trabajo (OT)</h1>
+    <div id="main-content" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 print-area hidden">
+        <div class="flex justify-between items-center mb-6 border-b pb-4">
+            <h1 class="text-2xl font-bold text-blue-800">Orden de Trabajo de Mantenimiento</h1>
+            <span class="text-sm font-mono bg-gray-100 p-2 rounded no-print">Año: 2026</span>
+        </div>
         
         <form id="otForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-4">
@@ -71,7 +104,8 @@
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <input type="hidden" id="ubicacion_text"> <div>
+                    <input type="hidden" id="ubicacion_text">
+                    <div>
                         <label class="block text-xs font-bold text-gray-500 uppercase">N° Inventario</label>
                         <input type="text" id="nInventario" class="w-full bg-gray-50 p-2 text-sm rounded border" readonly>
                     </div>
@@ -101,24 +135,43 @@
             </div>
 
             <div class="md:col-span-2">
-                <label class="block text-sm font-semibold text-gray-700">Descripción</label>
+                <label class="block text-sm font-semibold text-gray-700">Descripción de Tarea</label>
                 <textarea id="descripcion" rows="3" class="w-full border p-2 rounded" required></textarea>
             </div>
-            
-            <div class="md:col-span-2 flex justify-between items-center bg-gray-50 p-4 rounded border">
+
+            <div class="md:col-span-2 flex flex-col md:flex-row justify-between items-center bg-gray-50 p-4 rounded border gap-4 no-print">
+                <button type="button" onclick="window.print()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg">
+                    IMPRIMIR OT
+                </button>
                 <button type="submit" id="btnGuardar" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3 px-10 rounded-lg shadow-xl transition-all">
-                    REGISTRAR ORDEN DE TRABAJO
+                    GUARDAR EN REGISTRO
                 </button>
             </div>
         </form>
     </div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx5pw0Iwhudg7zFa4YXUVz2y-btG1YUSD83cs0hqQi2WOPc7OuKMRCWjd8q0YqOw40D/exec"; 
+        // CONFIGURACIÓN (Actualiza la URL con la de tu Apps Script de Configuración)
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4Xc8y6571gwPDhUm2GgamFg8hXZ2r_yMwF51kVV5U0AKJspQc6xLZxVRy72P6G1nxLg/exec"; 
         const TOKEN = "MANTENIMIENTO_FI_2026";
+        const PIN_CORRECTO = "2026"; // <--- AQUÍ PUEDES CAMBIAR EL PIN
+        
         let rawData = [];
 
-        window.onload = async () => {
+        // FUNCIÓN DE VERIFICACIÓN DE PIN
+        function verificarPIN() {
+            const pinIngresado = document.getElementById('pin-input').value;
+            if (pinIngresado === PIN_CORRECTO) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('main-content').classList.remove('hidden');
+                inicializarFormulario();
+            } else {
+                document.getElementById('pin-error').classList.remove('hidden');
+                document.getElementById('pin-input').value = "";
+            }
+        }
+
+        async function inicializarFormulario() {
             try {
                 const res = await fetch(`${WEB_APP_URL}?action=getEdificios&token=${TOKEN}`);
                 const edificios = await res.json();
@@ -129,23 +182,18 @@
                     opt.value = n; opt.textContent = n; select.appendChild(opt);
                 });
             } catch (e) { alert("Error al cargar edificios"); }
-        };
+        }
 
         async function cargarSectores() {
             const edif = document.getElementById('edificio').value;
             const secSel = document.getElementById('sector');
             const ubiSel = document.getElementById('ubicacionSelect');
-            
             secSel.disabled = true; ubiSel.disabled = true;
             secSel.innerHTML = '<option>Cargando...</option>';
-
             try {
                 const res = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edif)}&token=${TOKEN}`);
                 rawData = await res.json();
-                
-                // Agrupar sectores únicos
                 const sectoresUnicos = [...new Set(rawData.map(item => item.sector))];
-                
                 secSel.innerHTML = '<option value="">Seleccione sector...</option>';
                 sectoresUnicos.forEach(s => {
                     let opt = document.createElement('option');
@@ -158,13 +206,10 @@
         function filtrarUbicaciones() {
             const sectorElegido = document.getElementById('sector').value;
             const ubiSel = document.getElementById('ubicacionSelect');
-            
             ubiSel.innerHTML = '<option value="">Seleccione ubicación...</option>';
             const filtrados = rawData.filter(item => item.sector === sectorElegido);
-            
-            filtrados.forEach((item, index) => {
+            filtrados.forEach((item) => {
                 let opt = document.createElement('option');
-                // Guardamos el índice real de rawData para recuperarlo luego
                 opt.value = rawData.indexOf(item); 
                 opt.textContent = item.ubicacion;
                 ubiSel.appendChild(opt);
@@ -185,7 +230,6 @@
         document.getElementById('otForm').onsubmit = async (e) => {
             e.preventDefault();
             document.getElementById('loader').style.display = "flex";
-            
             const payload = {
                 token: TOKEN,
                 tipo: document.getElementById('tipo').value,
@@ -204,12 +248,11 @@
                 estado: "Abierta",
                 observaciones: ""
             };
-
             try {
                 await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                alert("¡Orden registrada!");
+                alert("¡Orden registrada exitosamente!");
                 location.reload();
-            } catch (error) { alert("Error al guardar"); }
+            } catch (error) { alert("Error al guardar"); document.getElementById('loader').style.display = "none"; }
         };
     </script>
 </body>
