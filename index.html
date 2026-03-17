@@ -3,37 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión OT & Stock - Ingeniería</title>
+    <title>Gestión OT & Stock FI-2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @media print { .no-print { display: none !important; } .print-area { border: 1px solid black; padding: 20px; } }
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
         #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e3a8a; display: flex; justify-content: center; align-items: center; z-index: 2000; }
         .tab-active { border-bottom: 4px solid #1e40af; color: #1e40af; font-weight: bold; }
-        .material-item { background: #f3f4f6; padding: 8px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+        .material-item { background: #f3f4f6; padding: 6px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 11px; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-2 md:p-4">
-    
+<body class="bg-gray-100 min-h-screen p-2 md:p-4 font-sans text-gray-800">
+
     <div id="auth-screen">
         <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full">
-            <h2 class="text-xl font-bold mb-4">Acceso Mantenimiento</h2>
-            <input type="password" id="pin-input" maxlength="4" placeholder="PIN" class="w-full text-center text-3xl border rounded-lg p-3 mb-4 focus:outline-none focus:border-blue-500">
-            <button onclick="verificarPIN()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700">ACCEDER</button>
+            <h2 class="text-xl font-bold mb-4 italic text-blue-900">Mantenimiento FI</h2>
+            <input type="password" id="pin-input" maxlength="4" placeholder="PIN" class="w-full text-center text-3xl border rounded-lg p-3 mb-4">
+            <button onclick="verificarPIN()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg">ACCEDER</button>
         </div>
     </div>
 
-    <div id="loader" class="loading-overlay italic text-blue-600 font-bold">Procesando...</div>
+    <div id="loader" class="loading-overlay font-bold italic text-blue-600">Procesando...</div>
 
     <div id="main-content" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-4 md:p-6 hidden">
         
         <div class="flex border-b mb-6 no-print">
-            <button id="tab-nueva" onclick="cambiarTab('nueva')" class="flex-1 py-3 text-center tab-active">NUEVA ORDEN</button>
-            <button id="tab-pendientes" onclick="cambiarTab('pendientes')" class="flex-1 py-3 text-center text-gray-500">CERRAR PENDIENTES</button>
+            <button id="tab-nueva" onclick="cambiarTab('nueva')" class="flex-1 py-3 tab-active">NUEVA OT</button>
+            <button id="tab-pendientes" onclick="cambiarTab('pendientes')" class="flex-1 py-3 text-gray-500">CERRAR PENDIENTES</button>
         </div>
 
         <div id="sec-nueva" class="print-area">
-            <h1 class="text-xl font-bold text-blue-800 mb-4 text-center border-b pb-2">Nueva Orden de Trabajo</h1>
             <form id="otForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-3">
                     <div class="flex gap-2">
@@ -49,24 +48,22 @@
                             <option value="Herrería">Herrería</option>
                         </select>
                     </div>
-                    <select id="estado" class="w-full border p-2 rounded bg-yellow-50 font-bold text-sm">
-                        <option value="Abierta">🟡 ABIERTA (Pendiente)</option>
-                        <option value="Cerrada">🟢 CERRADA (Finalizada)</option>
-                    </select>
+                    
                     <div class="bg-blue-50 p-3 rounded-lg space-y-2">
-                        <select id="edificio" onchange="cargarSectores()" class="w-full border p-2 rounded text-sm" required>
-                            <option value="">Seleccione Edificio...</option>
-                        </select>
-                        <select id="sector" onchange="filtrarUbicaciones()" class="w-full border p-2 rounded text-sm" disabled required>
-                            <option value="">Seleccione Sector...</option>
-                        </select>
-                        <select id="ubicacionSelect" onchange="actualizarDetalles()" class="w-full border p-2 rounded text-sm" disabled required>
-                            <option value="">Seleccione Ubicación...</option>
-                        </select>
-                        <input type="hidden" id="ubicacion_text">
-                        <input type="hidden" id="nInventario">
-                        <input type="hidden" id="equipo">
+                        <select id="edificio" onchange="cargarSectores()" class="w-full border p-2 rounded text-sm" required><option value="">Edificio...</option></select>
+                        <select id="sector" onchange="filtrarUbicaciones()" class="w-full border p-2 rounded text-sm" disabled><option value="">Sector...</option></select>
+                        <select id="ubicacionSelect" onchange="actualizarDetalles()" class="w-full border p-2 rounded text-sm" disabled><option value="">Ubicación...</option></select>
                     </div>
+
+                    <div id="detalle-equipo-extra" class="hidden bg-orange-50 p-3 rounded-lg border border-orange-200">
+                        <p class="text-[10px] font-bold text-orange-800 uppercase mb-1 underline">Información Hoja de Vida:</p>
+                        <div class="grid grid-cols-2 gap-2 text-sm">
+                            <p><b>Equipo:</b> <span id="display_equipo" class="text-blue-900"></span></p>
+                            <p><b>Inventario:</b> <span id="display_inventario" class="text-blue-900"></span></p>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="ubicacion_text"><input type="hidden" id="nInventario"><input type="hidden" id="equipo">
                 </div>
 
                 <div class="space-y-3">
@@ -76,50 +73,50 @@
                         <option value="DSG">DSG</option><option value="MAP">MAP</option>
                         <option value="AGL">AGL</option><option value="RRG">RRG</option>
                     </select>
-                    <textarea id="descripcion" rows="3" class="w-full border p-2 rounded text-sm" required placeholder="Descripción de la tarea..."></textarea>
-                    <textarea id="observaciones" rows="2" class="w-full border p-2 rounded text-sm bg-yellow-50" placeholder="Observaciones / Faltantes..."></textarea>
+                    <textarea id="descripcion" rows="3" class="w-full border p-2 rounded text-sm" required placeholder="Tarea a realizar..."></textarea>
+                    <select id="estado" class="w-full border p-2 rounded bg-yellow-50 font-bold text-sm">
+                        <option value="Abierta">🟡 ABIERTA (Pendiente)</option>
+                        <option value="Cerrada">🟢 CERRADA (Finalizada)</option>
+                    </select>
                 </div>
 
-                <div class="md:col-span-2 flex justify-between gap-4 no-print mt-2">
+                <div class="md:col-span-2 flex gap-4 no-print mt-2">
                     <button type="button" onclick="window.print()" class="bg-gray-500 text-white font-bold py-2 px-6 rounded-lg">IMPRIMIR</button>
-                    <button type="submit" class="flex-1 bg-blue-600 text-white font-extrabold py-2 rounded-lg shadow-lg">GUARDAR NUEVA OT</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white font-extrabold py-2 rounded-lg shadow-lg">GUARDAR ORDEN</button>
                 </div>
             </form>
         </div>
 
         <div id="sec-pendientes" class="hidden">
-            <h1 class="text-xl font-bold text-orange-700 mb-4 text-center border-b pb-2">Cierre de Órdenes</h1>
             <div class="space-y-4">
-                <select id="listaAbiertas" class="w-full border p-3 rounded-lg bg-white shadow-sm font-bold text-blue-900 border-blue-200">
-                    <option value="">Cargando órdenes abiertas...</option>
+                <select id="listaAbiertas" class="w-full border p-3 rounded-lg bg-white shadow-sm font-bold text-blue-900">
+                    <option value="">Cargando pendientes...</option>
                 </select>
 
                 <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <h3 class="font-bold text-sm mb-2">Añadir Insumos:</h3>
+                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Consumo de Materiales:</label>
                     <div class="flex gap-2 mb-3">
                         <select id="selectMaterial" class="flex-1 border p-2 rounded text-sm">
                             <option value="">Cargando stock...</option>
                         </select>
                         <input type="number" id="cantMaterial" value="1" min="1" class="w-16 border p-2 rounded text-center font-bold">
-                        <button type="button" onclick="agregarMaterialALista()" class="bg-blue-600 text-white px-4 rounded font-bold text-xl">+</button>
+                        <button type="button" onclick="agregarMaterialALista()" class="bg-blue-600 text-white px-4 rounded font-bold">+</button>
                     </div>
                     <div id="listaTemporalMateriales" class="space-y-1"></div>
                 </div>
 
-                <textarea id="comentarioCierre" rows="2" class="w-full border p-2 rounded-lg" placeholder="Comentario final..."></textarea>
-                <button onclick="finalizarOrdenConStock()" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-md">✅ CERRAR Y DESCONTAR</button>
+                <textarea id="comentarioCierre" rows="2" class="w-full border p-2 rounded-lg text-sm" placeholder="Comentario final del trabajo..."></textarea>
+                <button onclick="finalizarOrdenConStock()" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-md">✅ FINALIZAR Y ACTUALIZAR STOCK</button>
             </div>
         </div>
     </div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwYzGsTsqxpXVWwRCVO7mCaFdLXC_VVYPbX0UE2Be8lAa4f8eWNu-V9aeTQAzbag02W/exec"; 
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwCJdAIQSlwo1ply3IixyahcGkezDpdzl4-zH52mas4rP-r8KS9rE_89RXsngTkZhjM/exec"; 
         const TOKEN = "MANTENIMIENTO_FI_2026";
         const PIN_CORRECTO = "2026";
         
-        let rawDataUbicaciones = []; 
-        let listaStockCompleta = []; 
-        let carritoMateriales = []; 
+        let rawUbicaciones = []; let stockDB = []; let carrito = [];
 
         function verificarPIN() {
             if (document.getElementById('pin-input').value === PIN_CORRECTO) {
@@ -133,8 +130,11 @@
         function mostrarApp() {
             document.getElementById('auth-screen').style.display='none';
             document.getElementById('main-content').classList.remove('hidden');
-            inicializarEdificios();
-            cargarMaterialesStock();
+            fetch(`${WEB_APP_URL}?action=getEdificios&token=${TOKEN}`).then(r => r.json()).then(data => {
+                const s = document.getElementById('edificio');
+                data.forEach(n => s.innerHTML += `<option value="${n}">${n}</option>`);
+            });
+            cargarMateriales();
         }
 
         function cambiarTab(tab) {
@@ -145,116 +145,82 @@
             if(tab === 'pendientes') cargarPendientes();
         }
 
-        // --- LÓGICA DE UBICACIONES (CASCADA) ---
-        async function inicializarEdificios() {
-            const res = await fetch(`${WEB_APP_URL}?action=getEdificios&token=${TOKEN}`);
-            const edificios = await res.json();
-            const select = document.getElementById('edificio');
-            select.innerHTML = '<option value="">Seleccione Edificio...</option>';
-            edificios.forEach(n => { let opt = document.createElement('option'); opt.value = n; opt.textContent = n; select.appendChild(opt); });
-        }
-
         async function cargarSectores() {
             const edif = document.getElementById('edificio').value;
-            if (!edif) return;
+            if(!edif) return;
             document.getElementById('loader').style.display = "flex";
             const res = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edif)}&token=${TOKEN}`);
-            rawDataUbicaciones = await res.json();
-            
-            const secSel = document.getElementById('sector');
-            secSel.innerHTML = '<option value="">Seleccione Sector...</option>';
-            const sectoresUnicos = [...new Set(rawDataUbicaciones.map(i => i.sector))];
-            sectoresUnicos.forEach(s => { let opt = document.createElement('option'); opt.value = s; opt.textContent = s; secSel.appendChild(opt); });
-            
-            secSel.disabled = false;
-            document.getElementById('ubicacionSelect').disabled = true;
+            rawUbicaciones = await res.json();
+            const s = document.getElementById('sector');
+            s.innerHTML = '<option value="">Sector...</option>';
+            [...new Set(rawUbicaciones.map(i => i.sector))].forEach(sec => s.innerHTML += `<option value="${sec}">${sec}</option>`);
+            s.disabled = false;
             document.getElementById('loader').style.display = "none";
         }
 
         function filtrarUbicaciones() {
-            const sectorElegido = document.getElementById('sector').value;
-            const ubiSel = document.getElementById('ubicacionSelect');
-            ubiSel.innerHTML = '<option value="">Seleccione Ubicación...</option>';
-            
-            rawDataUbicaciones.filter(i => i.sector === sectorElegido).forEach(item => {
-                let opt = document.createElement('option');
-                opt.value = JSON.stringify(item); // Guardamos el objeto completo
-                opt.textContent = item.ubicacion;
-                ubiSel.appendChild(opt);
-            });
-            ubiSel.disabled = false;
+            const sec = document.getElementById('sector').value;
+            const u = document.getElementById('ubicacionSelect');
+            u.innerHTML = '<option value="">Ubicación...</option>';
+            rawUbicaciones.filter(i => i.sector === sec).forEach(i => u.innerHTML += `<option value='${JSON.stringify(i)}'>${i.ubicacion}</option>`);
+            u.disabled = false;
         }
 
         function actualizarDetalles() {
             const val = document.getElementById('ubicacionSelect').value;
-            if (!val) return;
+            if(!val) return;
             const info = JSON.parse(val);
             document.getElementById('ubicacion_text').value = info.ubicacion;
             document.getElementById('nInventario').value = info.inventario;
             document.getElementById('equipo').value = info.equipo;
+
+            const esAire = info.equipo.toLowerCase().includes("aire") || info.equipo.toLowerCase().includes("split");
+            document.getElementById('detalle-equipo-extra').classList.toggle('hidden', !esAire);
+            if(esAire) {
+                document.getElementById('display_equipo').innerText = info.equipo;
+                document.getElementById('display_inventario').innerText = info.inventario;
+            }
         }
 
-        // --- LÓGICA DE STOCK ---
-        async function cargarMaterialesStock() {
+        async function cargarMateriales() {
             const res = await fetch(`${WEB_APP_URL}?action=getMateriales&token=${TOKEN}`);
-            listaStockCompleta = await res.json();
-            const select = document.getElementById('selectMaterial');
-            select.innerHTML = '<option value="">Seleccionar material...</option>';
-            listaStockCompleta.forEach((m, index) => {
-                let opt = document.createElement('option');
-                opt.value = index;
-                opt.textContent = `[${m.categoria}] ${m.nombre}`;
-                select.appendChild(opt);
-            });
+            stockDB = await res.json();
+            const s = document.getElementById('selectMaterial');
+            s.innerHTML = '<option value="">Seleccionar material...</option>';
+            stockDB.forEach((m, i) => s.innerHTML += `<option value="${i}">[${m.categoria}] ${m.nombre}</option>`);
         }
 
         function agregarMaterialALista() {
-            const index = document.getElementById('selectMaterial').value;
+            const idx = document.getElementById('selectMaterial').value;
             const cant = parseInt(document.getElementById('cantMaterial').value);
-            if (index === "" || cant < 1) return;
-            const mat = listaStockCompleta[index];
-            carritoMateriales.push({ ...mat, cantidad: cant });
-            actualizarVistaCarrito();
-        }
-
-        function actualizarVistaCarrito() {
+            if(idx === "" || cant < 1) return;
+            carrito.push({...stockDB[idx], cantidad: cant});
             const div = document.getElementById('listaTemporalMateriales');
             div.innerHTML = "";
-            carritoMateriales.forEach((m, i) => {
-                div.innerHTML += `<div class="material-item text-xs"><span><b>${m.cantidad}</b> x ${m.nombre}</span><button onclick="eliminarDelCarrito(${i})" class="text-red-500 font-bold px-2">X</button></div>`;
-            });
+            carrito.forEach((m, i) => div.innerHTML += `<div class="material-item"><span><b>${m.cantidad}</b> x ${m.nombre}</span><button onclick="carrito.splice(${i},1);agregarMaterialALista()" class="text-red-500">X</button></div>`);
         }
 
-        function eliminarDelCarrito(i) { carritoMateriales.splice(i, 1); actualizarVistaCarrito(); }
-
         async function cargarPendientes() {
-            const select = document.getElementById('listaAbiertas');
-            select.innerHTML = '<option>Cargando pendientes...</option>';
+            const s = document.getElementById('listaAbiertas');
+            s.innerHTML = '<option>Cargando...</option>';
             const res = await fetch(`${WEB_APP_URL}?action=getAbiertas&token=${TOKEN}`);
-            const abiertas = await res.json();
-            select.innerHTML = '<option value="">Seleccione la OT a cerrar...</option>';
-            abiertas.forEach(ot => {
-                let opt = document.createElement('option');
-                opt.value = ot.id;
-                opt.textContent = `OT ${ot.id} | ${ot.detalle}`;
-                select.appendChild(opt);
-            });
+            const data = await res.json();
+            s.innerHTML = '<option value="">Seleccione la OT...</option>';
+            data.forEach(ot => s.innerHTML += `<option value="${ot.id}">OT ${ot.id} | ${ot.detalle}</option>`);
         }
 
         async function finalizarOrdenConStock() {
-            const idOT = document.getElementById('listaAbiertas').value;
-            if (!idOT) return alert("Seleccione una orden");
+            const id = document.getElementById('listaAbiertas').value;
+            if(!id) return alert("Seleccione OT");
             document.getElementById('loader').style.display = "flex";
-            const resumenTexto = carritoMateriales.map(m => `${m.cantidad} ${m.nombre}`).join(", ");
             const payload = {
-                token: TOKEN, action: 'cerrarOT', idOT: idOT,
+                token: TOKEN, action: 'cerrarOT', idOT: id,
                 comentarioFinal: document.getElementById('comentarioCierre').value,
-                materialesUsados: resumenTexto,
-                listaParaDescontar: carritoMateriales
+                materialesUsados: carrito.map(m => `${m.cantidad} ${m.nombre}`).join(", "),
+                listaParaDescontar: carrito
             };
-            await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
-            alert("Orden cerrada y stock actualizado.");
-            location.reload();
+            await fetch(WEB_APP_URL, {method: 'POST', body: JSON.stringify(payload)});
+            alert("Cerrada!"); location.reload();
         }
 
         document.getElementById('otForm').onsubmit = async (e) => {
@@ -271,15 +237,12 @@
                 nInventario: document.getElementById('nInventario').value,
                 equipo: document.getElementById('equipo').value,
                 reportadoPor: document.getElementById('reportadoPor').value,
-                medioReporte: "App",
-                personal: document.getElementById('personal').value,
+                medioReporte: "App", personal: document.getElementById('personal').value,
                 descripcion: document.getElementById('descripcion').value,
-                observaciones: document.getElementById('observaciones').value,
-                estado: document.getElementById('estado').value
+                observaciones: "", estado: document.getElementById('estado').value
             };
-            await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload) });
-            alert("Orden Guardada!");
-            location.reload();
+            await fetch(WEB_APP_URL, {method: 'POST', body: JSON.stringify(payload)});
+            alert("Guardada!"); location.reload();
         };
     </script>
 </body>
