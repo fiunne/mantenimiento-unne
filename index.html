@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión OT & Stock FI-2026</title>
+    <title>SGM - Facultad de Ingeniería</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @media print { .no-print { display: none !important; } .print-area { border: 1px solid black; padding: 20px; } }
@@ -13,13 +13,13 @@
         .material-item { background: #f3f4f6; padding: 6px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 11px; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-2 md:p-4 font-sans text-gray-800">
+<body class="bg-gray-100 min-h-screen p-2 md:p-4">
 
     <div id="auth-screen">
         <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full">
             <h2 class="text-xl font-bold mb-4 italic text-blue-900">Mantenimiento FI</h2>
-            <input type="password" id="pin-input" maxlength="4" placeholder="PIN" class="w-full text-center text-3xl border rounded-lg p-3 mb-4">
-            <button onclick="verificarPIN()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg">ACCEDER</button>
+            <input type="password" id="pin-input" maxlength="4" placeholder="PIN" class="w-full text-center text-3xl border rounded-lg p-3 mb-4 focus:outline-none">
+            <button onclick="verificarPIN()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700">ACCEDER</button>
         </div>
     </div>
 
@@ -28,8 +28,8 @@
     <div id="main-content" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-4 md:p-6 hidden">
         
         <div class="flex border-b mb-6 no-print">
-            <button id="tab-nueva" onclick="cambiarTab('nueva')" class="flex-1 py-3 tab-active">NUEVA OT</button>
-            <button id="tab-pendientes" onclick="cambiarTab('pendientes')" class="flex-1 py-3 text-gray-500">CERRAR PENDIENTES</button>
+            <button id="tab-nueva" onclick="cambiarTab('nueva')" class="flex-1 py-3 text-center tab-active">NUEVA ORDEN</button>
+            <button id="tab-pendientes" onclick="cambiarTab('pendientes')" class="flex-1 py-3 text-center text-gray-500">CERRAR PENDIENTES</button>
         </div>
 
         <div id="sec-nueva" class="print-area">
@@ -56,10 +56,10 @@
                     </div>
 
                     <div id="detalle-equipo-extra" class="hidden bg-orange-50 p-3 rounded-lg border border-orange-200">
-                        <p class="text-[10px] font-bold text-orange-800 uppercase mb-1 underline">Información Hoja de Vida:</p>
+                        <p class="text-[10px] font-bold text-orange-800 uppercase mb-1 underline italic">Datos de Hoja de Vida:</p>
                         <div class="grid grid-cols-2 gap-2 text-sm">
-                            <p><b>Equipo:</b> <span id="display_equipo" class="text-blue-900"></span></p>
-                            <p><b>Inventario:</b> <span id="display_inventario" class="text-blue-900"></span></p>
+                            <p><b>Equipo:</b> <span id="display_equipo" class="text-blue-900 font-medium"></span></p>
+                            <p><b>N° Inventario:</b> <span id="display_inventario" class="text-blue-900 font-medium"></span></p>
                         </div>
                     </div>
 
@@ -73,7 +73,7 @@
                         <option value="DSG">DSG</option><option value="MAP">MAP</option>
                         <option value="AGL">AGL</option><option value="RRG">RRG</option>
                     </select>
-                    <textarea id="descripcion" rows="3" class="w-full border p-2 rounded text-sm" required placeholder="Tarea a realizar..."></textarea>
+                    <textarea id="descripcion" rows="3" class="w-full border p-2 rounded text-sm" required placeholder="Descripción de la tarea..."></textarea>
                     <select id="estado" class="w-full border p-2 rounded bg-yellow-50 font-bold text-sm">
                         <option value="Abierta">🟡 ABIERTA (Pendiente)</option>
                         <option value="Cerrada">🟢 CERRADA (Finalizada)</option>
@@ -89,34 +89,39 @@
 
         <div id="sec-pendientes" class="hidden">
             <div class="space-y-4">
-                <select id="listaAbiertas" class="w-full border p-3 rounded-lg bg-white shadow-sm font-bold text-blue-900">
-                    <option value="">Cargando pendientes...</option>
-                </select>
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Seleccionar OT pendiente:</label>
+                    <select id="listaAbiertas" class="w-full border p-3 rounded-lg bg-white shadow-sm font-bold text-blue-900 border-blue-200">
+                        <option value="">Cargando...</option>
+                    </select>
+                </div>
 
                 <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Consumo de Materiales:</label>
+                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Agregar Insumos:</label>
                     <div class="flex gap-2 mb-3">
                         <select id="selectMaterial" class="flex-1 border p-2 rounded text-sm">
                             <option value="">Cargando stock...</option>
                         </select>
                         <input type="number" id="cantMaterial" value="1" min="1" class="w-16 border p-2 rounded text-center font-bold">
-                        <button type="button" onclick="agregarMaterialALista()" class="bg-blue-600 text-white px-4 rounded font-bold">+</button>
+                        <button type="button" onclick="agregarMaterialALista()" class="bg-blue-600 text-white px-4 rounded font-bold text-xl">+</button>
                     </div>
                     <div id="listaTemporalMateriales" class="space-y-1"></div>
                 </div>
 
-                <textarea id="comentarioCierre" rows="2" class="w-full border p-2 rounded-lg text-sm" placeholder="Comentario final del trabajo..."></textarea>
-                <button onclick="finalizarOrdenConStock()" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-md">✅ FINALIZAR Y ACTUALIZAR STOCK</button>
+                <textarea id="comentarioCierre" rows="2" class="w-full border p-2 rounded-lg text-sm" placeholder="Comentario de cierre / Detalle técnico..."></textarea>
+                <button onclick="finalizarOrdenConStock()" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-md hover:bg-green-700 transition-all">
+                    ✅ FINALIZAR Y ACTUALIZAR STOCK
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwCJdAIQSlwo1ply3IixyahcGkezDpdzl4-zH52mas4rP-r8KS9rE_89RXsngTkZhjM/exec"; 
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz19pV9Yo5t2nmRP7-wcGj1M9C7YpZXNyH8HmjSex8DE7eDAJmfRqXg_2Xn_zy4Ed8/exec"; 
         const TOKEN = "MANTENIMIENTO_FI_2026";
         const PIN_CORRECTO = "2026";
         
-        let rawUbicaciones = []; let stockDB = []; let carrito = [];
+        let rawUbi = []; let stockDB = []; let carrito = [];
 
         function verificarPIN() {
             if (document.getElementById('pin-input').value === PIN_CORRECTO) {
@@ -146,14 +151,14 @@
         }
 
         async function cargarSectores() {
-            const edif = document.getElementById('edificio').value;
-            if(!edif) return;
+            const ed = document.getElementById('edificio').value;
+            if(!ed) return;
             document.getElementById('loader').style.display = "flex";
-            const res = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edif)}&token=${TOKEN}`);
-            rawUbicaciones = await res.json();
+            const res = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${TOKEN}`);
+            rawUbi = await res.json();
             const s = document.getElementById('sector');
             s.innerHTML = '<option value="">Sector...</option>';
-            [...new Set(rawUbicaciones.map(i => i.sector))].forEach(sec => s.innerHTML += `<option value="${sec}">${sec}</option>`);
+            [...new Set(rawUbi.map(i => i.sector))].forEach(sec => s.innerHTML += `<option value="${sec}">${sec}</option>`);
             s.disabled = false;
             document.getElementById('loader').style.display = "none";
         }
@@ -162,7 +167,7 @@
             const sec = document.getElementById('sector').value;
             const u = document.getElementById('ubicacionSelect');
             u.innerHTML = '<option value="">Ubicación...</option>';
-            rawUbicaciones.filter(i => i.sector === sec).forEach(i => u.innerHTML += `<option value='${JSON.stringify(i)}'>${i.ubicacion}</option>`);
+            rawUbi.filter(i => i.sector === sec).forEach(i => u.innerHTML += `<option value='${JSON.stringify(i)}'>${i.ubicacion}</option>`);
             u.disabled = false;
         }
 
@@ -174,6 +179,7 @@
             document.getElementById('nInventario').value = info.inventario;
             document.getElementById('equipo').value = info.equipo;
 
+            // Mostrar recuadro Hoja de Vida si es Aire
             const esAire = info.equipo.toLowerCase().includes("aire") || info.equipo.toLowerCase().includes("split");
             document.getElementById('detalle-equipo-extra').classList.toggle('hidden', !esAire);
             if(esAire) {
@@ -195,9 +201,15 @@
             const cant = parseInt(document.getElementById('cantMaterial').value);
             if(idx === "" || cant < 1) return;
             carrito.push({...stockDB[idx], cantidad: cant});
+            actualizarListaVisual();
+        }
+
+        function actualizarListaVisual() {
             const div = document.getElementById('listaTemporalMateriales');
             div.innerHTML = "";
-            carrito.forEach((m, i) => div.innerHTML += `<div class="material-item"><span><b>${m.cantidad}</b> x ${m.nombre}</span><button onclick="carrito.splice(${i},1);agregarMaterialALista()" class="text-red-500">X</button></div>`);
+            carrito.forEach((m, i) => {
+                div.innerHTML += `<div class="material-item"><span><b>${m.cantidad}</b> x ${m.nombre}</span><button onclick="carrito.splice(${i},1);actualizarListaVisual()" class="text-red-500 font-bold px-2">X</button></div>`;
+            });
         }
 
         async function cargarPendientes() {
@@ -211,7 +223,7 @@
 
         async function finalizarOrdenConStock() {
             const id = document.getElementById('listaAbiertas').value;
-            if(!id) return alert("Seleccione OT");
+            if(!id) return alert("Seleccione una orden");
             document.getElementById('loader').style.display = "flex";
             const payload = {
                 token: TOKEN, action: 'cerrarOT', idOT: id,
@@ -220,7 +232,8 @@
                 listaParaDescontar: carrito
             };
             await fetch(WEB_APP_URL, {method: 'POST', body: JSON.stringify(payload)});
-            alert("Cerrada!"); location.reload();
+            alert("¡Orden cerrada con éxito!"); 
+            location.reload();
         }
 
         document.getElementById('otForm').onsubmit = async (e) => {
@@ -242,7 +255,8 @@
                 observaciones: "", estado: document.getElementById('estado').value
             };
             await fetch(WEB_APP_URL, {method: 'POST', body: JSON.stringify(payload)});
-            alert("Guardada!"); location.reload();
+            alert("¡Orden guardada correctamente!"); 
+            location.reload();
         };
     </script>
 </body>
