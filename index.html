@@ -3,28 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGM PRO 2026</title>
+    <title>SGM PRO 2026 - FULL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
         .tab-active { border-bottom: 4px solid #1e40af; color: #1e40af; font-weight: bold; background: white; }
-        .card-ext { border-l: 6px solid #ef4444; transition: all 0.2s; }
-        .card-ext:hover { transform: scale(1.02); }
+        .card-vencida { border-left: 8px solid #ef4444; background: #fff1f2; }
+        .card-proxima { border-left: 8px solid #f59e0b; background: #fffbeb; }
+        .card-ok { border-left: 8px solid #22c55e; background: #f0fdf4; }
+        .seccion-refrigeracion { display: none; }
     </style>
 </head>
-<body class="bg-gray-100 p-2 text-gray-800">
+<body class="bg-gray-100 p-2 text-gray-800 font-sans">
 
     <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-[2000] p-4">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center space-y-6">
             <h2 class="font-black text-xl text-slate-800 uppercase tracking-widest">SGM LOGIN</h2>
             <input type="password" id="pin-input" placeholder="PIN" class="w-full border-2 p-4 rounded-2xl text-center text-3xl tracking-[0.5em] outline-none border-gray-200 focus:border-blue-500">
-            <button onclick="verificarAcceso()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg">ENTRAR</button>
+            <button onclick="verificarAcceso()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-blue-700 transition">ENTRAR</button>
             <p id="login-error" class="text-red-500 font-bold text-xs hidden">❌ PIN INCORRECTO</p>
         </div>
     </div>
 
     <div id="loader" class="loading-overlay font-bold italic text-blue-600">
-        <div class="mb-2 text-lg animate-bounce">⚙️ Procesando...</div>
+        <div class="mb-2 text-lg animate-bounce">⚙️ Sincronizando sistema...</div>
     </div>
 
     <div id="main-content" class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-3 hidden">
@@ -40,18 +42,37 @@
              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div class="space-y-2">
                     <div class="flex gap-1">
-                        <select id="tipo" class="w-1/2 border p-2 rounded text-xs"><option value="Correctivo">Correctivo</option><option value="Preventivo">Preventivo</option></select>
-                        <select id="rubro" class="w-1/2 border p-2 rounded text-xs bg-blue-50 font-bold"><option value="General">General</option><option value="Electricidad">Electricidad</option><option value="Refrigeración">Refrigeración</option></select>
+                        <select id="tipo" class="w-1/3 border p-2 rounded text-xs">
+                            <option value="Correctivo">Correctivo</option>
+                            <option value="Preventivo">Preventivo</option>
+                            <option value="Mejora">Mejora</option>
+                        </select>
+                        <select id="rubro" onchange="checkRefri()" class="w-2/3 border p-2 rounded text-xs bg-blue-50 font-bold">
+                            <option value="General">Mantenimiento General</option>
+                            <option value="Electricidad">Electricidad</option>
+                            <option value="Refrigeración">Refrigeración / Aires</option>
+                        </select>
                     </div>
                     <select id="edificio" onchange="loadSectores('edificio','sector','ubiSel')" class="w-full border p-2 rounded text-xs"><option value="">Seleccionar Edificio...</option></select>
                     <select id="sector" onchange="filterUbi('sector','ubiSel')" class="w-full border p-2 rounded text-xs" disabled><option value="">Sector...</option></select>
                     <select id="ubiSel" onchange="setUbi()" class="w-full border p-2 rounded text-xs" disabled><option value="">Ubicación...</option></select>
+                    
+                    <div id="campos-refri" class="seccion-refrigeracion grid grid-cols-2 gap-2 p-2 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div class="col-span-2 text-[9px] font-bold text-blue-800 uppercase italic">Datos del Equipo:</div>
+                        <input type="text" id="ref-equipo" placeholder="Equipo (ej: Split 4500)" class="border p-2 rounded text-xs bg-white">
+                        <input type="text" id="ref-inv" placeholder="N° Inventario" class="border p-2 rounded text-xs bg-white">
+                    </div>
                 </div>
+
                 <div class="space-y-2">
                     <input type="text" id="rep" placeholder="Reportado por..." class="w-full border p-2 rounded text-xs">
-                    <select id="tec" class="w-full border p-2 rounded text-xs font-bold bg-yellow-50"><option value="">Técnico...</option><option value="ALG">ALG</option><option value="DSF">DSF</option><option value="MAP">MAP</option><option value="RRG">RRG</option></select>
-                    <textarea id="desc" rows="2" class="w-full border p-2 rounded text-xs" placeholder="Tarea a realizar..."></textarea>
-                    <button onclick="saveOT()" class="w-full bg-blue-600 text-white font-black py-3 rounded-lg shadow-md uppercase">Guardar Orden</button>
+                    <select id="tec" class="w-full border p-2 rounded text-xs font-bold bg-yellow-50">
+                        <option value="">Asignar Técnico...</option>
+                        <option value="ALG">ALG</option><option value="DSF">DSF</option>
+                        <option value="MAP">MAP</option><option value="RRG">RRG</option>
+                    </select>
+                    <textarea id="desc" rows="3" class="w-full border p-2 rounded text-xs" placeholder="Detalle de la tarea o falla reportada..."></textarea>
+                    <button onclick="saveOT()" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-wider hover:bg-blue-700 transition">Emitir Orden de Trabajo</button>
                 </div>
             </div>
             <input type="hidden" id="h-u"><input type="hidden" id="h-i"><input type="hidden" id="h-e">
@@ -59,20 +80,21 @@
 
         <div id="sec-pendientes" class="hidden space-y-3">
             <select id="listaOT" class="w-full border p-3 rounded-xl font-bold text-blue-900 bg-blue-50 border-blue-200"></select>
-            <div class="bg-gray-50 p-3 rounded-xl border space-y-2">
+            <div class="bg-gray-50 p-3 rounded-xl border border-dashed border-gray-300 space-y-2">
+                <p class="text-[9px] font-bold uppercase text-gray-500">Carga de Materiales / Repuestos:</p>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <select id="rS" onchange="cR()" class="border p-2 rounded text-xs"><option value="">Rubro</option></select>
                     <select id="gS" onchange="cG()" class="border p-2 rounded text-xs" disabled><option value="">Grupo</option></select>
                     <select id="mS" class="border p-2 rounded text-xs" disabled><option value="">Material</option></select>
                 </div>
                 <div class="flex gap-2">
-                    <input type="number" id="cnt" value="1" class="w-16 border p-2 rounded text-center font-bold">
-                    <button onclick="aM()" class="flex-1 bg-slate-800 text-white font-bold rounded p-2">AGREGAR MATERIAL</button>
+                    <input type="number" id="cnt" value="1" min="1" class="w-16 border p-2 rounded text-center font-bold">
+                    <button onclick="aM()" class="flex-1 bg-slate-800 text-white font-bold rounded p-2 text-xs uppercase">Añadir al Listado</button>
                 </div>
-                <div id="car" class="space-y-1 text-[10px] font-bold text-blue-800"></div>
+                <div id="car" class="space-y-1 text-[10px] font-bold text-blue-800 bg-white p-2 rounded border min-h-[40px]"></div>
             </div>
-            <textarea id="obs" rows="2" class="w-full border p-2 rounded text-xs" placeholder="Comentario técnico final..."></textarea>
-            <button onclick="cOT()" class="w-full bg-green-700 text-white font-black py-4 rounded-xl shadow-lg uppercase">Cerrar y Descontar</button>
+            <textarea id="obs" rows="2" class="w-full border p-2 rounded text-xs" placeholder="Observaciones técnicas del cierre..."></textarea>
+            <button onclick="cOT()" class="w-full bg-green-700 text-white font-black py-4 rounded-xl shadow-lg uppercase">Finalizar Tarea y Actualizar Stock</button>
         </div>
 
         <div id="sec-relevamiento" class="hidden space-y-3">
@@ -81,31 +103,33 @@
                 <select id="rel-sector" onchange="filterUbi('rel-sector','rel-ubi')" class="border p-2 rounded text-xs" disabled><option value="">Sector...</option></select>
                 <select id="rel-ubi" onchange="cargarDatosRel()" class="border p-2 rounded text-xs" disabled><option value="">Ubicación...</option></select>
             </div>
-            <div id="form-rel" class="hidden p-4 border rounded-2xl bg-white shadow-xl space-y-4">
+            <div id="form-rel" class="hidden p-4 border rounded-2xl bg-white shadow-xl space-y-4 animate-fade-in">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-3 p-3 bg-orange-50 rounded-xl border border-orange-100">
-                        <h4 class="font-black text-[10px] text-orange-600 uppercase">Climatización</h4>
-                        <input type="text" id="r-eq" placeholder="Equipo Aire" class="w-full border p-2 rounded text-xs">
-                        <input type="text" id="r-inv-aire" placeholder="Inventario Aire" class="w-full border p-2 rounded text-xs bg-white">
-                        <input type="text" id="r-vent" placeholder="Ventiladores (Techo/Pared)" class="w-full border p-2 rounded text-xs">
-                        <input type="text" id="r-inv-vent" placeholder="Inv. Ventiladores" class="w-full border p-2 rounded text-xs bg-white">
+                        <h4 class="font-black text-[10px] text-orange-600 uppercase">Aires y Ventilación</h4>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" id="r-eq" placeholder="Equipo Aire" class="border p-2 rounded text-xs">
+                            <input type="text" id="r-inv-aire" placeholder="Inv. Aire" class="border p-2 rounded text-xs">
+                            <input type="text" id="r-vent" placeholder="Ventiladores" class="border p-2 rounded text-xs">
+                            <input type="text" id="r-inv-vent" placeholder="Inv. Vent" class="border p-2 rounded text-xs">
+                        </div>
                     </div>
                     <div class="space-y-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
-                        <h4 class="font-black text-[10px] text-blue-600 uppercase">Iluminación y Emergencia</h4>
+                        <h4 class="font-black text-[10px] text-blue-600 uppercase">Iluminación / Emergencia</h4>
                         <input type="text" id="r-tlum" placeholder="Tipo de Luminaria" class="w-full border p-2 rounded text-xs">
-                        <div class="flex gap-2">
-                            <input type="number" id="r-cart" placeholder="Cant. Art" class="w-1/2 border p-2 rounded text-xs">
-                            <input type="number" id="r-clam" placeholder="Cant. Lam" class="w-1/2 border p-2 rounded text-xs">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="r-cart" placeholder="Cant. Artefactos" class="border p-2 rounded text-xs">
+                            <input type="number" id="r-clam" placeholder="Cant. Lámparas" class="border p-2 rounded text-xs">
                         </div>
                         <input type="text" id="r-em" placeholder="Luces de Emergencia" class="w-full border p-2 rounded text-xs">
                     </div>
                 </div>
-                <button onclick="guardarRel()" class="w-full bg-blue-800 text-white py-4 rounded-xl font-black uppercase shadow-lg">Actualizar Ficha Técnica</button>
+                <button onclick="guardarRel()" class="w-full bg-blue-800 text-white py-4 rounded-xl font-black uppercase shadow-lg">Guardar Relevamiento Técnico</button>
             </div>
         </div>
 
         <div id="sec-extintores" class="hidden space-y-3">
-            <select id="ext-edificio" onchange="loadExtintores()" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-black"><option value="">Seleccionar Edificio...</option></select>
+            <select id="ext-edificio" onchange="loadExtintores()" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-black shadow-lg"><option value="">Ver Extintores de Edificio...</option></select>
             <div id="lista-extintores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto p-1"></div>
         </div>
 
@@ -132,6 +156,7 @@
             fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`).then(r=>r.json()).then(d=>{
                 ['edificio','rel-edificio','ext-edificio'].forEach(id=>{
                     const sel = document.getElementById(id);
+                    sel.innerHTML = `<option value="">Seleccionar Edificio...</option>`;
                     d.forEach(n=>sel.innerHTML+=`<option value="${n}">${n}</option>`);
                 });
                 document.getElementById('loader').style.display="none";
@@ -148,7 +173,11 @@
             if(t==='historial') loadH();
         }
 
-        // --- LÓGICA DE UBICACIONES ---
+        function checkRefri() {
+            const isRef = document.getElementById('rubro').value === 'Refrigeración';
+            document.getElementById('campos-refri').style.display = isRef ? 'grid' : 'none';
+        }
+
         async function loadSectores(edId, secId, ubiId) {
             const ed = document.getElementById(edId).value; if(!ed) return;
             document.getElementById('loader').style.display="flex";
@@ -166,7 +195,40 @@
             u.disabled = false;
         }
 
-        // --- CERRAR OT CON MATERIALES ---
+        function setUbi() {
+            const raw = document.getElementById('ubiSel').value; if(!raw) return;
+            const i = JSON.parse(raw);
+            document.getElementById('h-u').value = i.ubi; 
+            document.getElementById('h-i').value = i.inv_aire; 
+            document.getElementById('h-e').value = i.eq_aire;
+            // Si es refrigeración, autopoblar
+            if(document.getElementById('rubro').value === 'Refrigeración') {
+                document.getElementById('ref-equipo').value = i.eq_aire || "";
+                document.getElementById('ref-inv').value = i.inv_aire || "";
+            }
+        }
+
+        async function saveOT() {
+            document.getElementById('loader').style.display="flex";
+            const p = { 
+                token: PIN_CORRECTO, 
+                tipo: document.getElementById('tipo').value, 
+                especialidad: document.getElementById('rubro').value, 
+                edificio: document.getElementById('edificio').value, 
+                sector: document.getElementById('sector').value, 
+                ubicacion: document.getElementById('h-u').value, 
+                nInventario: document.getElementById('rubro').value === 'Refrigeración' ? document.getElementById('ref-inv').value : document.getElementById('h-i').value, 
+                equipo: document.getElementById('rubro').value === 'Refrigeración' ? document.getElementById('ref-equipo').value : document.getElementById('h-e').value, 
+                reportadoPor: document.getElementById('rep').value, 
+                personal: document.getElementById('tec').value, 
+                descripcion: document.getElementById('desc').value, 
+                estado: "Abierta" 
+            };
+            await fetch(URL, {method:'POST', body: JSON.stringify(p)}); 
+            alert("Orden emitida correctamente.");
+            location.reload();
+        }
+
         async function loadA() {
             const d = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`).then(r=>r.json());
             document.getElementById('listaOT').innerHTML = d.map(o=>`<option value="${o.id}">${o.detalle}</option>`).join("");
@@ -174,7 +236,7 @@
         function loadM() { const r = document.getElementById('rS'); r.innerHTML='<option value="">Rubro</option>'; Object.keys(dbS).forEach(x=>r.innerHTML+=`<option value="${x}">${x}</option>`); }
         function cR() { const r=document.getElementById('rS').value; const g=document.getElementById('gS'); g.innerHTML='<option value="">Grupo</option>'; Object.keys(dbS[r]||{}).forEach(x=>g.innerHTML+=`<option value="${x}">${x}</option>`); g.disabled=false; }
         function cG() { const r=document.getElementById('rS').value; const g=document.getElementById('gS').value; const m=document.getElementById('mS'); m.innerHTML='<option value="">Material</option>'; (dbS[r][g]||[]).forEach(x=>m.innerHTML+=`<option value='${JSON.stringify(x)}'>${x.nombre}</option>`); m.disabled=false; }
-        function aM() { const raw=document.getElementById('mS').value; if(!raw) return; const m=JSON.parse(raw); its.push({nombre:m.nombre, cantidad:document.getElementById('cnt').value}); const c=document.getElementById('car'); c.innerHTML=""; its.forEach((x,idx)=>c.innerHTML+=`<div>${x.cantidad} x ${x.nombre} <button onclick="its.splice(${idx},1);aM()" class="text-red-500">[X]</button></div>`); }
+        function aM() { const raw=document.getElementById('mS').value; if(!raw) return; const m=JSON.parse(raw); its.push({nombre:m.nombre, cantidad:document.getElementById('cnt').value}); const c=document.getElementById('car'); c.innerHTML=""; its.forEach((x,idx)=>c.innerHTML+=`<div>${x.cantidad} x ${x.nombre} <button onclick="its.splice(${idx},1);aM()" class="text-red-500 font-bold ml-2">X</button></div>`); }
         
         async function cOT() {
             const id = document.getElementById('listaOT').value; if(!id) return;
@@ -183,7 +245,6 @@
             await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload();
         }
 
-        // --- RELEVAMIENTO ---
         function cargarDatosRel() {
             const i = JSON.parse(document.getElementById('rel-ubi').value);
             document.getElementById('r-eq').value = i.eq_aire||""; document.getElementById('r-inv-aire').value = i.inv_aire||"";
@@ -199,47 +260,46 @@
             await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload();
         }
 
-        // --- EXTINTORES FULL INFO ---
         async function loadExtintores() {
             const ed = document.getElementById('ext-edificio').value; if(!ed) return;
             document.getElementById('loader').style.display="flex";
             dbExt = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
             const cont = document.getElementById('lista-extintores'); cont.innerHTML = "";
+            const hoy = new Date();
+
             dbExt.forEach(x => {
+                const parts = x.f_venc.split('/');
+                const venc = new Date(parts[2], parts[1]-1, parts[0]);
+                const diff = (venc - hoy) / (1000 * 60 * 60 * 24);
+                let clase = "card-ok"; let badge = "✔️ AL DÍA";
+                if(diff < 0) { clase = "card-vencida"; badge = "❌ VENCIDO"; }
+                else if(diff < 30) { clase = "card-proxima"; badge = "⚠️ POR VENCER"; }
+
                 cont.innerHTML += `
-                    <div class="p-4 rounded-2xl shadow-md border card-ext bg-white">
+                    <div class="p-4 rounded-2xl shadow-md border ${clase}">
                         <div class="flex justify-between items-start mb-2">
                             <span class="text-xl font-black text-slate-800">${x.unne}</span>
-                            <span class="bg-slate-100 px-2 py-1 rounded text-[9px] font-bold uppercase">${x.tipo} ${x.cap}kg</span>
+                            <span class="text-[9px] font-black uppercase bg-white/50 px-2 py-1 rounded">${badge}</span>
                         </div>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter mb-2 leading-none">${x.planta} - ${x.sector}</p>
-                        <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t text-[10px]">
+                        <p class="text-[10px] font-bold text-gray-500 uppercase mb-2 leading-tight">${x.planta} - ${x.sector}</p>
+                        <div class="grid grid-cols-2 gap-2 pt-2 border-t text-[10px]">
                             <div><p class="text-gray-400">CARGA</p><p class="font-bold">${x.f_carga}</p></div>
-                            <div><p class="text-red-500">VENCE</p><p class="font-black text-red-600">${x.f_venc}</p></div>
-                            <div><p class="text-gray-400">PRUEBA HIDR.</p><p class="font-bold">${x.ph}</p></div>
-                            <div class="text-right"><p class="text-gray-400">ESTADO</p><p class="font-bold text-green-600">OK</p></div>
+                            <div><p class="text-gray-400">VENCIMIENTO</p><p class="font-black text-slate-900">${x.f_venc}</p></div>
+                            <div><p class="text-gray-400">PH</p><p class="font-bold">${x.ph}</p></div>
+                            <div class="text-right"><p class="text-gray-400">TIPO</p><p class="font-bold uppercase">${x.tipo} ${x.cap}kg</p></div>
                         </div>
                     </div>`;
             });
             document.getElementById('loader').style.display="none";
         }
 
-        function setUbi() {
-            const i = JSON.parse(document.getElementById('ubiSel').value);
-            document.getElementById('h-u').value = i.ubi; document.getElementById('h-i').value = i.inv_aire; document.getElementById('h-e').value = i.eq_aire;
-        }
-        async function saveOT() {
-            document.getElementById('loader').style.display="flex";
-            const p = { token: PIN_CORRECTO, tipo: document.getElementById('tipo').value, especialidad: document.getElementById('rubro').value, edificio: document.getElementById('edificio').value, sector: document.getElementById('sector').value, ubicacion: document.getElementById('h-u').value, nInventario: document.getElementById('h-i').value, equipo: document.getElementById('h-e').value, reportadoPor: document.getElementById('rep').value, personal: document.getElementById('tec').value, descripcion: document.getElementById('desc').value, estado: "Abierta" };
-            await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload();
-        }
         async function loadH() {
             const d = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r=>r.json());
             document.getElementById('historial-lista').innerHTML = d.map(o => `
-                <div class="bg-gray-50 p-3 rounded-xl border mb-2 text-[10px]">
-                    <div class="flex justify-between font-bold text-blue-800"><span>${o.id}</span><span>${o.fecha}</span></div>
-                    <p class="font-bold my-1 uppercase">${o.edif} | ${o.tec}</p>
-                    <p class="text-gray-600">${o.tarea}</p>
+                <div class="bg-gray-50 p-3 rounded-xl border mb-2 text-[10px] border-l-4 border-l-slate-400">
+                    <div class="flex justify-between font-bold text-blue-800 uppercase"><span>${o.id}</span><span>${o.fecha}</span></div>
+                    <p class="font-bold my-1 uppercase text-slate-700">${o.edif} | ${o.tec} | ${o.est}</p>
+                    <p class="text-gray-600 italic">"${o.tarea}"</p>
                 </div>`).join("");
         }
     </script>
