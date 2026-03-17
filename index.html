@@ -15,42 +15,41 @@
 
     <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-4 md:p-6">
         <div class="flex border-b mb-6">
-            <button onclick="tab('nueva')" id="btn-n" class="flex-1 py-3 tab-active uppercase text-xs tracking-wider">Nueva Orden</button>
-            <button onclick="tab('pendientes')" id="btn-p" class="flex-1 py-3 text-gray-500 uppercase text-xs tracking-wider">Cerrar Pendientes</button>
+            <button onclick="tab('nueva')" id="btn-n" class="flex-1 py-3 tab-active uppercase text-xs font-bold">Nueva Orden</button>
+            <button onclick="tab('pendientes')" id="btn-p" class="flex-1 py-3 text-gray-500 uppercase text-xs font-bold">Cerrar Pendientes</button>
         </div>
 
         <div id="sec-nueva" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-3">
-                    <label class="block text-xs font-bold text-gray-400 uppercase">1. Clasificación</label>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase">Clasificación de Intervención</label>
                     <select id="tipo" class="w-full border p-2 rounded text-sm bg-gray-50">
                         <option value="Correctivo">Correctivo</option>
                         <option value="Preventivo">Preventivo</option>
                         <option value="Mejora">Mejora</option>
                     </select>
                     <select id="rubro" onchange="toggleRefrigeracion()" class="w-full border p-2 rounded text-sm bg-blue-50 font-bold">
-                        <option value="General">Rubro: General / Varios</option>
-                        <option value="Electricidad">Rubro: Electricidad</option>
-                        <option value="Refrigeración">Rubro: Refrigeración</option>
+                        <option value="General">General / Varios</option>
+                        <option value="Electricidad">Electricidad</option>
+                        <option value="Refrigeración">Refrigeración</option>
                     </select>
 
-                    <label class="block text-xs font-bold text-gray-400 uppercase mt-2">2. Ubicación</label>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase mt-2">Ubicación</label>
                     <select id="edificio" onchange="loadSectores()" class="w-full border p-2 rounded text-sm"><option value="">Edificio...</option></select>
                     <select id="sector" onchange="filterUbi()" class="w-full border p-2 rounded text-sm" disabled><option value="">Sector...</option></select>
                     <select id="ubiSel" onchange="setUbi()" class="w-full border p-2 rounded text-sm" disabled><option value="">Ubicación...</option></select>
                     
-                    <div id="refi-fields" class="hidden p-3 bg-orange-50 border border-orange-200 rounded-lg space-y-2">
-                        <p class="text-[10px] font-bold text-orange-600 uppercase">Datos del Equipo</p>
+                    <div id="refi-fields" class="hidden p-3 bg-orange-50 border border-orange-200 rounded-lg space-y-2 shadow-inner">
                         <input type="text" id="disp_eq" class="w-full bg-white border p-2 rounded text-sm font-bold" readonly placeholder="Equipo">
                         <input type="text" id="disp_inv" class="w-full bg-white border p-2 rounded text-sm font-bold" readonly placeholder="N° Inventario">
                     </div>
                 </div>
 
                 <div class="space-y-3">
-                    <label class="block text-xs font-bold text-gray-400 uppercase">3. Origen del Aviso</label>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase">Origen y Reporte</label>
                     <div class="flex gap-2">
-                        <input type="text" id="reportado" placeholder="¿Quién avisó?" class="w-2/3 border p-2 rounded text-sm">
-                        <select id="medio" class="w-1/3 border p-2 rounded text-sm">
+                        <input type="text" id="reportado" placeholder="Reportado por..." class="w-2/3 border p-2 rounded text-sm">
+                        <select id="medio" class="w-1/3 border p-2 rounded text-sm bg-gray-50">
                             <option value="Personalmente">Personal</option>
                             <option value="Mail">Mail</option>
                             <option value="WhatsApp">WhatsApp</option>
@@ -58,20 +57,20 @@
                         </select>
                     </div>
 
-                    <label class="block text-xs font-bold text-gray-400 uppercase">4. Ejecución</label>
-                    <select id="tecnico" class="w-full border p-2 rounded text-sm font-bold">
-                        <option value="">Seleccionar Técnico...</option>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase">Personal y Tarea</label>
+                    <select id="tecnico" class="w-full border p-2 rounded text-sm font-bold border-blue-200">
+                        <option value="">Técnico Asignado...</option>
                         <option value="ALG">ALG</option><option value="DSF">DSF</option>
                         <option value="MAP">MAP</option><option value="RRG">RRG</option>
                     </select>
-                    <textarea id="desc" rows="3" class="w-full border p-2 rounded text-sm" placeholder="Descripción de la tarea..."></textarea>
+                    <textarea id="desc" rows="3" class="w-full border p-2 rounded text-sm" placeholder="Detalle de la falla o tarea..."></textarea>
                     
                     <div class="flex gap-2 pt-2">
-                        <select id="estado" class="w-full border p-2 rounded text-sm font-bold bg-yellow-50">
+                        <select id="estado" class="w-1/2 border p-2 rounded text-sm font-bold bg-yellow-50">
                             <option value="Abierta">DEJAR ABIERTA</option>
                             <option value="Cerrada">CERRAR AHORA</option>
                         </select>
-                        <button onclick="guardarOT()" class="w-full bg-blue-600 text-white font-bold py-2 rounded shadow-lg">GUARDAR</button>
+                        <button onclick="guardarOT()" class="w-1/2 bg-blue-600 text-white font-bold py-2 rounded shadow-lg">GUARDAR</button>
                     </div>
                 </div>
             </div>
@@ -79,37 +78,38 @@
         </div>
 
         <div id="sec-pendientes" class="hidden space-y-4">
+            <label class="block text-[10px] font-bold text-gray-400 uppercase">Seleccionar Orden Pendiente</label>
             <select id="listaOT" class="w-full border p-3 rounded-lg font-bold text-blue-900 border-blue-200 shadow-sm"></select>
             
             <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                <p class="text-[10px] font-bold text-gray-400 uppercase mb-3 italic">Registro de Consumos (Triple Cascada)</p>
+                <p class="text-[10px] font-bold text-gray-500 mb-3 uppercase italic">Consumo de Insumos</p>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                    <select id="rubroStock" onchange="cambioRubro()" class="border p-2 rounded text-xs font-bold"><option value="">1. Rubro (Hoja)</option></select>
-                    <select id="grupoStock" onchange="cambioGrupo()" class="border p-2 rounded text-xs" disabled><option value="">2. Grupo (Col B)</option></select>
-                    <select id="matStock" class="border p-2 rounded text-xs" disabled><option value="">3. Material (Col C)</option></select>
+                    <select id="rubroStock" onchange="cambioRubro()" class="border p-2 rounded text-xs font-bold bg-white"><option value="">1. Rubro (Hoja)</option></select>
+                    <select id="grupoStock" onchange="cambioGrupo()" class="border p-2 rounded text-xs bg-white" disabled><option value="">2. Grupo</option></select>
+                    <select id="matStock" class="border p-2 rounded text-xs bg-white" disabled><option value="">3. Descripción</option></select>
                 </div>
                 <div class="flex gap-2 mt-2">
                     <input type="number" id="cant" value="1" min="1" class="w-20 border p-2 rounded text-center font-bold">
-                    <button onclick="addMat()" class="flex-1 bg-gray-800 text-white font-bold rounded">+</button>
+                    <button onclick="addMat()" class="flex-1 bg-gray-800 text-white font-bold rounded hover:bg-black">+</button>
                 </div>
                 <div id="carrito" class="mt-3 space-y-1"></div>
             </div>
 
-            <textarea id="obsFinal" rows="2" class="w-full border p-2 rounded-lg text-sm bg-green-50" placeholder="Comentario técnico del cierre..."></textarea>
-            <button onclick="cerrarOT()" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-md">FINALIZAR Y DESCONTAR STOCK</button>
+            <textarea id="obsFinal" rows="2" class="w-full border p-2 rounded-lg text-sm bg-green-50" placeholder="Comentarios finales del cierre técnico..."></textarea>
+            <button onclick="cerrarOT()" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-md hover:bg-green-700 transition-all">FINALIZAR Y DESCONTAR STOCK</button>
         </div>
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbzh_fdW0Gi5EAKsbw5FbJfmv7qdAIJKl_WCoDe1SrwBEoOg0IXmzVXdySHF5J4j0I1C/exec";
+        const URL = "https://script.google.com/macros/s/AKfycbwFLWmyojnRK4M2sbBnz-R0qvGo6wnXIan2F5CRSNn1SHxf70XclcEU-8K-taYnDYLX/exec";
         const TOKEN = "MANTENIMIENTO_FI_2026";
         let dbUbi = []; let dbStock = {}; let items = [];
 
         function tab(t) {
             document.getElementById('sec-nueva').classList.toggle('hidden', t!=='nueva');
             document.getElementById('sec-pendientes').classList.toggle('hidden', t!=='pendientes');
-            document.getElementById('btn-n').className = `flex-1 py-3 ${t==='nueva'?'tab-active':'text-gray-500'}`;
-            document.getElementById('btn-p').className = `flex-1 py-3 ${t==='pendientes'?'tab-active':'text-gray-500'}`;
+            document.getElementById('btn-n').className = `flex-1 py-3 ${t==='nueva'?'tab-active text-blue-800':'text-gray-500'}`;
+            document.getElementById('btn-p').className = `flex-1 py-3 ${t==='pendientes'?'tab-active text-blue-800':'text-gray-500'}`;
             if(t==='pendientes') loadAbiertas();
         }
 
@@ -125,7 +125,6 @@
             });
         };
 
-        // GESTIÓN FORMULARIO NUEVA OT
         function toggleRefrigeracion() {
             const isRefri = document.getElementById('rubro').value === "Refrigeración";
             document.getElementById('refi-fields').classList.toggle('hidden', !isRefri);
@@ -159,7 +158,6 @@
             document.getElementById('disp_inv').value = i.inventario || "N/A";
         }
 
-        // GESTIÓN TRIPLE CASCADA STOCK
         function cambioRubro() {
             const r = document.getElementById('rubroStock').value;
             const gs = document.getElementById('grupoStock');
@@ -188,10 +186,9 @@
             items.push({...m, cantidad: document.getElementById('cant').value});
             const c = document.getElementById('carrito');
             c.innerHTML = "";
-            items.forEach((x,idx)=>c.innerHTML+=`<div class="flex justify-between bg-white p-2 rounded text-[10px] border shadow-sm"><span><b>${x.cantidad}</b> x ${x.nombre}</span><button onclick="items.splice(${idx},1);addMat()" class="text-red-500 font-bold px-2">X</button></div>`);
+            items.forEach((x,idx)=>c.innerHTML+=`<div class="flex justify-between bg-white p-2 rounded text-[11px] border shadow-sm"><span><b class="text-blue-700">${x.cantidad}</b> x ${x.nombre}</span><button onclick="items.splice(${idx},1);addMat()" class="text-red-500 font-bold px-2">X</button></div>`);
         }
 
-        // ACCIONES
         async function guardarOT() {
             document.getElementById('loader').style.display="flex";
             const p = { 
@@ -203,13 +200,14 @@
                 descripcion: document.getElementById('desc').value, estado: document.getElementById('estado').value
             };
             await fetch(URL, {method:'POST', body: JSON.stringify(p)});
-            alert("Orden Guardada!"); location.reload();
+            alert("Orden Guardada Correctamente"); 
+            location.reload();
         }
 
         async function loadAbiertas() {
             const d = await fetch(`${URL}?action=getAbiertas&token=${TOKEN}`).then(r=>r.json());
             const s = document.getElementById('listaOT');
-            s.innerHTML = d.map(o=>`<option value="${o.id}">OT ${o.id} | ${o.detalle}</option>`).join("");
+            s.innerHTML = d.map(o=>`<option value="${o.id}">${o.detalle}</option>`).join("");
         }
 
         async function cerrarOT() {
@@ -221,7 +219,8 @@
                 listaParaDescontar: items, comentarioFinal: document.getElementById('obsFinal').value 
             };
             await fetch(URL, {method:'POST', body: JSON.stringify(p)});
-            alert("OT Cerrada!"); location.reload();
+            alert("OT Finalizada!"); 
+            location.reload();
         }
     </script>
 </body>
