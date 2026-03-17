@@ -3,22 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGM - Relevamiento PRO</title>
+    <title>SGM - Integral FI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .tab-active { border-bottom: 4px solid #1e40af; color: #1e40af; font-weight: bold; }
+        .vencido { border-left: 5px solid #ef4444; background: #fee2e2; }
+        .por-vencer { border-left: 5px solid #f59e0b; background: #fef3c7; }
+        .al-dia { border-left: 5px solid #22c55e; }
     </style>
 </head>
 <body class="bg-gray-100 p-2 text-gray-800">
-    <div id="loader" class="loading-overlay font-bold italic text-blue-600">Procesando...</div>
+    <div id="loader" class="loading-overlay font-bold italic text-blue-600 italic">Actualizando Planillas...</div>
 
     <div class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-3">
-        <div class="flex border-b mb-4 overflow-x-auto text-[10px] font-bold uppercase">
-            <button onclick="tab('nueva')" id="btn-n" class="flex-1 py-3 tab-active">Nueva OT</button>
-            <button onclick="tab('pendientes')" id="btn-p" class="flex-1 py-3 text-gray-500">Cerrar</button>
-            <button onclick="tab('relevamiento')" id="btn-r" class="flex-1 py-3 text-gray-500">Relevar</button>
-            <button onclick="tab('historial')" id="btn-h" class="flex-1 py-3 text-gray-500">Historial</button>
+        <div class="flex border-b mb-4 overflow-x-auto text-[9px] font-bold uppercase whitespace-nowrap">
+            <button onclick="tab('nueva')" id="btn-n" class="px-4 py-3 tab-active">Nueva OT</button>
+            <button onclick="tab('pendientes')" id="btn-p" class="px-4 py-3 text-gray-500">Cerrar</button>
+            <button onclick="tab('relevamiento')" id="btn-r" class="px-4 py-3 text-gray-500">Relevar Edif</button>
+            <button onclick="tab('extintores')" id="btn-e" class="px-4 py-3 text-gray-500 text-red-600">Extintores</button>
+            <button onclick="tab('historial')" id="btn-h" class="px-4 py-3 text-gray-500">Historial</button>
+        </div>
+
+        <div id="sec-extintores" class="hidden space-y-3">
+            <div class="flex gap-2">
+                <select id="ext-edificio" onchange="loadExtintores()" class="flex-1 border p-2 rounded text-sm bg-blue-50 font-bold"><option value="">Seleccionar Edificio...</option></select>
+                <input type="text" id="ext-busqueda" oninput="filtrarExt()" placeholder="Buscar UNNE o N°..." class="flex-1 border p-2 rounded text-sm">
+            </div>
+            <div id="lista-extintores" class="space-y-2 max-h-[500px] overflow-y-auto">
+                </div>
+        </div>
+
+        <div id="form-extintor" class="hidden fixed inset-0 bg-black/50 p-4 z-50 flex items-center justify-center">
+            <div class="bg-white p-5 rounded-xl w-full max-w-sm space-y-3">
+                <h3 id="ext-titulo" class="font-bold text-blue-800 border-b pb-2"></h3>
+                <div>
+                    <label class="text-[10px] font-bold uppercase text-gray-400">Fecha de Carga (Hoy)</label>
+                    <input type="date" id="ext-f-carga" class="w-full border p-2 rounded">
+                </div>
+                <div>
+                    <label class="text-[10px] font-bold uppercase text-gray-400">Observaciones / Estado</label>
+                    <textarea id="ext-obs" class="w-full border p-2 rounded text-sm" rows="3"></textarea>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="document.getElementById('form-extintor').classList.add('hidden')" class="flex-1 bg-gray-200 py-2 rounded font-bold">CANCELAR</button>
+                    <button onclick="guardarExtintor()" class="flex-1 bg-blue-600 text-white py-2 rounded font-bold">GUARDAR</button>
+                </div>
+            </div>
         </div>
 
         <div id="sec-relevamiento" class="hidden space-y-3">
@@ -27,44 +58,18 @@
                 <select id="rel-sector" onchange="filterUbiRel()" class="border p-2 rounded text-sm" disabled><option value="">Sector...</option></select>
                 <select id="rel-ubi" onchange="cargarDatosRel()" class="border p-2 rounded text-sm" disabled><option value="">Ubicación...</option></select>
             </div>
-
             <div id="form-relevamiento" class="hidden space-y-3 p-3 border rounded-xl shadow-inner bg-gray-50">
-                <p class="text-[10px] font-bold text-blue-800 uppercase border-b pb-1 italic">Edición de Activos en el Local</p>
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="col-span-2 md:col-span-1">
-                        <label class="text-[9px] font-bold uppercase text-gray-400">Equipo Aire Acondicionado</label>
-                        <input type="text" id="r-eq" class="w-full border p-2 rounded text-sm font-bold bg-white" placeholder="Ej: Split 4500 frigorías">
-                    </div>
-                    <div class="col-span-2 md:col-span-1">
-                        <label class="text-[9px] font-bold uppercase text-gray-400">Inventario Aire (Col C)</label>
-                        <input type="text" id="r-inv-aire" class="w-full border p-2 rounded text-sm font-bold bg-white">
-                    </div>
-                    <div class="col-span-2">
-                        <label class="text-[9px] font-bold uppercase text-gray-400">Tipo de Luminarias</label>
-                        <input type="text" id="r-tlum" class="w-full border p-2 rounded text-sm bg-white" placeholder="Ej: Paneles LED 60x60">
-                    </div>
-                    <div>
-                        <label class="text-[9px] font-bold uppercase text-gray-400">Cant. Artefactos</label>
-                        <input type="number" id="r-cart" class="w-full border p-2 rounded text-sm bg-white">
-                    </div>
-                    <div>
-                        <label class="text-[9px] font-bold uppercase text-gray-400">Cant. Lámparas</label>
-                        <input type="number" id="r-clam" class="w-full border p-2 rounded text-sm bg-white">
-                    </div>
-                    <div>
-                        <label class="text-[9px] font-bold uppercase text-gray-400">Luz Emergencia</label>
-                        <input type="text" id="r-em" class="w-full border p-2 rounded text-sm bg-white" placeholder="Cant. o Sí/No">
-                    </div>
-                    <div>
-                        <label class="text-[9px] font-bold uppercase text-gray-400">Ventiladores</label>
-                        <input type="text" id="r-vent" class="w-full border p-2 rounded text-sm bg-white" placeholder="Tipo y Cant.">
-                    </div>
-                    <div class="col-span-2">
-                        <label class="text-[9px] font-bold uppercase text-gray-400">Inv. Vent. / Otros (Col J)</label>
-                        <input type="text" id="r-inv-vent" class="w-full border p-2 rounded text-sm font-bold bg-white">
-                    </div>
+                <div class="grid grid-cols-2 gap-3 text-[9px] font-bold uppercase text-gray-400">
+                    <div class="col-span-2 md:col-span-1">Equipo Aire<input type="text" id="r-eq" class="w-full border p-2 rounded text-sm font-bold text-black"></div>
+                    <div class="col-span-2 md:col-span-1">Inventario Aire (C)<input type="text" id="r-inv-aire" class="w-full border p-2 rounded text-sm font-bold text-black"></div>
+                    <div class="col-span-2">Tipo Luminarias<input type="text" id="r-tlum" class="w-full border p-2 rounded text-sm text-black"></div>
+                    <div>Cant. Art.<input type="number" id="r-cart" class="w-full border p-2 rounded text-sm text-black"></div>
+                    <div>Cant. Lamp.<input type="number" id="r-clam" class="w-full border p-2 rounded text-sm text-black"></div>
+                    <div>Emergencia<input type="text" id="r-em" class="w-full border p-2 rounded text-sm text-black"></div>
+                    <div>Ventiladores<input type="text" id="r-vent" class="w-full border p-2 rounded text-sm text-black"></div>
+                    <div class="col-span-2">Inv. Vent. / Otros (J)<input type="text" id="r-inv-vent" class="w-full border p-2 rounded text-sm font-bold text-black"></div>
                 </div>
-                <button onclick="guardarRelevamiento()" class="w-full bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md hover:bg-blue-800 transition-colors">ACTUALIZAR FICHA DEL LOCAL</button>
+                <button onclick="guardarRelevamiento()" class="w-full bg-blue-700 text-white font-bold py-3 rounded-lg">ACTUALIZAR LOCAL</button>
             </div>
         </div>
 
@@ -94,6 +99,7 @@
             </div>
             <input type="hidden" id="h-u"><input type="hidden" id="h-i"><input type="hidden" id="h-e">
         </div>
+
         <div id="sec-pendientes" class="hidden space-y-3">
             <select id="listaOT" class="w-full border p-2 rounded font-bold text-blue-900"></select>
             <div class="bg-gray-50 p-3 rounded-lg border">
@@ -108,17 +114,21 @@
             <textarea id="obs" rows="2" class="w-full border p-2 rounded text-xs bg-green-50" placeholder="Comentario técnico..."></textarea>
             <button onclick="cOT()" class="w-full bg-green-600 text-white font-bold py-3 rounded-lg">FINALIZAR Y DESCONTAR</button>
         </div>
+
         <div id="sec-historial" class="hidden space-y-2 max-h-[400px] overflow-y-auto"></div>
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbxnfReaf1DbRZn4_qjzfgYb8k19SfAohbZ2fnLEZoPcvD8IAZb802RTjXeDCyEzgJ0R/exec";
+        const URL = "https://script.google.com/macros/s/AKfycbwxRL8OnMqLjYbTi8hK9vISmYNuxy6d_kJJgbXNskL8jwdO_AaYj4_PJW3onyqH_8WR/exec";
         const TOKEN = "MANTENIMIENTO_FI_2026";
-        let dbU = []; let dbS = {}; let its = []; let dbR = [];
+        let dbU = []; let dbS = {}; let its = []; let dbR = []; let dbExt = []; let extUnneSel = "";
 
         function tab(t) {
-            ['nueva','pendientes','relevamiento','historial'].forEach(s => document.getElementById('sec-'+s).classList.toggle('hidden', t!==s));
-            ['n','p','r','h'].forEach(b => document.getElementById('btn-'+b).className = `flex-1 py-3 ${t===(b==='n'?'nueva':b==='p'?'pendientes':b==='r'?'relevamiento':'historial')?'tab-active text-blue-800':'text-gray-500'}`);
+            ['nueva','pendientes','relevamiento','extintores','historial'].forEach(s => document.getElementById('sec-'+s).classList.toggle('hidden', t!==s));
+            ['n','p','r','e','h'].forEach(b => {
+                const btn = document.getElementById('btn-'+b);
+                btn.className = `px-4 py-3 ${t===(b==='n'?'nueva':b==='p'?'pendientes':b==='r'?'relevamiento':b==='e'?'extintores':'historial')?'tab-active text-blue-800':'text-gray-500'}`;
+            });
             if(t==='pendientes') loadA(); if(t==='historial') loadH();
         }
 
@@ -127,6 +137,7 @@
                 d.forEach(n=>{
                     document.getElementById('edificio').innerHTML+=`<option value="${n}">${n}</option>`;
                     document.getElementById('rel-edificio').innerHTML+=`<option value="${n}">${n}</option>`;
+                    document.getElementById('ext-edificio').innerHTML+=`<option value="${n}">${n}</option>`;
                 });
             });
             fetch(`${URL}?action=getMateriales&token=${TOKEN}`).then(r=>r.json()).then(d=>{
@@ -135,51 +146,98 @@
             });
         };
 
-        // --- LÓGICA RELEVAMIENTO ---
+        // --- LÓGICA EXTINTORES ---
+        async function loadExtintores() {
+            const ed = document.getElementById('ext-edificio').value; if(!ed) return;
+            document.getElementById('loader').style.display="flex";
+            dbExt = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${TOKEN}`).then(r=>r.json());
+            filtrarExt();
+            document.getElementById('loader').style.display="none";
+        }
+
+        function filtrarExt() {
+            const txt = document.getElementById('ext-busqueda').value.toLowerCase();
+            const cont = document.getElementById('lista-extintores');
+            cont.innerHTML = "";
+            const ahora = new Date();
+
+            dbExt.filter(x => x.unne.toLowerCase().includes(txt) || x.nro.toString().includes(txt) || x.sector.toLowerCase().includes(txt))
+                 .forEach(x => {
+                    const venc = new Date(x.f_venc);
+                    const diff = (venc - ahora) / (1000 * 60 * 60 * 24);
+                    let clase = "al-dia";
+                    if(diff < 0) clase = "vencido";
+                    else if(diff < 30) clase = "por-vencer";
+
+                    cont.innerHTML += `
+                        <div onclick="abrirFormExt('${x.unne}', '${x.obs}')" class="p-3 rounded-lg shadow-sm border ${clase} cursor-pointer bg-white">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="text-blue-800 font-bold text-sm">${x.unne}</span>
+                                    <span class="text-[10px] bg-gray-100 px-1 rounded ml-2">N° ${x.nro}</span>
+                                </div>
+                                <span class="text-[10px] font-bold uppercase">${x.tipo} - ${x.cap}</span>
+                            </div>
+                            <p class="text-[11px] text-gray-600 mt-1">${x.sector}</p>
+                            <div class="flex justify-between mt-2 text-[10px] border-t pt-1">
+                                <span>Carga: ${new Date(x.f_carga).toLocaleDateString()}</span>
+                                <span class="font-bold">Vence: ${new Date(x.f_venc).toLocaleDateString()}</span>
+                            </div>
+                            ${x.obs ? `<p class="text-[10px] italic text-blue-600 mt-1">Obs: ${x.obs}</p>` : ''}
+                        </div>`;
+                 });
+        }
+
+        function abrirFormExt(unne, obs) {
+            extUnneSel = unne;
+            document.getElementById('ext-titulo').innerText = "Actualizar: " + unne;
+            document.getElementById('ext-obs').value = obs || "";
+            document.getElementById('ext-f-carga').value = new Date().toISOString().split('T')[0];
+            document.getElementById('form-extintor').classList.remove('hidden');
+        }
+
+        async function guardarExtintor() {
+            document.getElementById('loader').style.display="flex";
+            const p = {
+                action: 'updateExtintor', token: TOKEN, 
+                edificio: document.getElementById('ext-edificio').value,
+                unne: extUnneSel,
+                f_carga: document.getElementById('ext-f-carga').value,
+                obs: document.getElementById('ext-obs').value
+            };
+            await fetch(URL, {method:'POST', body: JSON.stringify(p)});
+            location.reload();
+        }
+
+        // --- LAS DEMÁS FUNCIONES SE MANTIENEN IGUAL (Nueva OT, Relevamiento, Historial) ---
         async function loadSectoresRel() {
             const ed = document.getElementById('rel-edificio').value;
             document.getElementById('loader').style.display="flex";
             dbR = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${TOKEN}`).then(r=>r.json());
-            const s = document.getElementById('rel-sector');
-            s.innerHTML = '<option value="">Sector...</option>';
+            const s = document.getElementById('rel-sector'); s.innerHTML = '<option value="">Sector...</option>';
             [...new Set(dbR.map(i=>i.sector))].forEach(sec=>s.innerHTML+=`<option value="${sec}">${sec}</option>`);
             s.disabled = false; document.getElementById('loader').style.display="none";
         }
         function filterUbiRel() {
             const sec = document.getElementById('rel-sector').value;
-            const u = document.getElementById('rel-ubi');
-            u.innerHTML = '<option value="">Ubicación...</option>';
+            const u = document.getElementById('rel-ubi'); u.innerHTML = '<option value="">Ubicación...</option>';
             dbR.filter(i=>i.sector===sec).forEach(i=>u.innerHTML+=`<option value='${JSON.stringify(i)}'>${i.ubi}</option>`);
             u.disabled = false;
         }
         function cargarDatosRel() {
             const d = JSON.parse(document.getElementById('rel-ubi').value);
-            document.getElementById('r-inv-aire').value = d.inv_aire; 
-            document.getElementById('r-eq').value = d.eq_aire;
-            document.getElementById('r-tlum').value = d.t_lum; 
-            document.getElementById('r-cart').value = d.c_art;
-            document.getElementById('r-clam').value = d.c_lam; 
-            document.getElementById('r-em').value = d.em;
-            document.getElementById('r-vent').value = d.vent; 
-            document.getElementById('r-inv-vent').value = d.inv_vent;
+            document.getElementById('r-inv-aire').value = d.inv_aire; document.getElementById('r-eq').value = d.eq_aire;
+            document.getElementById('r-tlum').value = d.t_lum; document.getElementById('r-cart').value = d.c_art;
+            document.getElementById('r-clam').value = d.c_lam; document.getElementById('r-em').value = d.em;
+            document.getElementById('r-vent').value = d.vent; document.getElementById('r-inv-vent').value = d.inv_vent;
             document.getElementById('form-relevamiento').classList.remove('hidden');
         }
         async function guardarRelevamiento() {
             document.getElementById('loader').style.display="flex";
             const u = JSON.parse(document.getElementById('rel-ubi').value);
-            const p = {
-                action: 'updateRelevamiento', token: TOKEN, edificio: document.getElementById('rel-edificio').value,
-                sector: u.sector, ubi: u.ubi, inv_aire: document.getElementById('r-inv-aire').value,
-                eq_aire: document.getElementById('r-eq').value, t_lum: document.getElementById('r-tlum').value,
-                c_art: document.getElementById('r-cart').value, c_lam: document.getElementById('r-clam').value,
-                em: document.getElementById('r-em').value, vent: document.getElementById('r-vent').value,
-                inv_vent: document.getElementById('r-inv-vent').value
-            };
-            await fetch(URL, {method:'POST', body: JSON.stringify(p)});
-            alert("¡Ficha del local actualizada!"); location.reload();
+            const p = { action: 'updateRelevamiento', token: TOKEN, edificio: document.getElementById('rel-edificio').value, sector: u.sector, ubi: u.ubi, inv_aire: document.getElementById('r-inv-aire').value, eq_aire: document.getElementById('r-eq').value, t_lum: document.getElementById('r-tlum').value, c_art: document.getElementById('r-cart').value, c_lam: document.getElementById('r-clam').value, em: document.getElementById('r-em').value, vent: document.getElementById('r-vent').value, inv_vent: document.getElementById('r-inv-vent').value };
+            await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload();
         }
-
-        // --- FUNCIONES OT (Mismo funcionamiento de antes) ---
         function toggleRefri() { document.getElementById('refi-box').classList.toggle('hidden', document.getElementById('rubro').value !== "Refrigeración"); }
         async function loadSectores() {
             const ed = document.getElementById('edificio').value;
