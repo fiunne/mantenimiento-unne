@@ -3,260 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGM - Facultad de Ingeniería</title>
+    <title>SGM FI-2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @media print { .no-print { display: none !important; } .print-area { border: 1px solid black; padding: 20px; } }
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1e3a8a; display: flex; justify-content: center; align-items: center; z-index: 2000; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .tab-active { border-bottom: 4px solid #1e40af; color: #1e40af; font-weight: bold; }
-        .material-item { background: #f3f4f6; padding: 6px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-size: 11px; }
     </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-2 md:p-4">
+<body class="bg-gray-100 p-2 md:p-4">
+    <div id="loader" class="loading-overlay font-bold italic text-blue-600 border-2">Procesando...</div>
 
-    <div id="auth-screen">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full">
-            <h2 class="text-xl font-bold mb-4 italic text-blue-900">Mantenimiento FI</h2>
-            <input type="password" id="pin-input" maxlength="4" placeholder="PIN" class="w-full text-center text-3xl border rounded-lg p-3 mb-4 focus:outline-none">
-            <button onclick="verificarPIN()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700">ACCEDER</button>
-        </div>
-    </div>
-
-    <div id="loader" class="loading-overlay font-bold italic text-blue-600">Procesando...</div>
-
-    <div id="main-content" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-4 md:p-6 hidden">
-        
-        <div class="flex border-b mb-6 no-print">
-            <button id="tab-nueva" onclick="cambiarTab('nueva')" class="flex-1 py-3 text-center tab-active">NUEVA ORDEN</button>
-            <button id="tab-pendientes" onclick="cambiarTab('pendientes')" class="flex-1 py-3 text-center text-gray-500">CERRAR PENDIENTES</button>
+    <div id="main-content" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-4 md:p-6">
+        <div class="flex border-b mb-6">
+            <button onclick="tab('nueva')" id="btn-n" class="flex-1 py-3 tab-active">NUEVA OT</button>
+            <button onclick="tab('pendientes')" id="btn-p" class="flex-1 py-3 text-gray-500">CERRAR OT</button>
         </div>
 
-        <div id="sec-nueva" class="print-area">
+        <div id="sec-nueva">
             <form id="otForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-3">
                     <div class="flex gap-2">
-                        <select id="tipo" class="w-1/2 border p-2 rounded text-sm" required>
-                            <option value="Preventivo">Preventivo</option>
-                            <option value="Correctivo" selected>Correctivo</option>
-                            <option value="Mejora">Mejora</option>
-                        </select>
-                        <select id="especialidad" class="w-1/2 border p-2 rounded text-sm" required>
+                        <select id="especialidad" class="w-full border p-2 rounded text-sm bg-blue-50 font-bold" required>
                             <option value="Electricidad">Electricidad</option>
                             <option value="Refrigeración">Refrigeración</option>
                             <option value="Ferretería">Ferretería</option>
-                            <option value="Herrería">Herrería</option>
                         </select>
                     </div>
+                    <select id="edificio" onchange="loadSectores()" class="w-full border p-2 rounded text-sm" required><option value="">Edificio...</option></select>
+                    <select id="sector" onchange="filterUbi()" class="w-full border p-2 rounded text-sm" disabled required><option value="">Sector...</option></select>
+                    <select id="ubicacionSelect" onchange="setDetalles()" class="w-full border p-2 rounded text-sm" disabled required><option value="">Ubicación...</option></select>
                     
-                    <div class="bg-blue-50 p-3 rounded-lg space-y-2">
-                        <select id="edificio" onchange="cargarSectores()" class="w-full border p-2 rounded text-sm" required><option value="">Edificio...</option></select>
-                        <select id="sector" onchange="filtrarUbicaciones()" class="w-full border p-2 rounded text-sm" disabled><option value="">Sector...</option></select>
-                        <select id="ubicacionSelect" onchange="actualizarDetalles()" class="w-full border p-2 rounded text-sm" disabled><option value="">Ubicación...</option></select>
+                    <div id="box-equipo" class="p-3 rounded-lg border bg-gray-50 border-gray-300">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase">Equipo / Activo:</label>
+                        <input type="text" id="disp_eq" class="w-full bg-transparent font-bold text-blue-900 outline-none" readonly value="Sin equipo">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase mt-2 block">N° Inventario:</label>
+                        <input type="text" id="disp_inv" class="w-full bg-transparent font-bold text-blue-900 outline-none" readonly value="-">
                     </div>
-
-                    <div id="detalle-equipo-extra" class="hidden bg-orange-50 p-3 rounded-lg border border-orange-200">
-                        <p class="text-[10px] font-bold text-orange-800 uppercase mb-1 underline italic">Datos de Hoja de Vida:</p>
-                        <div class="grid grid-cols-2 gap-2 text-sm">
-                            <p><b>Equipo:</b> <span id="display_equipo" class="text-blue-900 font-medium"></span></p>
-                            <p><b>N° Inventario:</b> <span id="display_inventario" class="text-blue-900 font-medium"></span></p>
-                        </div>
-                    </div>
-
-                    <input type="hidden" id="ubicacion_text"><input type="hidden" id="nInventario"><input type="hidden" id="equipo">
+                    <input type="hidden" id="h_ubi"><input type="hidden" id="h_inv"><input type="hidden" id="h_eq">
                 </div>
 
                 <div class="space-y-3">
-                    <input type="text" id="reportadoPor" placeholder="Reportado por..." class="w-full border p-2 rounded text-sm" required>
-                    <select id="personal" class="w-full border p-2 rounded text-sm" required>
-                        <option value="">Técnico Asignado...</option>
-                        <option value="DSG">DSG</option><option value="MAP">MAP</option>
-                        <option value="AGL">AGL</option><option value="RRG">RRG</option>
+                    <input type="text" id="reportado" placeholder="Reportado por..." class="w-full border p-2 rounded text-sm" required>
+                    <select id="tecnico" class="w-full border p-2 rounded text-sm" required>
+                        <option value="DSG">DSG</option><option value="MAP">MAP</option><option value="AGL">AGL</option>
                     </select>
-                    <textarea id="descripcion" rows="3" class="w-full border p-2 rounded text-sm" required placeholder="Descripción de la tarea..."></textarea>
-                    <select id="estado" class="w-full border p-2 rounded bg-yellow-50 font-bold text-sm">
-                        <option value="Abierta">🟡 ABIERTA (Pendiente)</option>
-                        <option value="Cerrada">🟢 CERRADA (Finalizada)</option>
-                    </select>
-                </div>
-
-                <div class="md:col-span-2 flex gap-4 no-print mt-2">
-                    <button type="button" onclick="window.print()" class="bg-gray-500 text-white font-bold py-2 px-6 rounded-lg">IMPRIMIR</button>
-                    <button type="submit" class="flex-1 bg-blue-600 text-white font-extrabold py-2 rounded-lg shadow-lg">GUARDAR ORDEN</button>
+                    <textarea id="desc" rows="3" class="w-full border p-2 rounded text-sm" required placeholder="Falla detectada..."></textarea>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg">GUARDAR ORDEN</button>
                 </div>
             </form>
         </div>
 
-        <div id="sec-pendientes" class="hidden">
-            <div class="space-y-4">
-                <div>
-                    <label class="text-xs font-bold text-gray-500 uppercase">Seleccionar OT pendiente:</label>
-                    <select id="listaAbiertas" class="w-full border p-3 rounded-lg bg-white shadow-sm font-bold text-blue-900 border-blue-200">
-                        <option value="">Cargando...</option>
-                    </select>
-                </div>
-
-                <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
-                    <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Agregar Insumos:</label>
-                    <div class="flex gap-2 mb-3">
-                        <select id="selectMaterial" class="flex-1 border p-2 rounded text-sm">
-                            <option value="">Cargando stock...</option>
-                        </select>
-                        <input type="number" id="cantMaterial" value="1" min="1" class="w-16 border p-2 rounded text-center font-bold">
-                        <button type="button" onclick="agregarMaterialALista()" class="bg-blue-600 text-white px-4 rounded font-bold text-xl">+</button>
+        <div id="sec-pendientes" class="hidden space-y-4">
+            <select id="listaOT" class="w-full border p-3 rounded-lg font-bold text-blue-900 border-blue-200"><option value="">Cargando...</option></select>
+            
+            <div class="bg-gray-100 p-4 rounded-xl border">
+                <p class="text-xs font-bold text-gray-500 mb-2 uppercase italic">Gestión de Insumos (Doble Cascada):</p>
+                <div class="grid grid-cols-1 gap-2">
+                    <select id="selCat" onchange="updateMat()" class="w-full border p-2 rounded text-sm font-bold bg-white"><option value="">1. Seleccione Grupo (Ej: Iluminación)...</option></select>
+                    <div class="flex gap-2">
+                        <select id="selMat" class="flex-1 border p-2 rounded text-sm bg-white"><option value="">2. Seleccione Material...</option></select>
+                        <input type="number" id="cant" value="1" min="1" class="w-16 border p-2 rounded text-center font-bold">
+                        <button onclick="addMat()" class="bg-blue-600 text-white px-6 rounded font-bold">+</button>
                     </div>
-                    <div id="listaTemporalMateriales" class="space-y-1"></div>
                 </div>
-
-                <textarea id="comentarioCierre" rows="2" class="w-full border p-2 rounded-lg text-sm" placeholder="Comentario de cierre / Detalle técnico..."></textarea>
-                <button onclick="finalizarOrdenConStock()" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl shadow-md hover:bg-green-700 transition-all">
-                    ✅ FINALIZAR Y ACTUALIZAR STOCK
-                </button>
+                <div id="carrito" class="mt-3 space-y-1"></div>
             </div>
+
+            <textarea id="obsFinal" rows="2" class="w-full border p-2 rounded-lg text-sm" placeholder="Detalle del trabajo realizado..."></textarea>
+            <button onclick="cerrarOT()" class="w-full bg-green-600 text-white font-bold py-4 rounded-xl">FINALIZAR Y DESCONTAR STOCK</button>
         </div>
     </div>
 
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz19pV9Yo5t2nmRP7-wcGj1M9C7YpZXNyH8HmjSex8DE7eDAJmfRqXg_2Xn_zy4Ed8/exec"; 
+        const URL = "https://script.google.com/macros/s/AKfycbwZIxNopGXNpqd76BbEIzbES11eFl777BUakSaJga0Nq_bfVMHcKI5aojmOLELCzqCd/exec";
         const TOKEN = "MANTENIMIENTO_FI_2026";
-        const PIN_CORRECTO = "2026";
-        
-        let rawUbi = []; let stockDB = []; let carrito = [];
+        let dbUbi = []; let dbStock = {}; let items = [];
 
-        function verificarPIN() {
-            if (document.getElementById('pin-input').value === PIN_CORRECTO) {
-                localStorage.setItem('auth_mantenimiento', 'true');
-                mostrarApp();
-            } else { alert("PIN Incorrecto"); }
+        function tab(t) {
+            document.getElementById('sec-nueva').classList.toggle('hidden', t!=='nueva');
+            document.getElementById('sec-pendientes').classList.toggle('hidden', t!=='pendientes');
+            document.getElementById('btn-n').className = `flex-1 py-3 ${t==='nueva'?'tab-active':'text-gray-500'}`;
+            document.getElementById('btn-p').className = `flex-1 py-3 ${t==='pendientes'?'tab-active':'text-gray-500'}`;
+            if(t==='pendientes') loadOTs();
         }
 
-        window.onload = () => { if (localStorage.getItem('auth_mantenimiento') === 'true') mostrarApp(); };
-
-        function mostrarApp() {
-            document.getElementById('auth-screen').style.display='none';
-            document.getElementById('main-content').classList.remove('hidden');
-            fetch(`${WEB_APP_URL}?action=getEdificios&token=${TOKEN}`).then(r => r.json()).then(data => {
-                const s = document.getElementById('edificio');
-                data.forEach(n => s.innerHTML += `<option value="${n}">${n}</option>`);
+        window.onload = () => {
+            fetch(`${URL}?action=getEdificios&token=${TOKEN}`).then(r=>r.json()).then(d=>{
+                d.forEach(n=>document.getElementById('edificio').innerHTML+=`<option value="${n}">${n}</option>`);
             });
-            cargarMateriales();
-        }
+            fetch(`${URL}?action=getMateriales&token=${TOKEN}`).then(r=>r.json()).then(d=>{
+                dbStock = d;
+                Object.keys(d).forEach(cat => document.getElementById('selCat').innerHTML+=`<option value="${cat}">${cat}</option>`);
+            });
+        };
 
-        function cambiarTab(tab) {
-            document.getElementById('sec-nueva').classList.toggle('hidden', tab !== 'nueva');
-            document.getElementById('sec-pendientes').classList.toggle('hidden', tab !== 'pendientes');
-            document.getElementById('tab-nueva').className = `flex-1 py-3 text-center ${tab === 'nueva' ? 'tab-active' : 'text-gray-500'}`;
-            document.getElementById('tab-pendientes').className = `flex-1 py-3 text-center ${tab === 'pendientes' ? 'tab-active' : 'text-gray-500'}`;
-            if(tab === 'pendientes') cargarPendientes();
-        }
-
-        async function cargarSectores() {
+        async function loadSectores() {
+            document.getElementById('loader').style.display="flex";
             const ed = document.getElementById('edificio').value;
-            if(!ed) return;
-            document.getElementById('loader').style.display = "flex";
-            const res = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${TOKEN}`);
-            rawUbi = await res.json();
+            dbUbi = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${TOKEN}`).then(r=>r.json());
             const s = document.getElementById('sector');
             s.innerHTML = '<option value="">Sector...</option>';
-            [...new Set(rawUbi.map(i => i.sector))].forEach(sec => s.innerHTML += `<option value="${sec}">${sec}</option>`);
+            [...new Set(dbUbi.map(i=>i.sector))].forEach(sec=>s.innerHTML+=`<option value="${sec}">${sec}</option>`);
             s.disabled = false;
-            document.getElementById('loader').style.display = "none";
+            document.getElementById('loader').style.display="none";
         }
 
-        function filtrarUbicaciones() {
+        function filterUbi() {
             const sec = document.getElementById('sector').value;
             const u = document.getElementById('ubicacionSelect');
             u.innerHTML = '<option value="">Ubicación...</option>';
-            rawUbi.filter(i => i.sector === sec).forEach(i => u.innerHTML += `<option value='${JSON.stringify(i)}'>${i.ubicacion}</option>`);
+            dbUbi.filter(i=>i.sector===sec).forEach(i=>u.innerHTML+=`<option value='${JSON.stringify(i)}'>${i.ubicacion}</option>`);
             u.disabled = false;
         }
 
-        function actualizarDetalles() {
-            const val = document.getElementById('ubicacionSelect').value;
-            if(!val) return;
-            const info = JSON.parse(val);
-            document.getElementById('ubicacion_text').value = info.ubicacion;
-            document.getElementById('nInventario').value = info.inventario;
-            document.getElementById('equipo').value = info.equipo;
-
-            // Mostrar recuadro Hoja de Vida si es Aire
-            const esAire = info.equipo.toLowerCase().includes("aire") || info.equipo.toLowerCase().includes("split");
-            document.getElementById('detalle-equipo-extra').classList.toggle('hidden', !esAire);
-            if(esAire) {
-                document.getElementById('display_equipo').innerText = info.equipo;
-                document.getElementById('display_inventario').innerText = info.inventario;
-            }
+        function setDetalles() {
+            const i = JSON.parse(document.getElementById('ubicacionSelect').value);
+            document.getElementById('h_ubi').value = i.ubicacion;
+            document.getElementById('h_inv').value = i.inventario;
+            document.getElementById('h_eq').value = i.equipo;
+            document.getElementById('disp_eq').value = i.equipo || "Sin equipo";
+            document.getElementById('disp_inv').value = i.inventario || "-";
+            
+            const esAire = i.equipo.toLowerCase().includes("aire");
+            document.getElementById('box-equipo').className = esAire ? "p-3 rounded-lg border bg-orange-50 border-orange-400 shadow-inner" : "p-3 rounded-lg border bg-gray-50 border-gray-300";
         }
 
-        async function cargarMateriales() {
-            const res = await fetch(`${WEB_APP_URL}?action=getMateriales&token=${TOKEN}`);
-            stockDB = await res.json();
-            const s = document.getElementById('selectMaterial');
-            s.innerHTML = '<option value="">Seleccionar material...</option>';
-            stockDB.forEach((m, i) => s.innerHTML += `<option value="${i}">[${m.categoria}] ${m.nombre}</option>`);
+        function updateMat() {
+            const cat = document.getElementById('selCat').value;
+            const s = document.getElementById('selMat');
+            s.innerHTML = '<option value="">Seleccione Material...</option>';
+            if(dbStock[cat]) dbStock[cat].forEach(m=>s.innerHTML+=`<option value='${JSON.stringify(m)}'>${m.nombre}</option>`);
         }
 
-        function agregarMaterialALista() {
-            const idx = document.getElementById('selectMaterial').value;
-            const cant = parseInt(document.getElementById('cantMaterial').value);
-            if(idx === "" || cant < 1) return;
-            carrito.push({...stockDB[idx], cantidad: cant});
-            actualizarListaVisual();
+        function addMat() {
+            const m = JSON.parse(document.getElementById('selMat').value);
+            items.push({...m, cantidad: document.getElementById('cant').value});
+            const c = document.getElementById('carrito');
+            c.innerHTML = "";
+            items.forEach((x,idx)=>c.innerHTML+=`<div class="flex justify-between bg-white p-2 rounded text-xs border"><span>${x.cantidad} x ${x.nombre}</span><button onclick="items.splice(${idx},1);addMat()" class="text-red-500 font-bold">X</button></div>`);
         }
 
-        function actualizarListaVisual() {
-            const div = document.getElementById('listaTemporalMateriales');
-            div.innerHTML = "";
-            carrito.forEach((m, i) => {
-                div.innerHTML += `<div class="material-item"><span><b>${m.cantidad}</b> x ${m.nombre}</span><button onclick="carrito.splice(${i},1);actualizarListaVisual()" class="text-red-500 font-bold px-2">X</button></div>`;
-            });
-        }
-
-        async function cargarPendientes() {
-            const s = document.getElementById('listaAbiertas');
-            s.innerHTML = '<option>Cargando...</option>';
-            const res = await fetch(`${WEB_APP_URL}?action=getAbiertas&token=${TOKEN}`);
-            const data = await res.json();
+        async function loadOTs() {
+            const d = await fetch(`${URL}?action=getAbiertas&token=${TOKEN}`).then(r=>r.json());
+            const s = document.getElementById('listaOT');
             s.innerHTML = '<option value="">Seleccione la OT...</option>';
-            data.forEach(ot => s.innerHTML += `<option value="${ot.id}">OT ${ot.id} | ${ot.detalle}</option>`);
+            d.forEach(o=>s.innerHTML+=`<option value="${o.id}">OT ${o.id} | ${o.detalle}</option>`);
         }
 
-        async function finalizarOrdenConStock() {
-            const id = document.getElementById('listaAbiertas').value;
-            if(!id) return alert("Seleccione una orden");
-            document.getElementById('loader').style.display = "flex";
-            const payload = {
-                token: TOKEN, action: 'cerrarOT', idOT: id,
-                comentarioFinal: document.getElementById('comentarioCierre').value,
-                materialesUsados: carrito.map(m => `${m.cantidad} ${m.nombre}`).join(", "),
-                listaParaDescontar: carrito
-            };
-            await fetch(WEB_APP_URL, {method: 'POST', body: JSON.stringify(payload)});
-            alert("¡Orden cerrada con éxito!"); 
-            location.reload();
+        async function cerrarOT() {
+            document.getElementById('loader').style.display="flex";
+            const p = { action:'cerrarOT', idOT: document.getElementById('listaOT').value, materialesUsados: items.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), listaParaDescontar: items, comentarioFinal: document.getElementById('obsFinal').value, token: TOKEN };
+            await fetch(URL, {method:'POST', body: JSON.stringify(p)});
+            alert("Cerrada con éxito"); location.reload();
         }
 
         document.getElementById('otForm').onsubmit = async (e) => {
             e.preventDefault();
-            document.getElementById('loader').style.display = "flex";
-            const payload = {
-                token: TOKEN,
-                tipo: document.getElementById('tipo').value,
-                especialidad: document.getElementById('especialidad').value,
-                prioridad: "Media",
-                edificio: document.getElementById('edificio').value,
-                sector: document.getElementById('sector').value,
-                ubicacion: document.getElementById('ubicacion_text').value,
-                nInventario: document.getElementById('nInventario').value,
-                equipo: document.getElementById('equipo').value,
-                reportadoPor: document.getElementById('reportadoPor').value,
-                medioReporte: "App", personal: document.getElementById('personal').value,
-                descripcion: document.getElementById('descripcion').value,
-                observaciones: "", estado: document.getElementById('estado').value
-            };
-            await fetch(WEB_APP_URL, {method: 'POST', body: JSON.stringify(payload)});
-            alert("¡Orden guardada correctamente!"); 
-            location.reload();
+            document.getElementById('loader').style.display="flex";
+            const p = { edificio: document.getElementById('edificio').value, sector: document.getElementById('sector').value, ubicacion: document.getElementById('h_ubi').value, nInventario: document.getElementById('h_inv').value, equipo: document.getElementById('h_eq').value, reportadoPor: document.getElementById('reportado').value, personal: document.getElementById('tecnico').value, descripcion: document.getElementById('desc').value, estado: "Abierta", token: TOKEN };
+            await fetch(URL, {method:'POST', body: JSON.stringify(p)});
+            alert("Guardada!"); location.reload();
         };
     </script>
 </body>
