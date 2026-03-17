@@ -16,7 +16,6 @@
             background: rgba(255,255,255,0.8); display: none; 
             justify-content: center; align-items: center; z-index: 1000;
         }
-        /* Estilos para el bloqueo por PIN */
         #auth-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #1e3a8a; display: flex; flex-direction: column;
@@ -28,29 +27,21 @@
     
     <div id="auth-screen">
         <div class="bg-white p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full">
-            <div class="mb-4 inline-block p-3 bg-blue-100 rounded-full text-blue-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-            </div>
-            <h2 class="text-xl font-bold text-gray-800 mb-2">Acceso Restringido</h2>
-            <p class="text-sm text-gray-500 mb-6">Ingrese el PIN de 4 dígitos para continuar</p>
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Acceso Mantenimiento</h2>
+            <p class="text-sm text-gray-500 mb-6">Ingrese PIN de acceso</p>
             <input type="password" id="pin-input" maxlength="4" placeholder="••••" 
                    class="w-full text-center text-3xl tracking-[1rem] border-2 border-blue-200 rounded-lg p-3 mb-4 focus:outline-none focus:border-blue-500">
-            <button onclick="verificarPIN()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors">
+            <button onclick="verificarPIN()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg hover:bg-blue-700">
                 ACCEDER
             </button>
-            <p id="pin-error" class="text-red-500 text-sm mt-3 hidden italic">PIN Incorrecto. Intente de nuevo.</p>
+            <p id="pin-error" class="text-red-500 text-sm mt-3 hidden italic">PIN Incorrecto.</p>
         </div>
     </div>
 
-    <div id="loader" class="loading-overlay italic text-blue-600 font-bold text-lg">Procesando...</div>
+    <div id="loader" class="loading-overlay italic text-blue-600 font-bold text-lg">Guardando datos...</div>
 
     <div id="main-content" class="max-w-4xl mx-auto bg-white rounded-xl shadow-lg p-6 print-area hidden">
-        <div class="flex justify-between items-center mb-6 border-b pb-4">
-            <h1 class="text-2xl font-bold text-blue-800">Orden de Trabajo de Mantenimiento</h1>
-            <span class="text-sm font-mono bg-gray-100 p-2 rounded no-print">Año: 2026</span>
-        </div>
+        <h1 class="text-2xl font-bold text-blue-800 mb-6 text-center border-b pb-4">Orden de Trabajo de Mantenimiento</h1>
         
         <form id="otForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-4">
@@ -105,14 +96,8 @@
                 </div>
                 <div class="grid grid-cols-2 gap-2">
                     <input type="hidden" id="ubicacion_text">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase">N° Inventario</label>
-                        <input type="text" id="nInventario" class="w-full bg-gray-50 p-2 text-sm rounded border" readonly>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 uppercase">Equipo</label>
-                        <input type="text" id="equipo" class="w-full bg-gray-50 p-2 text-sm rounded border" readonly>
-                    </div>
+                    <input type="text" id="nInventario" placeholder="Inventario" class="w-full bg-gray-50 p-2 text-xs rounded border" readonly>
+                    <input type="text" id="equipo" placeholder="Equipo" class="w-full bg-gray-50 p-2 text-xs rounded border" readonly>
                 </div>
             </div>
 
@@ -126,11 +111,18 @@
                     <select id="medioReporte" class="w-full border p-2 rounded">
                         <option value="WhatsApp">WhatsApp</option>
                         <option value="Personalmente">Personalmente</option>
+                        <option value="Email">Email</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700">Personal Asignado</label>
-                    <input type="text" id="personal" class="w-full border p-2 rounded" required>
+                    <select id="personal" class="w-full border p-2 rounded" required>
+                        <option value="">Seleccione...</option>
+                        <option value="DSG">DSG</option>
+                        <option value="MAP">MAP</option>
+                        <option value="AGL">AGL</option>
+                        <option value="RRG">RRG</option>
+                    </select>
                 </div>
             </div>
 
@@ -141,7 +133,7 @@
 
             <div class="md:col-span-2 flex flex-col md:flex-row justify-between items-center bg-gray-50 p-4 rounded border gap-4 no-print">
                 <button type="button" onclick="window.print()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg">
-                    IMPRIMIR OT
+                    IMPRIMIR
                 </button>
                 <button type="submit" id="btnGuardar" class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-3 px-10 rounded-lg shadow-xl transition-all">
                     GUARDAR EN REGISTRO
@@ -151,27 +143,34 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN (Actualiza la URL con la de tu Apps Script de Configuración)
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxNXs3KSaSqUU_MUhhwMvgyN1INlNKsA0Qj1E_Uwec-X2rlGwX9fDR9FDpJ6xcO8D4t/exec"; 
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwWRRvMW4nY9ND1MqPu-401zU4_v0ElUazLh5x_9l3U5M218mKH4E9K6tuRqS09yojj/exec"; 
         const TOKEN = "MANTENIMIENTO_FI_2026";
-        const PIN_CORRECTO = "2026"; // <--- AQUÍ PUEDES CAMBIAR EL PIN
-        
+        const PIN_CORRECTO = "2026"; 
         let rawData = [];
 
-        // FUNCIÓN DE VERIFICACIÓN DE PIN
+        // LÓGICA DE SESIÓN PIN
+        window.onload = () => {
+            if (localStorage.getItem('auth_mantenimiento') === 'true') {
+                mostrarApp();
+            }
+        };
+
         function verificarPIN() {
-            const pinIngresado = document.getElementById('pin-input').value;
-            if (pinIngresado === PIN_CORRECTO) {
-                document.getElementById('auth-screen').style.display = 'none';
-                document.getElementById('main-content').classList.remove('hidden');
-                inicializarFormulario();
+            if (document.getElementById('pin-input').value === PIN_CORRECTO) {
+                localStorage.setItem('auth_mantenimiento', 'true');
+                mostrarApp();
             } else {
                 document.getElementById('pin-error').classList.remove('hidden');
-                document.getElementById('pin-input').value = "";
             }
         }
 
-        async function inicializarFormulario() {
+        function mostrarApp() {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('main-content').classList.remove('hidden');
+            inicializarDatos();
+        }
+
+        async function inicializarDatos() {
             try {
                 const res = await fetch(`${WEB_APP_URL}?action=getEdificios&token=${TOKEN}`);
                 const edificios = await res.json();
@@ -181,34 +180,33 @@
                     let opt = document.createElement('option');
                     opt.value = n; opt.textContent = n; select.appendChild(opt);
                 });
-            } catch (e) { alert("Error al cargar edificios"); }
+            } catch (e) { alert("Error de red"); }
         }
 
         async function cargarSectores() {
             const edif = document.getElementById('edificio').value;
             const secSel = document.getElementById('sector');
             const ubiSel = document.getElementById('ubicacionSelect');
-            secSel.disabled = true; ubiSel.disabled = true;
+            if (!edif) return;
             secSel.innerHTML = '<option>Cargando...</option>';
             try {
                 const res = await fetch(`${WEB_APP_URL}?action=getSectores&edificio=${encodeURIComponent(edif)}&token=${TOKEN}`);
                 rawData = await res.json();
-                const sectoresUnicos = [...new Set(rawData.map(item => item.sector))];
+                const unicos = [...new Set(rawData.map(item => item.sector))];
                 secSel.innerHTML = '<option value="">Seleccione sector...</option>';
-                sectoresUnicos.forEach(s => {
+                unicos.forEach(s => {
                     let opt = document.createElement('option');
                     opt.value = s; opt.textContent = s; secSel.appendChild(opt);
                 });
                 secSel.disabled = false;
-            } catch (e) { alert("Error cargando sectores"); }
+            } catch (e) { alert("Error sectores"); }
         }
 
         function filtrarUbicaciones() {
-            const sectorElegido = document.getElementById('sector').value;
+            const sector = document.getElementById('sector').value;
             const ubiSel = document.getElementById('ubicacionSelect');
             ubiSel.innerHTML = '<option value="">Seleccione ubicación...</option>';
-            const filtrados = rawData.filter(item => item.sector === sectorElegido);
-            filtrados.forEach((item) => {
+            rawData.filter(i => i.sector === sector).forEach(item => {
                 let opt = document.createElement('option');
                 opt.value = rawData.indexOf(item); 
                 opt.textContent = item.ubicacion;
@@ -218,9 +216,9 @@
         }
 
         function actualizarDetalles() {
-            const realIdx = document.getElementById('ubicacionSelect').value;
-            if (realIdx !== "") {
-                const info = rawData[realIdx];
+            const idx = document.getElementById('ubicacionSelect').value;
+            if (idx !== "") {
+                const info = rawData[idx];
                 document.getElementById('nInventario').value = info.inventario || "n/c";
                 document.getElementById('equipo').value = info.equipo || "n/c";
                 document.getElementById('ubicacion_text').value = info.ubicacion;
@@ -244,15 +242,16 @@
                 medioReporte: document.getElementById('medioReporte').value,
                 personal: document.getElementById('personal').value,
                 descripcion: document.getElementById('descripcion').value,
-                materiales: "",
-                estado: "Abierta",
-                observaciones: ""
+                estado: "Abierta"
             };
             try {
                 await fetch(WEB_APP_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                alert("¡Orden registrada exitosamente!");
+                alert("¡Orden Guardada!");
                 location.reload();
-            } catch (error) { alert("Error al guardar"); document.getElementById('loader').style.display = "none"; }
+            } catch (error) { 
+                alert("Error de guardado"); 
+                document.getElementById('loader').style.display = "none";
+            }
         };
     </script>
 </body>
