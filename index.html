@@ -6,27 +6,37 @@
     <title>SGM - Gestión Integral FI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
         .tab-active { border-bottom: 4px solid #1e40af; color: #1e40af; font-weight: bold; }
-        .vencido { border-t: 8px solid #ef4444 !important; background: #fef2f2; ring: 2px solid #fee2e2; }
+        .vencido { border-t: 8px solid #ef4444 !important; background: #fef2f2; }
         .por-vencer { border-t: 8px solid #f59e0b !important; background: #fffbeb; }
         .al-dia { border-t: 8px solid #22c55e !important; background: #ffffff; }
         @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .animate-alert { animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        .animate-alert { animation: pulse-red 2s infinite; }
     </style>
 </head>
 <body class="bg-gray-100 p-2 text-gray-800">
-    <div id="loader" class="loading-overlay font-bold italic text-blue-600">
-        <div class="mb-2 text-lg">Procesando datos...</div>
-        <div class="text-sm">Sincronizando con Planillas Google</div>
+    <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-[2000] p-4">
+        <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center space-y-6">
+            <div class="text-4xl">🔐</div>
+            <h2 class="font-black text-xl text-slate-800 uppercase tracking-tight">Acceso Restringido</h2>
+            <input type="password" id="pin-input" placeholder="Ingresar PIN..." class="w-full border-2 border-slate-200 p-4 rounded-2xl text-center text-2xl tracking-[1em] focus:border-blue-500 outline-none">
+            <button onclick="verificarAcceso()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-blue-700 transition-all">ENTRAR AL SISTEMA</button>
+            <p id="login-error" class="text-red-500 font-bold text-xs hidden">❌ PIN INCORRECTO</p>
+        </div>
     </div>
 
-    <div class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-3">
+    <div id="loader" class="loading-overlay font-bold italic text-blue-600">
+        <div class="mb-2 text-lg animate-bounce">⚙️ Procesando...</div>
+        <div class="text-xs uppercase tracking-widest opacity-50">Sincronizando con Google Cloud</div>
+    </div>
+
+    <div id="main-content" class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-3 hidden">
         <div class="flex border-b mb-4 overflow-x-auto text-[10px] font-bold uppercase whitespace-nowrap bg-gray-50 rounded-t-lg">
             <button onclick="tab('nueva')" id="btn-n" class="px-5 py-4 tab-active">Nueva OT</button>
             <button onclick="tab('pendientes')" id="btn-p" class="px-5 py-4 text-gray-500">Cerrar OT</button>
             <button onclick="tab('relevamiento')" id="btn-r" class="px-5 py-4 text-gray-500">Relevamiento Edif</button>
-            <button onclick="tab('extintores')" id="btn-e" class="px-5 py-4 text-red-600 border-l border-r bg-red-50">🛡️ Extintores</button>
+            <button onclick="tab('extintores')" id="btn-e" class="px-5 py-4 text-red-600 border-l border-r bg-red-50 font-black">🛡️ Extintores</button>
             <button onclick="tab('historial')" id="btn-h" class="px-5 py-4 text-gray-500">Historial</button>
         </div>
 
@@ -60,17 +70,16 @@
         <div id="sec-pendientes" class="hidden space-y-3">
             <select id="listaOT" class="w-full border p-3 rounded font-bold text-blue-900 bg-blue-50"></select>
             <div class="bg-gray-50 p-3 rounded-lg border">
-                <p class="text-[9px] font-bold text-gray-500 uppercase mb-2 italic">Consumo de Materiales</p>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <select id="rS" onchange="cR()" class="border p-2 rounded text-xs font-bold bg-white"><option value="">Rubro</option></select>
                     <select id="gS" onchange="cG()" class="border p-2 rounded text-xs bg-white" disabled><option value="">Grupo</option></select>
                     <select id="mS" class="border p-2 rounded text-xs bg-white" disabled><option value="">Material</option></select>
                 </div>
-                <div class="flex gap-2 mt-2"><input type="number" id="cnt" value="1" min="1" class="w-16 border p-2 rounded text-center font-bold text-blue-700"><button onclick="aM()" class="flex-1 bg-slate-800 text-white font-bold rounded hover:bg-black transition-colors">AGREGAR AL LISTADO</button></div>
+                <div class="flex gap-2 mt-2"><input type="number" id="cnt" value="1" min="1" class="w-16 border p-2 rounded text-center font-bold text-blue-700"><button onclick="aM()" class="flex-1 bg-slate-800 text-white font-bold rounded">AGREGAR</button></div>
                 <div id="car" class="mt-2 space-y-1"></div>
             </div>
-            <textarea id="obs" rows="2" class="w-full border p-2 rounded text-xs bg-green-50" placeholder="Comentario técnico de cierre..."></textarea>
-            <button onclick="cOT()" class="w-full bg-green-700 text-white font-bold py-3 rounded-lg shadow-lg">FINALIZAR TAREA Y ACTUALIZAR STOCK</button>
+            <textarea id="obs" rows="2" class="w-full border p-2 rounded text-xs bg-green-50" placeholder="Comentario técnico..."></textarea>
+            <button onclick="cOT()" class="w-full bg-green-700 text-white font-bold py-3 rounded-lg">CERRAR Y DESCONTAR STOCK</button>
         </div>
 
         <div id="sec-relevamiento" class="hidden space-y-3">
@@ -80,26 +89,25 @@
                 <select id="rel-ubi" onchange="cargarDatosRel()" class="border p-2 rounded text-sm font-bold text-blue-800" disabled><option value="">Ubicación...</option></select>
             </div>
             <div id="form-relevamiento" class="hidden space-y-4 p-4 border rounded-xl shadow-lg bg-white">
-                <p class="text-xs font-black text-blue-900 border-b pb-2 uppercase italic">Ficha Técnica del Local / Oficina</p>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="space-y-3">
-                        <div><label class="text-[10px] font-bold text-gray-400 uppercase">Equipo Aire Acondicionado</label><input type="text" id="r-eq" class="w-full border p-2 rounded text-sm font-bold bg-gray-50"></div>
-                        <div><label class="text-[10px] font-bold text-gray-400 uppercase">N° Inventario Aire (Col C)</label><input type="text" id="r-inv-aire" class="w-full border p-2 rounded text-sm font-bold bg-yellow-50"></div>
-                        <div><label class="text-[10px] font-bold text-gray-400 uppercase">Tipo de Luminarias</label><input type="text" id="r-tlum" class="w-full border p-2 rounded text-sm"></div>
+                        <div><label class="text-[10px] font-bold text-gray-400 uppercase">Equipo Aire</label><input type="text" id="r-eq" class="w-full border p-2 rounded text-sm font-bold bg-gray-50"></div>
+                        <div><label class="text-[10px] font-bold text-gray-400 uppercase">Inv. Aire (C)</label><input type="text" id="r-inv-aire" class="w-full border p-2 rounded text-sm font-bold bg-yellow-50"></div>
+                        <div><label class="text-[10px] font-bold text-gray-400 uppercase">Tipo Luminarias</label><input type="text" id="r-tlum" class="w-full border p-2 rounded text-sm"></div>
                     </div>
                     <div class="space-y-3">
                         <div class="grid grid-cols-2 gap-2">
-                            <div><label class="text-[10px] font-bold text-gray-400 uppercase">Cant. Artefactos</label><input type="number" id="r-cart" class="w-full border p-2 rounded text-sm"></div>
-                            <div><label class="text-[10px] font-bold text-gray-400 uppercase">Cant. Lámparas</label><input type="number" id="r-clam" class="w-full border p-2 rounded text-sm"></div>
+                            <div><label class="text-[10px] font-bold text-gray-400 uppercase">Cant. Art.</label><input type="number" id="r-cart" class="w-full border p-2 rounded text-sm"></div>
+                            <div><label class="text-[10px] font-bold text-gray-400 uppercase">Cant. Lamp.</label><input type="number" id="r-clam" class="w-full border p-2 rounded text-sm"></div>
                         </div>
                         <div class="grid grid-cols-2 gap-2">
-                            <div><label class="text-[10px] font-bold text-gray-400 uppercase">Luz Emergencia</label><input type="text" id="r-em" class="w-full border p-2 rounded text-sm"></div>
+                            <div><label class="text-[10px] font-bold text-gray-400 uppercase">Emergencia</label><input type="text" id="r-em" class="w-full border p-2 rounded text-sm"></div>
                             <div><label class="text-[10px] font-bold text-gray-400 uppercase">Ventiladores</label><input type="text" id="r-vent" class="w-full border p-2 rounded text-sm"></div>
                         </div>
-                        <div><label class="text-[10px] font-bold text-gray-400 uppercase">Inv. Vent. / Otros (Col J)</label><input type="text" id="r-inv-vent" class="w-full border p-2 rounded text-sm font-bold bg-yellow-50"></div>
+                        <div><label class="text-[10px] font-bold text-gray-400 uppercase">Inv. Vent. / Otros (J)</label><input type="text" id="r-inv-vent" class="w-full border p-2 rounded text-sm font-bold bg-yellow-50"></div>
                     </div>
                 </div>
-                <button onclick="guardarRelevamiento()" class="w-full bg-blue-800 text-white font-black py-4 rounded-lg shadow-xl hover:bg-blue-900 transition-all uppercase tracking-widest">Guardar Cambios en Planilla</button>
+                <button onclick="guardarRelevamiento()" class="w-full bg-blue-800 text-white font-black py-4 rounded-lg shadow-xl uppercase">Guardar Cambios</button>
             </div>
         </div>
 
@@ -107,50 +115,69 @@
             <div class="bg-slate-800 p-4 rounded-xl shadow-2xl text-white space-y-3 border-b-4 border-red-600">
                 <div class="flex flex-col md:flex-row gap-3">
                     <select id="ext-edificio" onchange="loadExtintores()" class="flex-1 bg-slate-700 border-none p-3 rounded-lg font-bold text-white"><option value="">Seleccionar Edificio...</option></select>
-                    <input type="text" id="ext-busqueda" oninput="filtrarExt()" placeholder="🔍 Buscar por UNNE, N° o Sector..." class="flex-1 p-3 rounded-lg text-black font-bold border-2 border-transparent focus:border-blue-500">
+                    <input type="text" id="ext-busqueda" oninput="filtrarExt()" placeholder="🔍 Buscar UNNE o Sector..." class="flex-1 p-3 rounded-lg text-black font-bold">
                 </div>
                 <div class="flex justify-between items-center pt-2">
-                    <div id="stats-ext" class="text-[11px] flex gap-4 uppercase font-black tracking-tighter">
-                        </div>
-                    <button onclick="imprimirVencidos()" class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-full text-[10px] font-black shadow-lg transition-all transform active:scale-95">
-                        📄 GENERAR LISTA DE COMPRA (PDF)
-                    </button>
+                    <div id="stats-ext" class="text-[11px] flex gap-4 uppercase font-black tracking-tighter"></div>
+                    <button onclick="imprimirVencidos()" class="bg-red-600 hover:bg-red-700 px-6 py-2 rounded-full text-[10px] font-black shadow-lg transition-all">📄 LISTA DE COMPRA</button>
                 </div>
             </div>
-
-            <div id="lista-extintores" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[600px] overflow-y-auto p-1">
-                </div>
+            <div id="lista-extintores" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto p-1"></div>
         </div>
 
-        <div id="sec-historial" class="hidden space-y-2 max-h-[500px] overflow-y-auto">
-            <p class="text-center italic text-gray-400 text-xs">Últimos movimientos registrados...</p>
-        </div>
+        <div id="sec-historial" class="hidden space-y-2 max-h-[500px] overflow-y-auto"></div>
 
         <div id="form-extintor" class="hidden fixed inset-0 bg-black/70 p-4 z-50 flex items-center justify-center backdrop-blur-sm">
             <div class="bg-white p-6 rounded-2xl w-full max-w-md shadow-2xl space-y-4">
                 <h3 id="ext-titulo" class="font-black text-2xl text-blue-900 border-b-2 pb-2"></h3>
                 <div>
-                    <label class="text-[10px] font-black uppercase text-gray-500">Fecha de Carga (Última Realizada)</label>
-                    <input type="date" id="ext-f-carga" class="w-full border-2 p-3 rounded-xl font-bold text-lg">
+                    <label class="text-[10px] font-black uppercase text-gray-500">Fecha de Carga</label>
+                    <input type="date" id="ext-f-carga" class="w-full border-2 p-3 rounded-xl font-bold">
                 </div>
                 <div>
-                    <label class="text-[10px] font-black uppercase text-gray-500">Estado / Observación Técnica</label>
-                    <textarea id="ext-obs" class="w-full border-2 p-3 rounded-xl text-sm font-semibold" rows="3" placeholder="Ej: Precinto cambiado, Manómetro OK..."></textarea>
+                    <label class="text-[10px] font-black uppercase text-gray-500">Estado / Obs</label>
+                    <textarea id="ext-obs" class="w-full border-2 p-3 rounded-xl text-sm" rows="3"></textarea>
                 </div>
                 <div class="flex gap-3 pt-2">
                     <button onclick="document.getElementById('form-extintor').classList.add('hidden')" class="flex-1 bg-gray-200 py-3 rounded-xl font-bold text-gray-600 uppercase">Cerrar</button>
-                    <button onclick="guardarExtintor()" class="flex-1 bg-blue-700 text-white py-3 rounded-xl font-black uppercase shadow-lg">Guardar en Sistema</button>
+                    <button onclick="guardarExtintor()" class="flex-1 bg-blue-700 text-white py-3 rounded-xl font-black uppercase shadow-lg">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURACIÓN (REEMPLAZAR CON TU URL) ---
+        // --- CONFIGURACIÓN ---
         const URL = "https://script.google.com/macros/s/AKfycbw0VXXkYfUiYq3Ygv8o_VueaSePl1kFCEA4yYp4sdPv8Bgy8PtD3VuSIW0g6eDSN6AF/exec"; 
-        const TOKEN = "MANTENIMIENTO_FI_2026";
+        const PIN_CORRECTO = "MANTENIMIENTO_FI_2026";
         
         let dbU = []; let dbS = {}; let its = []; let dbR = []; let dbExt = []; let extUnneSel = "";
+
+        // LOGIN
+        function verificarAcceso() {
+            const input = document.getElementById('pin-input').value;
+            if(input === PIN_CORRECTO) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                inicializarSistema();
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        }
+
+        function inicializarSistema() {
+            document.getElementById('loader').style.display="flex";
+            fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`).then(r=>r.json()).then(d=>{
+                d.forEach(n=>{
+                    document.getElementById('edificio').innerHTML+=`<option value="${n}">${n}</option>`;
+                    document.getElementById('rel-edificio').innerHTML+=`<option value="${n}">${n}</option>`;
+                    document.getElementById('ext-edificio').innerHTML+=`<option value="${n}">${n}</option>`;
+                });
+                document.getElementById('loader').style.display="none";
+            }).catch(e => { alert("Error de conexión. Verifica la URL del Script."); document.getElementById('loader').style.display="none"; });
+
+            fetch(`${URL}?action=getMateriales&token=${PIN_CORRECTO}`).then(r=>r.json()).then(d=>{ dbS = d; Object.keys(d).forEach(r => document.getElementById('rS').innerHTML+=`<option value="${r}">${r}</option>`); });
+        }
 
         // NAVEGACIÓN
         function tab(t) {
@@ -162,28 +189,14 @@
             if(t==='pendientes') loadA(); if(t==='historial') loadH();
         }
 
-        window.onload = () => {
-            document.getElementById('loader').style.display="flex";
-            fetch(`${URL}?action=getEdificios&token=${TOKEN}`).then(r=>r.json()).then(d=>{
-                d.forEach(n=>{
-                    document.getElementById('edificio').innerHTML+=`<option value="${n}">${n}</option>`;
-                    document.getElementById('rel-edificio').innerHTML+=`<option value="${n}">${n}</option>`;
-                    document.getElementById('ext-edificio').innerHTML+=`<option value="${n}">${n}</option>`;
-                });
-                document.getElementById('loader').style.display="none";
-            });
-            fetch(`${URL}?action=getMateriales&token=${TOKEN}`).then(r=>r.json()).then(d=>{
-                dbS = d;
-                Object.keys(d).forEach(r => document.getElementById('rS').innerHTML+=`<option value="${r}">${r}</option>`);
-            });
-        };
-
-        // --- LÓGICA EXTINTORES ---
+        // EXTINTORES
         async function loadExtintores() {
             const ed = document.getElementById('ext-edificio').value; if(!ed) return;
             document.getElementById('loader').style.display="flex";
-            dbExt = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${TOKEN}`).then(r=>r.json());
-            filtrarExt();
+            try {
+                dbExt = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
+                filtrarExt();
+            } catch(e) { alert("Error cargando extintores"); }
             document.getElementById('loader').style.display="none";
         }
 
@@ -194,49 +207,44 @@
             const ahora = new Date();
             let contVencidos = 0;
 
-            dbExt.filter(x => x.unne.toLowerCase().includes(txt) || x.nro.toString().includes(txt) || x.sector.toLowerCase().includes(txt))
+            dbExt.filter(x => x.unne.toLowerCase().includes(txt) || x.sector.toLowerCase().includes(txt))
                  .forEach(x => {
                     const venc = new Date(x.f_venc);
                     const diff = (venc - ahora) / (1000 * 60 * 60 * 24);
-                    
                     let clase = "al-dia";
-                    let tag = '<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[9px] font-black tracking-wider">MANTENIMIENTO OK</span>';
-                    let alertaFuerte = "";
+                    let tag = '<span class="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[9px] font-black">VIGENTE</span>';
 
                     if(diff < 0) {
                         contVencidos++;
-                        clase = "vencido shadow-red-100";
-                        tag = '<span class="bg-red-600 text-white px-3 py-1 rounded-full text-[9px] font-black animate-alert">VENCIDO / RECARGA URGENTE</span>';
-                        alertaFuerte = "text-red-700 font-black underline";
+                        clase = "vencido";
+                        tag = '<span class="bg-red-600 text-white px-3 py-1 rounded-full text-[9px] font-black animate-alert">VENCIDO</span>';
                     } else if(diff < 30) {
-                        clase = "por-vencer shadow-amber-100";
-                        tag = '<span class="bg-amber-500 text-white px-3 py-1 rounded-full text-[9px] font-black">VENCE PRÓXIMAMENTE</span>';
+                        clase = "por-vencer";
+                        tag = '<span class="bg-amber-500 text-white px-3 py-1 rounded-full text-[9px] font-black">POR VENCER</span>';
                     }
 
                     cont.innerHTML += `
-                        <div class="p-4 rounded-2xl shadow-md transition-all hover:shadow-xl cursor-pointer border ${clase}" onclick="abrirFormExt('${x.unne}', '${x.obs}')">
-                            <div class="flex justify-between items-center mb-3">
-                                <span class="text-2xl font-black text-slate-800 tracking-tight">${x.unne}</span>
+                        <div class="p-4 rounded-2xl shadow-md border ${clase}" onclick="abrirFormExt('${x.unne}', '${x.obs}')">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xl font-black text-slate-800">${x.unne}</span>
                                 ${tag}
                             </div>
-                            <div class="grid grid-cols-2 gap-2 text-[10px] uppercase font-bold text-gray-500 mb-3">
-                                <div class="bg-gray-100/50 p-2 rounded-lg">⚙️ Tipo: <span class="text-black">${x.tipo}</span></div>
-                                <div class="bg-gray-100/50 p-2 rounded-lg">⚖️ Cap: <span class="text-black">${x.cap} KG</span></div>
-                                <div class="col-span-2 bg-gray-100/50 p-2 rounded-lg">📍 Ubicación: <span class="text-black">${x.planta} - ${x.sector}</span></div>
+                            <div class="text-[10px] uppercase font-bold text-gray-500">
+                                📍 ${x.planta} - ${x.sector}<br>
+                                ⚙️ ${x.tipo} ${x.cap} KG
                             </div>
-                            <div class="flex justify-between items-center pt-2 border-t border-gray-100">
-                                <span class="text-[11px] font-semibold">Vencimiento: <span class="${alertaFuerte}">${x.f_venc}</span></span>
-                                <span class="text-[9px] bg-blue-600 text-white px-2 py-1 rounded font-bold uppercase">Actualizar</span>
+                            <div class="flex justify-between mt-2 pt-2 border-t text-[11px] font-bold">
+                                <span>Vence: ${x.f_venc}</span>
+                                <span class="text-blue-600 uppercase">Editar</span>
                             </div>
-                            ${x.obs ? `<p class="mt-2 text-[10px] italic text-blue-600 bg-blue-50 p-1 rounded">Obs: ${x.obs}</p>` : ''}
                         </div>`;
                  });
-            document.getElementById('stats-ext').innerHTML = `<span>🛡️ TOTAL: ${dbExt.length}</span> <span class="${contVencidos>0?'text-red-400':''}">⚠️ VENCIDOS: ${contVencidos}</span>`;
+            document.getElementById('stats-ext').innerHTML = `<span>🛡️ TOTAL: ${dbExt.length}</span> <span>⚠️ VENCIDOS: ${contVencidos}</span>`;
         }
 
         function abrirFormExt(unne, obs) {
             extUnneSel = unne;
-            document.getElementById('ext-titulo').innerText = "Extintor: " + unne;
+            document.getElementById('ext-titulo').innerText = unne;
             document.getElementById('ext-obs').value = obs || "";
             document.getElementById('ext-f-carga').value = new Date().toISOString().split('T')[0];
             document.getElementById('form-extintor').classList.remove('hidden');
@@ -244,31 +252,27 @@
 
         async function guardarExtintor() {
             document.getElementById('loader').style.display="flex";
-            const p = { action: 'updateExtintor', token: TOKEN, edificio: document.getElementById('ext-edificio').value, unne: extUnneSel, f_carga: document.getElementById('ext-f-carga').value, obs: document.getElementById('ext-obs').value };
+            const p = { action: 'updateExtintor', token: PIN_CORRECTO, edificio: document.getElementById('ext-edificio').value, unne: extUnneSel, f_carga: document.getElementById('ext-f-carga').value, obs: document.getElementById('ext-obs').value };
             await fetch(URL, {method:'POST', body: JSON.stringify(p)});
-            location.reload();
+            loadExtintores();
+            document.getElementById('form-extintor').classList.add('hidden');
         }
 
         function imprimirVencidos() {
-            const ed = document.getElementById('ext-edificio').value; if(!ed) return alert("Primero seleccioná un edificio");
+            const ed = document.getElementById('ext-edificio').value; if(!ed) return;
             const vencidos = dbExt.filter(x => new Date(x.f_venc) < new Date());
-            if(vencidos.length === 0) return alert("No hay extintores vencidos en " + ed);
-            
-            let v = window.open('', '', 'width=900,height=700');
-            v.document.write(`<html><head><title>REPORTE DE COMPRA - ${ed}</title><style>body{font-family:sans-serif;padding:30px}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #000;padding:10px;text-align:left}th{background:#eee}h1{color:#c00}</style></head><body>`);
-            v.document.write(`<h1>REQUERIMIENTO DE RECARGA - EDIF. ${ed}</h1>`);
-            v.document.write(`<p>Generado el: ${new Date().toLocaleDateString()}</p>`);
-            v.document.write(`<table><thead><tr><th>UNNE</th><th>Tipo/Peso</th><th>Última Carga</th><th>Ubicación / Sector</th></tr></thead><tbody>`);
-            vencidos.forEach(x => v.document.write(`<tr><td>${x.unne}</td><td>${x.tipo} ${x.cap}kg</td><td>${x.f_carga}</td><td>${x.planta} - ${x.sector}</td></tr>`));
-            v.document.write(`</tbody></table><br><br><p>Firma Responsable: _________________________</p></body></html>`);
-            v.document.close(); v.print();
+            if(vencidos.length === 0) return alert("No hay vencidos");
+            let v = window.open('', '', 'width=800,height=600');
+            v.document.write(`<h1>Vencidos - ${ed}</h1><table><tr><th>UNNE</th><th>Tipo</th><th>Sector</th></tr>`);
+            vencidos.forEach(x => v.document.write(`<tr><td>${x.unne}</td><td>${x.tipo}</td><td>${x.sector}</td></tr>`));
+            v.document.write(`</table>`); v.print();
         }
 
-        // --- LÓGICA DE RELEVAMIENTO EDIFICIOS (SECTORES) ---
+        // --- LÓGICA GENERAL ---
         async function loadSectoresRel() {
             const ed = document.getElementById('rel-edificio').value;
             document.getElementById('loader').style.display="flex";
-            dbR = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${TOKEN}`).then(r=>r.json());
+            dbR = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
             const s = document.getElementById('rel-sector'); s.innerHTML = '<option value="">Sector...</option>';
             [...new Set(dbR.map(i=>i.sector))].forEach(sec=>s.innerHTML+=`<option value="${sec}">${sec}</option>`);
             s.disabled = false; document.getElementById('loader').style.display="none";
@@ -290,16 +294,14 @@
         async function guardarRelevamiento() {
             document.getElementById('loader').style.display="flex";
             const u = JSON.parse(document.getElementById('rel-ubi').value);
-            const p = { action: 'updateRelevamiento', token: TOKEN, edificio: document.getElementById('rel-edificio').value, sector: u.sector, ubi: u.ubi, inv_aire: document.getElementById('r-inv-aire').value, eq_aire: document.getElementById('r-eq').value, t_lum: document.getElementById('r-tlum').value, c_art: document.getElementById('r-cart').value, c_lam: document.getElementById('r-clam').value, em: document.getElementById('r-em').value, vent: document.getElementById('r-vent').value, inv_vent: document.getElementById('r-inv-vent').value };
+            const p = { action: 'updateRelevamiento', token: PIN_CORRECTO, edificio: document.getElementById('rel-edificio').value, sector: u.sector, ubi: u.ubi, inv_aire: document.getElementById('r-inv-aire').value, eq_aire: document.getElementById('r-eq').value, t_lum: document.getElementById('r-tlum').value, c_art: document.getElementById('r-cart').value, c_lam: document.getElementById('r-clam').value, em: document.getElementById('r-em').value, vent: document.getElementById('r-vent').value, inv_vent: document.getElementById('r-inv-vent').value };
             await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload();
         }
-
-        // --- LÓGICA DE OT (HISTORIAL, NUEVA, CERRAR) ---
         function toggleRefri() { document.getElementById('refi-box').classList.toggle('hidden', document.getElementById('rubro').value !== "Refrigeración"); }
         async function loadSectores() {
             const ed = document.getElementById('edificio').value;
             document.getElementById('loader').style.display="flex";
-            dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${TOKEN}`).then(r=>r.json());
+            dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
             const s = document.getElementById('sector'); s.innerHTML = '<option value="">Sector...</option>';
             [...new Set(dbU.map(i=>i.sector))].forEach(sec=>s.innerHTML+=`<option value="${sec}">${sec}</option>`);
             s.disabled = false; document.getElementById('loader').style.display="none";
@@ -320,24 +322,23 @@
         function cG() { const r = document.getElementById('rS').value; const g = document.getElementById('gS').value; const m = document.getElementById('mS'); m.innerHTML = '<option value="">Material</option>'; if(dbS[r][g]) { dbS[r][g].forEach(ma => m.innerHTML+=`<option value='${JSON.stringify(ma)}'>${ma.nombre}</option>`); m.disabled = false; } }
         function aM() { const raw = document.getElementById('mS').value; if(!raw) return; const m = JSON.parse(raw); its.push({...m, cantidad: document.getElementById('cnt').value}); const c = document.getElementById('car'); c.innerHTML = ""; its.forEach((x,idx)=>c.innerHTML+=`<div class="flex justify-between bg-white p-2 rounded text-[10px] border shadow-sm"><span><b>${x.cantidad}</b> x ${x.nombre}</span><button onclick="its.splice(${idx},1);aM()" class="text-red-500 font-bold px-2">X</button></div>`); }
         async function saveOT() {
-            if(!document.getElementById('edificio').value || !document.getElementById('tec').value) return alert("Completa Edificio y Técnico");
             document.getElementById('loader').style.display="flex";
-            const p = { token: TOKEN, tipo: document.getElementById('tipo').value, especialidad: document.getElementById('rubro').value, edificio: document.getElementById('edificio').value, sector: document.getElementById('sector').value, ubicacion: document.getElementById('h-u').value, nInventario: document.getElementById('h-i').value, equipo: document.getElementById('h-e').value, reportadoPor: document.getElementById('rep').value, medioReporte: document.getElementById('med').value, personal: document.getElementById('tec').value, descripcion: document.getElementById('desc').value, estado: document.getElementById('est').value };
+            const p = { token: PIN_CORRECTO, tipo: document.getElementById('tipo').value, especialidad: document.getElementById('rubro').value, edificio: document.getElementById('edificio').value, sector: document.getElementById('sector').value, ubicacion: document.getElementById('h-u').value, nInventario: document.getElementById('h-i').value, equipo: document.getElementById('h-e').value, reportadoPor: document.getElementById('rep').value, medioReporte: document.getElementById('med').value, personal: document.getElementById('tec').value, descripcion: document.getElementById('desc').value, estado: document.getElementById('est').value };
             await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload();
         }
         async function loadA() {
-            const d = await fetch(`${URL}?action=getAbiertas&token=${TOKEN}`).then(r=>r.json());
+            const d = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`).then(r=>r.json());
             document.getElementById('listaOT').innerHTML = d.map(o=>`<option value="${o.id}">${o.detalle}</option>`).join("");
         }
         async function cOT() {
             if(!document.getElementById('listaOT').value) return; 
             document.getElementById('loader').style.display="flex";
-            const p = { action:'cerrarOT', token: TOKEN, idOT: document.getElementById('listaOT').value, materialesUsados: its.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), listaParaDescontar: its, comentarioFinal: document.getElementById('obs').value };
+            const p = { action:'cerrarOT', token: PIN_CORRECTO, idOT: document.getElementById('listaOT').value, materialesUsados: its.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), listaParaDescontar: its, comentarioFinal: document.getElementById('obs').value };
             await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload();
         }
         async function loadH() {
             const h = document.getElementById('sec-historial'); h.innerHTML = '<p class="text-center text-xs p-5">Cargando historial...</p>';
-            const d = await fetch(`${URL}?action=getHistorial&token=${TOKEN}`).then(r=>r.json());
+            const d = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r=>r.json());
             h.innerHTML = d.map(o => `<div class="bg-gray-50 p-3 rounded-xl border-l-4 ${o.estado==='Cerrada'?'border-green-500':'border-yellow-500'} shadow-sm text-[10px] mb-2"><div class="flex justify-between font-bold"><span>ID: ${o.id}</span><span>${o.fecha}</span></div><p class="py-1">${o.edif} - ${o.tarea}</p><div class="flex justify-between italic text-gray-500"><span>Técnico: ${o.tecnico}</span><span>Estado: ${o.estado}</span></div></div>`).join("");
         }
     </script>
