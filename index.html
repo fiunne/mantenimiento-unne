@@ -8,34 +8,27 @@
     <style>
         .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
         .tab-active { border-bottom: 4px solid #1e40af; color: #1e40af; font-weight: bold; }
-        .vencido { border-t: 8px solid #ef4444 !important; background: #fef2f2; }
-        .por-vencer { border-t: 8px solid #f59e0b !important; background: #fffbeb; }
-        .al-dia { border-t: 8px solid #22c55e !important; background: #ffffff; }
-        @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .animate-alert { animation: pulse-red 2s infinite; }
     </style>
 </head>
 <body class="bg-gray-100 p-2 text-gray-800">
 
     <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-[2000] p-4">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center space-y-6">
-            <h2 class="font-black text-xl text-slate-800 uppercase">Acceso Restringido</h2>
-            <input type="password" id="pin-input" placeholder="PIN" class="w-full border-2 p-4 rounded-2xl text-center text-2xl tracking-[0.5em] focus:border-blue-500 outline-none">
-            <button onclick="verificarAcceso()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg">ENTRAR</button>
+            <h2 class="font-black text-xl text-slate-800 uppercase">Acceso al Sistema</h2>
+            <input type="password" id="pin-input" placeholder="PIN de Seguridad" class="w-full border-2 p-4 rounded-2xl text-center text-2xl tracking-[0.5em] outline-none focus:border-blue-500">
+            <button onclick="verificarAcceso()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-blue-700">ENTRAR</button>
             <p id="login-error" class="text-red-500 font-bold text-xs hidden">❌ PIN INCORRECTO</p>
         </div>
     </div>
 
     <div id="loader" class="loading-overlay font-bold italic text-blue-600">
-        <div class="mb-2 text-lg">⚙️ Conectando...</div>
+        <div class="mb-2 text-lg animate-pulse">⚙️ Sincronizando datos...</div>
     </div>
 
     <div id="main-content" class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-3 hidden">
         <div class="flex border-b mb-4 overflow-x-auto text-[10px] font-bold uppercase whitespace-nowrap bg-gray-50 rounded-t-lg">
             <button onclick="tab('nueva')" id="btn-n" class="px-5 py-4 tab-active">Nueva OT</button>
             <button onclick="tab('pendientes')" id="btn-p" class="px-5 py-4 text-gray-500">Cerrar OT</button>
-            <button onclick="tab('relevamiento')" id="btn-r" class="px-5 py-4 text-gray-500">Relevamiento</button>
-            <button onclick="tab('extintores')" id="btn-e" class="px-5 py-4 text-red-600 border-l border-r bg-red-50">🛡️ Extintores</button>
             <button onclick="tab('historial')" id="btn-h" class="px-5 py-4 text-gray-500">Historial</button>
         </div>
 
@@ -44,21 +37,17 @@
                 <div class="space-y-2">
                     <div class="flex gap-1">
                         <select id="tipo" class="w-1/2 border p-2 rounded text-xs"><option value="Correctivo">Correctivo</option><option value="Preventivo">Preventivo</option></select>
-                        <select id="rubro" onchange="toggleRefri()" class="w-1/2 border p-2 rounded text-xs bg-blue-50 font-bold"><option value="General">General</option><option value="Electricidad">Electricidad</option><option value="Refrigeración">Refrigeración</option></select>
+                        <select id="rubro" class="w-1/2 border p-2 rounded text-xs bg-blue-50 font-bold"><option value="General">General</option><option value="Electricidad">Electricidad</option><option value="Refrigeración">Refrigeración</option></select>
                     </div>
-                    <select id="edificio" onchange="loadSectores()" class="w-full border p-2 rounded text-xs"><option value="">Edificio...</option></select>
+                    <select id="edificio" onchange="loadSectores()" class="w-full border p-2 rounded text-xs"><option value="">Seleccionar Edificio...</option></select>
                     <select id="sector" onchange="filterUbi()" class="w-full border p-2 rounded text-xs" disabled><option value="">Sector...</option></select>
                     <select id="ubiSel" onchange="setUbi()" class="w-full border p-2 rounded text-xs" disabled><option value="">Ubicación...</option></select>
-                    <div id="refi-box" class="hidden p-2 bg-orange-50 border rounded text-xs">
-                        <input type="text" id="d-eq" class="w-full mb-1 p-1 border" readonly placeholder="Equipo">
-                        <input type="text" id="d-inv" class="w-full p-1 border" readonly placeholder="Inv">
-                    </div>
                 </div>
                 <div class="space-y-2">
-                    <input type="text" id="rep" placeholder="Avisó..." class="w-full border p-2 rounded text-xs">
+                    <input type="text" id="rep" placeholder="Reportado por..." class="w-full border p-2 rounded text-xs">
                     <select id="tec" class="w-full border p-2 rounded text-xs font-bold"><option value="">Técnico...</option><option value="ALG">ALG</option><option value="DSF">DSF</option><option value="MAP">MAP</option><option value="RRG">RRG</option></select>
-                    <textarea id="desc" rows="2" class="w-full border p-2 rounded text-xs" placeholder="Tarea..."></textarea>
-                    <button onclick="saveOT()" class="w-full bg-blue-600 text-white font-bold py-2 rounded">GUARDAR OT</button>
+                    <textarea id="desc" rows="2" class="w-full border p-2 rounded text-xs" placeholder="Descripción de la tarea..."></textarea>
+                    <button onclick="saveOT()" class="w-full bg-blue-600 text-white font-bold py-2 rounded shadow">GUARDAR ORDEN</button>
                 </div>
             </div>
             <input type="hidden" id="h-u"><input type="hidden" id="h-i"><input type="hidden" id="h-e">
@@ -66,193 +55,114 @@
 
         <div id="sec-pendientes" class="hidden space-y-3">
             <select id="listaOT" class="w-full border p-3 rounded font-bold text-blue-900 bg-blue-50"></select>
-            <div class="bg-gray-50 p-3 rounded-lg border">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
-                    <select id="rS" onchange="cR()" class="border p-2 rounded text-xs"><option value="">Rubro</option></select>
-                    <select id="gS" onchange="cG()" class="border p-2 rounded text-xs" disabled><option value="">Grupo</option></select>
-                    <select id="mS" class="border p-2 rounded text-xs" disabled><option value="">Material</option></select>
-                </div>
-                <div class="flex gap-2 mt-2"><input type="number" id="cnt" value="1" class="w-16 border p-2 rounded text-center font-bold"><button onclick="aM()" class="flex-1 bg-slate-800 text-white font-bold rounded">AGREGAR</button></div>
-                <div id="car" class="mt-2 space-y-1 text-xs"></div>
-            </div>
-            <textarea id="obs" rows="2" class="w-full border p-2 rounded text-xs" placeholder="Comentario cierre..."></textarea>
-            <button onclick="cOT()" class="w-full bg-green-700 text-white font-bold py-3 rounded-lg">FINALIZAR</button>
+            <p class="text-center text-gray-400 text-xs">Carga de materiales próximamente...</p>
         </div>
 
-        <div id="sec-relevamiento" class="hidden space-y-3">
-            <div class="bg-blue-50 p-3 rounded-xl border grid grid-cols-1 md:grid-cols-3 gap-2">
-                <select id="rel-edificio" onchange="loadSectoresRel()" class="border p-2 rounded text-sm"><option value="">Edificio...</option></select>
-                <select id="rel-sector" onchange="filterUbiRel()" class="border p-2 rounded text-sm" disabled><option value="">Sector...</option></select>
-                <select id="rel-ubi" onchange="cargarDatosRel()" class="border p-2 rounded text-sm" disabled><option value="">Ubicación...</option></select>
-            </div>
-            <div id="form-relevamiento" class="hidden space-y-3 p-4 border rounded-xl bg-white shadow-md">
-                <div class="grid grid-cols-2 gap-3 text-sm">
-                    <input type="text" id="r-eq" placeholder="Equipo Aire" class="border p-2 rounded">
-                    <input type="text" id="r-inv-aire" placeholder="Inv. Aire" class="border p-2 rounded bg-yellow-50">
-                    <input type="text" id="r-tlum" placeholder="Tipo Luz" class="border p-2 rounded">
-                    <input type="number" id="r-cart" placeholder="Cant. Art" class="border p-2 rounded">
-                </div>
-                <button onclick="guardarRelevamiento()" class="w-full bg-blue-800 text-white py-3 rounded font-bold uppercase">Actualizar Ficha</button>
-            </div>
-        </div>
-
-        <div id="sec-extintores" class="hidden space-y-4">
-            <div class="bg-slate-800 p-4 rounded-xl text-white space-y-3 border-b-4 border-red-600">
-                <div class="flex flex-col md:flex-row gap-3">
-                    <select id="ext-edificio" onchange="loadExtintores()" class="flex-1 bg-slate-700 border-none p-3 rounded-lg font-bold text-white"><option value="">Seleccionar Edificio...</option></select>
-                    <input type="text" id="ext-busqueda" oninput="filtrarExt()" placeholder="🔍 UNNE o Sector..." class="flex-1 p-3 rounded-lg text-black font-bold">
-                </div>
-                <div class="flex justify-between items-center text-[11px] font-black uppercase">
-                    <div id="stats-ext"></div>
-                    <button onclick="imprimirVencidos()" class="bg-red-600 px-4 py-2 rounded-full">📄 LISTA DE COMPRA</button>
-                </div>
-            </div>
-            <div id="lista-extintores" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[500px] overflow-y-auto"></div>
-        </div>
-
-        <div id="sec-historial" class="hidden space-y-2 max-h-[500px] overflow-y-auto"></div>
-
-        <div id="form-extintor" class="hidden fixed inset-0 bg-black/70 p-4 z-50 flex items-center justify-center">
-            <div class="bg-white p-6 rounded-2xl w-full max-w-md space-y-4">
-                <h3 id="ext-titulo" class="font-black text-2xl text-blue-900 border-b pb-2"></h3>
-                <input type="date" id="ext-f-carga" class="w-full border-2 p-3 rounded-xl font-bold">
-                <textarea id="ext-obs" class="w-full border-2 p-3 rounded-xl text-sm" rows="3" placeholder="Obs técnica..."></textarea>
-                <div class="flex gap-3">
-                    <button onclick="document.getElementById('form-extintor').classList.add('hidden')" class="flex-1 bg-gray-200 py-3 rounded-xl">Cerrar</button>
-                    <button onclick="guardarExtintor()" class="flex-1 bg-blue-700 text-white py-3 rounded-xl">Guardar</button>
-                </div>
-            </div>
+        <div id="sec-historial" class="hidden space-y-2 max-h-[500px] overflow-y-auto">
+            <div id="historial-lista"></div>
         </div>
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbzHdGIgpj9blyqeWCcRwYpGT3yOGHevy76mMaCC3Wp7ue49YYBH7r-PPFdzgovy7J6d/exec"; 
-        const PIN_CORRECTO = "MANTENIMIENTO_FI_2026";
+        // --- CONFIGURACIÓN ---
+        const URL = "https://script.google.com/macros/s/AKfycbxzoMeMmk7brTZjOWzFmNiV6sb9OCHqDmjHpB6Be9zxeIz_3rHe1Ox5-kU67F65wAl2/exec"; 
+        const PIN_CORRECTO = "1234";
         
-        let dbU = []; let dbS = {}; let its = []; let dbR = []; let dbExt = []; let extUnneSel = "";
+        let dbU = [];
 
         function verificarAcceso() {
-            if(document.getElementById('pin-input').value === PIN_CORRECTO) {
+            const input = document.getElementById('pin-input').value;
+            if(input === PIN_CORRECTO) {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
                 inicializar();
-            } else { document.getElementById('login-error').classList.remove('hidden'); }
+            } else {
+                document.getElementById('login-error').classList.remove('hidden');
+            }
         }
 
         function inicializar() {
             document.getElementById('loader').style.display="flex";
-            fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`).then(r=>r.json()).then(d=>{
-                d.forEach(n=>{
-                    document.getElementById('edificio').innerHTML+=`<option value="${n}">${n}</option>`;
-                    document.getElementById('rel-edificio').innerHTML+=`<option value="${n}">${n}</option>`;
-                    document.getElementById('ext-edificio').innerHTML+=`<option value="${n}">${n}</option>`;
+            // Se envía el PIN en la URL para que el servidor autorice la carga inicial
+            fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`)
+                .then(r => r.json())
+                .then(d => {
+                    const sel = document.getElementById('edificio');
+                    sel.innerHTML = '<option value="">Seleccionar Edificio...</option>';
+                    d.forEach(n => sel.innerHTML += `<option value="${n}">${n}</option>`);
+                    document.getElementById('loader').style.display="none";
+                })
+                .catch(e => {
+                    document.getElementById('loader').style.display="none";
+                    alert("Error de conexión: Verifica que el PIN en Código.gs sea '1234'");
                 });
-                document.getElementById('loader').style.display="none";
-            }).catch(() => alert("Error de conexión. Verifica la URL en el código."));
-            fetch(`${URL}?action=getMateriales&token=${PIN_CORRECTO}`).then(r=>r.json()).then(d=>dbS=d);
         }
 
         function tab(t) {
-            ['nueva','pendientes','relevamiento','extintores','historial'].forEach(s => document.getElementById('sec-'+s).classList.toggle('hidden', t!==s));
-            if(t==='pendientes') loadA(); if(t==='historial') loadH();
+            ['nueva','pendientes','historial'].forEach(s => document.getElementById('sec-'+s).classList.toggle('hidden', t!==s));
+            if(t==='historial') loadH();
         }
 
-        // LÓGICA EXTINTORES
-        async function loadExtintores() {
-            const ed = document.getElementById('ext-edificio').value; if(!ed) return;
+        async function loadSectores() {
+            const ed = document.getElementById('edificio').value;
+            if(!ed) return;
             document.getElementById('loader').style.display="flex";
-            dbExt = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
-            filtrarExt();
+            const res = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`);
+            dbU = await res.json();
+            const s = document.getElementById('sector');
+            s.innerHTML = '<option value="">Sector...</option>';
+            [...new Set(dbU.map(i=>i.sector))].forEach(sec => s.innerHTML += `<option value="${sec}">${sec}</option>`);
+            s.disabled = false;
             document.getElementById('loader').style.display="none";
         }
 
-        function filtrarExt() {
-            const txt = document.getElementById('ext-busqueda').value.toLowerCase();
-            const cont = document.getElementById('lista-extintores');
-            cont.innerHTML = "";
-            let contV = 0;
-            const hoy = new Date();
-
-            dbExt.filter(x => x.unne.toLowerCase().includes(txt) || x.sector.toLowerCase().includes(txt)).forEach(x => {
-                const fV = x.f_venc.split('/');
-                const venc = new Date(fV[2], fV[1]-1, fV[0]);
-                const diff = (venc - hoy) / (1000 * 60 * 60 * 24);
-                let clase = "al-dia";
-                if(diff < 0) { contV++; clase = "vencido"; } else if(diff < 30) { clase = "por-vencer"; }
-
-                cont.innerHTML += `
-                    <div class="p-4 rounded-2xl shadow border ${clase}" onclick="abrirFormExt('${x.unne}', '${x.obs}')">
-                        <div class="flex justify-between font-black"><span>${x.unne}</span> <span class="text-[9px] uppercase">${clase==='vencido'?'❌ Vencido':'✔️ OK'}</span></div>
-                        <div class="text-[10px] mt-1 text-gray-500">${x.tipo} ${x.cap}kg - ${x.sector}</div>
-                        <div class="text-xs font-bold mt-2 pt-2 border-t">Vence: ${x.f_venc}</div>
-                    </div>`;
-            });
-            document.getElementById('stats-ext').innerText = `Total: ${dbExt.length} | Vencidos: ${contV}`;
-        }
-
-        function abrirFormExt(unne, obs) {
-            extUnneSel = unne;
-            document.getElementById('ext-titulo').innerText = unne;
-            document.getElementById('ext-obs').value = obs || "";
-            document.getElementById('ext-f-carga').value = new Date().toISOString().split('T')[0];
-            document.getElementById('form-extintor').classList.remove('hidden');
-        }
-
-        async function guardarExtintor() {
-            document.getElementById('loader').style.display="flex";
-            const p = { action: 'updateExtintor', token: PIN_CORRECTO, edificio: document.getElementById('ext-edificio').value, unne: extUnneSel, f_carga: document.getElementById('ext-f-carga').value, obs: document.getElementById('ext-obs').value };
-            await fetch(URL, {method:'POST', body: JSON.stringify(p)});
-            document.getElementById('form-extintor').classList.add('hidden');
-            loadExtintores();
-        }
-
-        function imprimirVencidos() {
-            const ed = document.getElementById('ext-edificio').value; if(!ed) return;
-            const vencidos = dbExt.filter(x => {
-                const fV = x.f_venc.split('/');
-                return new Date(fV[2], fV[1]-1, fV[0]) < new Date();
-            });
-            if(vencidos.length === 0) return alert("Sin vencidos.");
-            let v = window.open('', '', 'width=800,height=600');
-            v.document.write(`<h1>COMPRA RECARGA - ${ed}</h1><table border="1" style="width:100%; border-collapse:collapse"><tr><th>UNNE</th><th>TIPO</th><th>SECTOR</th></tr>`);
-            vencidos.forEach(x => v.document.write(`<tr><td>${x.unne}</td><td>${x.tipo}</td><td>${x.sector}</td></tr>`));
-            v.document.write(`</table>`); v.print();
-        }
-
-        // LÓGICA RESTANTE (RESUMIDA)
-        async function loadSectores() {
-            const ed = document.getElementById('edificio').value;
-            dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
-            const s = document.getElementById('sector'); s.innerHTML = '<option value="">Sector...</option>';
-            [...new Set(dbU.map(i=>i.sector))].forEach(sec=>s.innerHTML+=`<option value="${sec}">${sec}</option>`);
-            s.disabled = false;
-        }
         function filterUbi() {
             const sec = document.getElementById('sector').value;
-            const u = document.getElementById('ubiSel'); u.innerHTML = '<option value="">Ubicación...</option>';
-            dbU.filter(i=>i.sector===sec).forEach(i=>u.innerHTML+=`<option value='${JSON.stringify(i)}'>${i.ubi}</option>`);
+            const u = document.getElementById('ubiSel');
+            u.innerHTML = '<option value="">Ubicación...</option>';
+            dbU.filter(i => i.sector === sec).forEach(i => u.innerHTML += `<option value='${JSON.stringify(i)}'>${i.ubi}</option>`);
             u.disabled = false;
         }
+
         function setUbi() {
             const i = JSON.parse(document.getElementById('ubiSel').value);
-            document.getElementById('h-u').value = i.ubi; document.getElementById('h-i').value = i.inv_aire;
-            document.getElementById('h-e').value = i.eq_aire; document.getElementById('d-eq').value = i.eq_aire || "N/A";
-            document.getElementById('d-inv').value = i.inv_aire || "N/A";
+            document.getElementById('h-u').value = i.ubi;
+            document.getElementById('h-i').value = i.inv_aire;
+            document.getElementById('h-e').value = i.eq_aire;
         }
+
         async function saveOT() {
             document.getElementById('loader').style.display="flex";
-            const p = { token: PIN_CORRECTO, tipo: document.getElementById('tipo').value, especialidad: document.getElementById('rubro').value, edificio: document.getElementById('edificio').value, sector: document.getElementById('sector').value, ubicacion: document.getElementById('h-u').value, nInventario: document.getElementById('h-i').value, equipo: document.getElementById('h-e').value, reportadoPor: document.getElementById('rep').value, medioReporte: "App", personal: document.getElementById('tec').value, descripcion: document.getElementById('desc').value, estado: "Abierta" };
-            await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload();
+            const p = {
+                token: PIN_CORRECTO,
+                tipo: document.getElementById('tipo').value,
+                especialidad: document.getElementById('rubro').value,
+                edificio: document.getElementById('edificio').value,
+                sector: document.getElementById('sector').value,
+                ubicacion: document.getElementById('h-u').value,
+                nInventario: document.getElementById('h-i').value,
+                equipo: document.getElementById('h-e').value,
+                reportadoPor: document.getElementById('rep').value,
+                medioReporte: "App",
+                personal: document.getElementById('tec').value,
+                descripcion: document.getElementById('desc').value,
+                estado: "Abierta"
+            };
+            await fetch(URL, {method:'POST', body: JSON.stringify(p)});
+            alert("Orden Guardada");
+            location.reload();
         }
-        async function loadA() {
-            const d = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`).then(r=>r.json());
-            document.getElementById('listaOT').innerHTML = d.map(o=>`<option value="${o.id}">${o.detalle}</option>`).join("");
-        }
+
         async function loadH() {
+            const list = document.getElementById('historial-lista');
+            list.innerHTML = '<p class="text-center text-xs p-5">Cargando...</p>';
             const d = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r=>r.json());
-            document.getElementById('sec-historial').innerHTML = d.map(o => `<div class="bg-white p-2 border mb-1 text-[10px]"><b>${o.id}</b> - ${o.edif} - ${o.tecnico} (${o.estado})</div>`).join("");
+            list.innerHTML = d.map(o => `
+                <div class="bg-white p-3 border-l-4 border-blue-500 shadow-sm text-[10px] mb-2">
+                    <div class="flex justify-between font-bold"><span>${o.id}</span><span>${o.fecha}</span></div>
+                    <p>${o.edif} - ${o.tarea}</p>
+                </div>`).join("");
         }
-        function toggleRefri() { document.getElementById('refi-box').classList.toggle('hidden', document.getElementById('rubro').value !== "Refrigeración"); }
     </script>
 </body>
 </html>
