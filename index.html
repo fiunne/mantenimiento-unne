@@ -8,28 +8,32 @@
     <style>
         .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
         .tab-active { border-bottom: 4px solid #1e40af; color: #1e40af; font-weight: bold; }
+        .vencido { border-top: 8px solid #ef4444 !important; background: #fef2f2; }
+        .al-dia { border-top: 8px solid #22c55e !important; background: #ffffff; }
     </style>
 </head>
 <body class="bg-gray-100 p-2 text-gray-800">
 
     <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-[2000] p-4">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center space-y-6">
-            <h2 class="font-black text-xl text-slate-800 uppercase">Acceso al Sistema</h2>
-            <input type="password" id="pin-input" placeholder="PIN de Seguridad" class="w-full border-2 p-4 rounded-2xl text-center text-2xl tracking-[0.5em] outline-none focus:border-blue-500">
-            <button onclick="verificarAcceso()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg hover:bg-blue-700">ENTRAR</button>
+            <h2 class="font-black text-xl text-slate-800 uppercase">Acceso Restringido</h2>
+            <input type="password" id="pin-input" placeholder="PIN" class="w-full border-2 p-4 rounded-2xl text-center text-2xl tracking-[0.5em] outline-none">
+            <button onclick="verificarAcceso()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg">ENTRAR</button>
             <p id="login-error" class="text-red-500 font-bold text-xs hidden">❌ PIN INCORRECTO</p>
         </div>
     </div>
 
     <div id="loader" class="loading-overlay font-bold italic text-blue-600">
-        <div class="mb-2 text-lg animate-pulse">⚙️ Sincronizando datos...</div>
+        <div class="mb-2 text-lg">⚙️ Sincronizando...</div>
     </div>
 
     <div id="main-content" class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-3 hidden">
         <div class="flex border-b mb-4 overflow-x-auto text-[10px] font-bold uppercase whitespace-nowrap bg-gray-50 rounded-t-lg">
-            <button onclick="tab('nueva')" id="btn-n" class="px-5 py-4 tab-active">Nueva OT</button>
-            <button onclick="tab('pendientes')" id="btn-p" class="px-5 py-4 text-gray-500">Cerrar OT</button>
-            <button onclick="tab('historial')" id="btn-h" class="px-5 py-4 text-gray-500">Historial</button>
+            <button onclick="tab('nueva')" id="btn-nueva" class="px-5 py-4 tab-active">Nueva OT</button>
+            <button onclick="tab('pendientes')" id="btn-pendientes" class="px-5 py-4 text-gray-500">Cerrar OT</button>
+            <button onclick="tab('relevamiento')" id="btn-relevamiento" class="px-5 py-4 text-gray-500">Relevamiento</button>
+            <button onclick="tab('extintores')" id="btn-extintores" class="px-5 py-4 text-red-600">🛡️ Extintores</button>
+            <button onclick="tab('historial')" id="btn-historial" class="px-5 py-4 text-gray-500">Historial</button>
         </div>
 
         <div id="sec-nueva" class="space-y-3">
@@ -39,15 +43,15 @@
                         <select id="tipo" class="w-1/2 border p-2 rounded text-xs"><option value="Correctivo">Correctivo</option><option value="Preventivo">Preventivo</option></select>
                         <select id="rubro" class="w-1/2 border p-2 rounded text-xs bg-blue-50 font-bold"><option value="General">General</option><option value="Electricidad">Electricidad</option><option value="Refrigeración">Refrigeración</option></select>
                     </div>
-                    <select id="edificio" onchange="loadSectores()" class="w-full border p-2 rounded text-xs"><option value="">Seleccionar Edificio...</option></select>
-                    <select id="sector" onchange="filterUbi()" class="w-full border p-2 rounded text-xs" disabled><option value="">Sector...</option></select>
+                    <select id="edificio" onchange="loadSectores('edificio','sector','ubiSel')" class="w-full border p-2 rounded text-xs"><option value="">Edificio...</option></select>
+                    <select id="sector" onchange="filterUbi('sector','ubiSel')" class="w-full border p-2 rounded text-xs" disabled><option value="">Sector...</option></select>
                     <select id="ubiSel" onchange="setUbi()" class="w-full border p-2 rounded text-xs" disabled><option value="">Ubicación...</option></select>
                 </div>
                 <div class="space-y-2">
                     <input type="text" id="rep" placeholder="Reportado por..." class="w-full border p-2 rounded text-xs">
                     <select id="tec" class="w-full border p-2 rounded text-xs font-bold"><option value="">Técnico...</option><option value="ALG">ALG</option><option value="DSF">DSF</option><option value="MAP">MAP</option><option value="RRG">RRG</option></select>
-                    <textarea id="desc" rows="2" class="w-full border p-2 rounded text-xs" placeholder="Descripción de la tarea..."></textarea>
-                    <button onclick="saveOT()" class="w-full bg-blue-600 text-white font-bold py-2 rounded shadow">GUARDAR ORDEN</button>
+                    <textarea id="desc" rows="2" class="w-full border p-2 rounded text-xs" placeholder="Tarea..."></textarea>
+                    <button onclick="saveOT()" class="w-full bg-blue-600 text-white font-bold py-2 rounded">GUARDAR ORDEN</button>
                 </div>
             </div>
             <input type="hidden" id="h-u"><input type="hidden" id="h-i"><input type="hidden" id="h-e">
@@ -55,7 +59,25 @@
 
         <div id="sec-pendientes" class="hidden space-y-3">
             <select id="listaOT" class="w-full border p-3 rounded font-bold text-blue-900 bg-blue-50"></select>
-            <p class="text-center text-gray-400 text-xs">Carga de materiales próximamente...</p>
+            <p class="text-center text-gray-400 text-xs">Módulo de cierre en desarrollo...</p>
+        </div>
+
+        <div id="sec-relevamiento" class="hidden space-y-3">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 bg-blue-50 p-3 rounded-lg border">
+                <select id="rel-edificio" onchange="loadSectores('rel-edificio','rel-sector','rel-ubi')" class="border p-2 rounded text-xs"><option value="">Edificio...</option></select>
+                <select id="rel-sector" onchange="filterUbi('rel-sector','rel-ubi')" class="border p-2 rounded text-xs" disabled><option value="">Sector...</option></select>
+                <select id="rel-ubi" onchange="cargarDatosRel()" class="border p-2 rounded text-xs" disabled><option value="">Ubicación...</option></select>
+            </div>
+            <div id="form-rel" class="hidden grid grid-cols-2 gap-2 text-xs border p-3 rounded-lg bg-white shadow">
+                <div><label>Equipo Aire</label><input type="text" id="r-eq" class="w-full border p-1 rounded"></div>
+                <div><label>Inventario (C)</label><input type="text" id="r-inv-aire" class="w-full border p-1 rounded bg-yellow-50"></div>
+                <button onclick="guardarRel()" class="col-span-2 bg-blue-800 text-white py-2 mt-2 rounded font-bold">ACTUALIZAR FICHA</button>
+            </div>
+        </div>
+
+        <div id="sec-extintores" class="hidden space-y-3">
+            <select id="ext-edificio" onchange="loadExtintores()" class="w-full bg-slate-800 text-white p-3 rounded-lg font-bold"><option value="">Seleccionar Edificio...</option></select>
+            <div id="lista-extintores" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[500px] overflow-y-auto"></div>
         </div>
 
         <div id="sec-historial" class="hidden space-y-2 max-h-[500px] overflow-y-auto">
@@ -64,104 +86,90 @@
     </div>
 
     <script>
-        // --- CONFIGURACIÓN ---
-        const URL = "https://script.google.com/macros/s/AKfycbxzoMeMmk7brTZjOWzFmNiV6sb9OCHqDmjHpB6Be9zxeIz_3rHe1Ox5-kU67F65wAl2/exec"; 
-        const PIN_CORRECTO = "1234";
-        
-        let dbU = [];
+        const URL = "https://script.google.com/macros/s/AKfycbyz7gX2Vftgesb-gqdp-2bttBLvJxPotSbR-Ig-dJ6JFI97mVeAPFm5UqjxfyvZ5eQw/exec"; 
+        const PIN_CORRECTO = "4370";
+        let dbU = []; let dbExt = [];
 
         function verificarAcceso() {
-            const input = document.getElementById('pin-input').value;
-            if(input === PIN_CORRECTO) {
+            if(document.getElementById('pin-input').value === PIN_CORRECTO) {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
                 inicializar();
-            } else {
-                document.getElementById('login-error').classList.remove('hidden');
-            }
+            } else { document.getElementById('login-error').classList.remove('hidden'); }
         }
 
         function inicializar() {
             document.getElementById('loader').style.display="flex";
-            // Se envía el PIN en la URL para que el servidor autorice la carga inicial
-            fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`)
-                .then(r => r.json())
-                .then(d => {
-                    const sel = document.getElementById('edificio');
-                    sel.innerHTML = '<option value="">Seleccionar Edificio...</option>';
-                    d.forEach(n => sel.innerHTML += `<option value="${n}">${n}</option>`);
-                    document.getElementById('loader').style.display="none";
-                })
-                .catch(e => {
-                    document.getElementById('loader').style.display="none";
-                    alert("Error de conexión: Verifica que el PIN en Código.gs sea '1234'");
+            fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`).then(r=>r.json()).then(d=>{
+                ['edificio','rel-edificio','ext-edificio'].forEach(id=>{
+                    const sel = document.getElementById(id);
+                    d.forEach(n=>sel.innerHTML+=`<option value="${n}">${n}</option>`);
                 });
+                document.getElementById('loader').style.display="none";
+            });
         }
 
         function tab(t) {
-            ['nueva','pendientes','historial'].forEach(s => document.getElementById('sec-'+s).classList.toggle('hidden', t!==s));
-            if(t==='historial') loadH();
+            ['nueva','pendientes','relevamiento','extintores','historial'].forEach(id => {
+                document.getElementById('sec-'+id).classList.toggle('hidden', id!==t);
+                document.getElementById('btn-'+id).classList.toggle('tab-active', id===t);
+            });
+            if(t==='pendientes') loadA(); if(t==='historial') loadH();
         }
 
-        async function loadSectores() {
-            const ed = document.getElementById('edificio').value;
-            if(!ed) return;
+        // --- LÓGICA DE UBICACIONES COMPARTIDA ---
+        async function loadSectores(edId, secId, ubiId) {
+            const ed = document.getElementById(edId).value; if(!ed) return;
             document.getElementById('loader').style.display="flex";
-            const res = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`);
-            dbU = await res.json();
-            const s = document.getElementById('sector');
-            s.innerHTML = '<option value="">Sector...</option>';
-            [...new Set(dbU.map(i=>i.sector))].forEach(sec => s.innerHTML += `<option value="${sec}">${sec}</option>`);
-            s.disabled = false;
+            dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
+            const s = document.getElementById(secId); s.innerHTML = '<option value="">Sector...</option>';
+            [...new Set(dbU.map(i=>i.sector))].forEach(sec=>s.innerHTML+=`<option value="${sec}">${sec}</option>`);
+            s.disabled = false; document.getElementById(ubiId).disabled = true;
             document.getElementById('loader').style.display="none";
         }
 
-        function filterUbi() {
-            const sec = document.getElementById('sector').value;
-            const u = document.getElementById('ubiSel');
-            u.innerHTML = '<option value="">Ubicación...</option>';
-            dbU.filter(i => i.sector === sec).forEach(i => u.innerHTML += `<option value='${JSON.stringify(i)}'>${i.ubi}</option>`);
+        function filterUbi(secId, ubiId) {
+            const sec = document.getElementById(secId).value;
+            const u = document.getElementById(ubiId); u.innerHTML = '<option value="">Ubicación...</option>';
+            dbU.filter(i=>i.sector===sec).forEach(i=>u.innerHTML+=`<option value='${JSON.stringify(i)}'>${i.ubi}</option>`);
             u.disabled = false;
         }
 
+        // --- EXTINTORES ---
+        async function loadExtintores() {
+            const ed = document.getElementById('ext-edificio').value;
+            document.getElementById('loader').style.display="flex";
+            dbExt = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
+            const cont = document.getElementById('lista-extintores'); cont.innerHTML = "";
+            dbExt.forEach(x => {
+                cont.innerHTML += `
+                    <div class="p-3 rounded-lg shadow border-t-8 ${x.obs?'vencido':'al-dia'} bg-white">
+                        <div class="flex justify-between font-bold"><span>${x.unne}</span><span class="text-[9px]">${x.tipo}</span></div>
+                        <div class="text-[10px] text-gray-500">${x.sector}</div>
+                        <div class="text-xs mt-2">Vence: <b>${x.f_venc}</b></div>
+                    </div>`;
+            });
+            document.getElementById('loader').style.display="none";
+        }
+
+        // --- RESTO DE FUNCIONES ---
         function setUbi() {
             const i = JSON.parse(document.getElementById('ubiSel').value);
-            document.getElementById('h-u').value = i.ubi;
-            document.getElementById('h-i').value = i.inv_aire;
-            document.getElementById('h-e').value = i.eq_aire;
+            document.getElementById('h-u').value = i.ubi; document.getElementById('h-i').value = i.inv_aire; document.getElementById('h-e').value = i.eq_aire;
         }
-
         async function saveOT() {
             document.getElementById('loader').style.display="flex";
-            const p = {
-                token: PIN_CORRECTO,
-                tipo: document.getElementById('tipo').value,
-                especialidad: document.getElementById('rubro').value,
-                edificio: document.getElementById('edificio').value,
-                sector: document.getElementById('sector').value,
-                ubicacion: document.getElementById('h-u').value,
-                nInventario: document.getElementById('h-i').value,
-                equipo: document.getElementById('h-e').value,
-                reportadoPor: document.getElementById('rep').value,
-                medioReporte: "App",
-                personal: document.getElementById('tec').value,
-                descripcion: document.getElementById('desc').value,
-                estado: "Abierta"
-            };
-            await fetch(URL, {method:'POST', body: JSON.stringify(p)});
-            alert("Orden Guardada");
-            location.reload();
+            const p = { token: PIN_CORRECTO, tipo: document.getElementById('tipo').value, especialidad: document.getElementById('rubro').value, edificio: document.getElementById('edificio').value, sector: document.getElementById('sector').value, ubicacion: document.getElementById('h-u').value, nInventario: document.getElementById('h-i').value, equipo: document.getElementById('h-e').value, reportadoPor: document.getElementById('rep').value, personal: document.getElementById('tec').value, descripcion: document.getElementById('desc').value, estado: "Abierta" };
+            await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload();
         }
-
         async function loadH() {
-            const list = document.getElementById('historial-lista');
-            list.innerHTML = '<p class="text-center text-xs p-5">Cargando...</p>';
             const d = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r=>r.json());
-            list.innerHTML = d.map(o => `
-                <div class="bg-white p-3 border-l-4 border-blue-500 shadow-sm text-[10px] mb-2">
-                    <div class="flex justify-between font-bold"><span>${o.id}</span><span>${o.fecha}</span></div>
-                    <p>${o.edif} - ${o.tarea}</p>
-                </div>`).join("");
+            document.getElementById('historial-lista').innerHTML = d.map(o => `<div class="bg-white p-2 border mb-1 text-[10px]"><b>${o.id}</b> - ${o.fecha} - ${o.edif} (${o.estado})</div>`).join("");
+        }
+        function cargarDatosRel() {
+            const i = JSON.parse(document.getElementById('rel-ubi').value);
+            document.getElementById('r-eq').value = i.eq_aire; document.getElementById('r-inv-aire').value = i.inv_aire;
+            document.getElementById('form-rel').classList.remove('hidden');
         }
     </script>
 </body>
