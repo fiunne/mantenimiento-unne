@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGM PRO 2026 - FINAL</title>
+    <title>SGM PRO 2026 - SISTEMA INTEGRAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
@@ -18,7 +18,7 @@
 
     <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-[2000] p-4">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center space-y-6">
-            <h2 class="font-black text-xl text-slate-800 uppercase tracking-widest">SGM LOGIN</h2>
+            <h2 class="font-black text-xl text-slate-800 uppercase tracking-widest text-center">SGM LOGIN</h2>
             <input type="password" id="pin-input" placeholder="PIN" class="w-full border-2 p-4 rounded-2xl text-center text-3xl tracking-[0.5em] outline-none border-gray-200 focus:border-blue-500">
             <button onclick="verificarAcceso()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg">ENTRAR</button>
             <p id="login-error" class="text-red-500 font-bold text-xs hidden">❌ PIN INCORRECTO</p>
@@ -26,7 +26,7 @@
     </div>
 
     <div id="loader" class="loading-overlay font-bold italic text-blue-600">
-        <div class="mb-2 text-lg animate-bounce">⚙️ Sincronizando sistema...</div>
+        <div class="mb-2 text-lg animate-bounce text-center">⚙️ Sincronizando sistema...<br><span class="text-xs font-normal">Por favor, espere.</span></div>
     </div>
 
     <div id="main-content" class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-3 hidden">
@@ -42,11 +42,23 @@
              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div class="space-y-2">
                     <div class="flex gap-1">
-                        <select id="tipo" class="w-1/3 border p-2 rounded text-xs"><option value="Correctivo">Correctivo</option><option value="Preventivo">Preventivo</option><option value="Mejora">Mejora</option></select>
-                        <select id="rubro" onchange="checkRefri()" class="w-2/3 border p-2 rounded text-xs bg-blue-50 font-bold">
-                            <option value="General">Mantenimiento General</option><option value="Electricidad">Electricidad</option><option value="Refrigeración">Refrigeración / Aires</option>
+                        <select id="tipo" class="w-1/3 border p-2 rounded text-xs">
+                            <option value="Correctivo">Correctivo</option>
+                            <option value="Preventivo">Preventivo</option>
+                            <option value="Mejora">Mejora</option>
+                        </select>
+                        <select id="prioridad" class="w-2/3 border p-2 rounded text-xs font-bold bg-red-50 text-red-700">
+                            <option value="Baja">Prioridad: BAJA</option>
+                            <option value="Media" selected>Prioridad: MEDIA</option>
+                            <option value="Alta">Prioridad: ALTA</option>
+                            <option value="Urgente">Prioridad: URGENTE 🔥</option>
                         </select>
                     </div>
+                    <select id="rubro" onchange="checkRefri()" class="w-full border p-2 rounded text-xs bg-blue-50 font-bold">
+                        <option value="General">Mantenimiento General</option>
+                        <option value="Electricidad">Electricidad</option>
+                        <option value="Refrigeración">Refrigeración / Aires</option>
+                    </select>
                     <select id="edificio" onchange="loadSectores('edificio','sector','ubiSel')" class="w-full border p-2 rounded text-xs"><option value="">Cargando Edificios...</option></select>
                     <select id="sector" onchange="filterUbi('sector','ubiSel')" class="w-full border p-2 rounded text-xs" disabled><option value="">Sector...</option></select>
                     <select id="ubiSel" onchange="setUbi()" class="w-full border p-2 rounded text-xs" disabled><option value="">Ubicación...</option></select>
@@ -75,7 +87,9 @@
         </div>
 
         <div id="sec-pendientes" class="hidden space-y-3">
-            <select id="listaOT" class="w-full border p-3 rounded-xl font-bold text-blue-900 bg-blue-50 border-blue-200"><option value="">Cargando órdenes...</option></select>
+            <select id="listaOT" class="w-full border p-3 rounded-xl font-bold text-blue-900 bg-blue-50 border-blue-200">
+                <option value="">Cargando órdenes abiertas...</option>
+            </select>
             <div class="bg-gray-50 p-3 rounded-xl border border-dashed border-gray-300 space-y-2">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <select id="rS" onchange="cR()" class="border p-2 rounded text-xs"><option value="">Rubro</option></select>
@@ -125,7 +139,7 @@
                 <select id="ext-edificio" onchange="loadExtintores()" class="flex-1 bg-slate-900 text-white p-4 rounded-2xl font-black shadow-lg"><option value="">Ver Edificio...</option></select>
                 <button onclick="toggleFiltroOC()" id="btn-oc" class="bg-orange-500 text-white px-4 rounded-2xl font-black text-[10px] uppercase shadow-lg">Solo OC</button>
             </div>
-            <div id="lista-extintores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto p-1"></div>
+            <div id="lista-extintores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto p-1 text-center"></div>
         </div>
 
         <div id="sec-historial" class="hidden space-y-2 max-h-[500px] overflow-y-auto">
@@ -134,17 +148,20 @@
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbzW_Wxfi1Lhx-8w_wqzSewocVAGHqDf7Xk4XVKjgSZyICf07TCAtYAnHbATqqSqgKbT/exec"; 
+        const URL = "https://script.google.com/macros/s/AKfycbwkZXcFsF6EOcDWt296T-Zke2siBH4dpzll6wvNFwQvSoJZjC3b2Nm6BgQdhFpjcvN1/exec"; 
         const PIN_CORRECTO = "4370";
         let dbU = []; let dbS = {}; let its = []; let cacheExt = []; let fOC = false;
 
         function showL(v) { document.getElementById('loader').style.display = v ? "flex" : "none"; }
+        
         function verificarAcceso() {
             if(document.getElementById('pin-input').value === PIN_CORRECTO) {
                 document.getElementById('login-screen').classList.add('hidden');
                 document.getElementById('main-content').classList.remove('hidden');
                 inicializar();
-            } else { document.getElementById('login-error').classList.remove('hidden'); }
+            } else { 
+                document.getElementById('login-error').classList.remove('hidden'); 
+            }
         }
 
         async function inicializar() {
@@ -163,14 +180,18 @@
 
         function tab(t) {
             ['nueva','pendientes','relevamiento','extintores','historial'].forEach(id => {
-                document.getElementById('sec-'+id).classList.toggle('hidden', id!==t);
-                document.getElementById('btn-'+id).classList.toggle('tab-active', id===t);
+                const sec = document.getElementById('sec-'+id);
+                const btn = document.getElementById('btn-'+id);
+                if(sec) sec.classList.toggle('hidden', id!==t);
+                if(btn) btn.classList.toggle('tab-active', id===t);
             });
             if(t==='pendientes') loadA();
             if(t==='historial') loadH();
         }
 
-        function checkRefri() { document.getElementById('campos-refri').style.display = document.getElementById('rubro').value === 'Refrigeración' ? 'grid' : 'none'; }
+        function checkRefri() { 
+            document.getElementById('campos-refri').style.display = document.getElementById('rubro').value === 'Refrigeración' ? 'grid' : 'none'; 
+        }
 
         async function loadSectores(edId, secId, ubiId) {
             const ed = document.getElementById(edId).value; if(!ed) return;
@@ -192,68 +213,159 @@
         }
 
         function setUbi() {
-            const i = JSON.parse(document.getElementById('ubiSel').value);
-            document.getElementById('h-u').value = i.ubi; document.getElementById('h-i').value = i.inv_aire; document.getElementById('h-e').value = i.eq_aire;
+            const raw = document.getElementById('ubiSel').value;
+            if(!raw) return;
+            const i = JSON.parse(raw);
+            document.getElementById('h-u').value = i.ubi; 
+            document.getElementById('h-i').value = i.inv_aire; 
+            document.getElementById('h-e').value = i.eq_aire;
             if(document.getElementById('rubro').value === 'Refrigeración') {
-                document.getElementById('ref-equipo').value = i.eq_aire || ""; document.getElementById('ref-inv').value = i.inv_aire || "";
+                document.getElementById('ref-equipo').value = i.eq_aire || ""; 
+                document.getElementById('ref-inv').value = i.inv_aire || "";
             }
         }
 
         async function saveOT() {
+            const edif = document.getElementById('edificio').value;
+            if(!edif) { alert("Seleccione un edificio"); return; }
             showL(true);
             const p = { 
-                token: PIN_CORRECTO, tipo: document.getElementById('tipo').value, especialidad: document.getElementById('rubro').value,
-                edificio: document.getElementById('edificio').value, sector: document.getElementById('sector').value,
-                ubicacion: document.getElementById('h-u').value, nInventario: document.getElementById('h-i').value,
-                equipo: document.getElementById('h-e').value, reportadoPor: document.getElementById('rep').value,
-                medioReporte: document.getElementById('medio').value, personal: document.getElementById('tec').value,
+                token: PIN_CORRECTO, 
+                tipo: document.getElementById('tipo').value, 
+                prioridad: document.getElementById('prioridad').value,
+                especialidad: document.getElementById('rubro').value,
+                edificio: edif, 
+                sector: document.getElementById('sector').value,
+                ubicacion: document.getElementById('h-u').value, 
+                nInventario: document.getElementById('h-i').value, 
+                equipo: document.getElementById('h-e').value, 
+                reportadoPor: document.getElementById('rep').value, 
+                medioReporte: document.getElementById('medio').value, 
+                personal: document.getElementById('tec').value,
                 descripcion: document.getElementById('desc').value
             };
             try {
-                await fetch(URL, {method:'POST', body: JSON.stringify(p)}); 
-                alert("✅ Orden emitida"); location.reload();
-            } finally { showL(false); }
+                const res = await fetch(URL, {method:'POST', body: JSON.stringify(p)}); 
+                const txt = await res.text();
+                if(txt === "Ok") { alert("✅ Orden emitida"); location.reload(); }
+                else { alert("Error: " + txt); }
+            } catch(e) { alert("Error de conexión"); }
+            finally { showL(false); }
         }
 
         async function loadA() {
             showL(true);
             try {
-                const d = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`).then(r=>r.json());
+                const res = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`);
+                const d = await res.json();
                 const sel = document.getElementById('listaOT');
-                sel.innerHTML = d.length ? d.map(o=>`<option value="${o.id}">${o.detalle}</option>`).join("") : '<option value="">No hay OTs abiertas</option>';
-                if(!Object.keys(dbS).length) dbS = await fetch(`${URL}?action=getMateriales&token=${PIN_CORRECTO}`).then(r=>r.json());
+                if(!d || d.length === 0) {
+                    sel.innerHTML = '<option value="">No hay OTs abiertas actualmente</option>';
+                } else {
+                    sel.innerHTML = d.map(o=>`<option value="${o.id}">${o.detalle}</option>`).join("");
+                }
+                if(!Object.keys(dbS).length) {
+                    const rMat = await fetch(`${URL}?action=getMateriales&token=${PIN_CORRECTO}`);
+                    dbS = await rMat.json();
+                }
                 loadM();
-            } finally { showL(false); }
+            } catch(e) { console.error(e); }
+            finally { showL(false); }
         }
 
-        function loadM() { const r=document.getElementById('rS'); r.innerHTML='<option value="">Rubro</option>'; Object.keys(dbS).forEach(x=>r.innerHTML+=`<option value="${x}">${x}</option>`); }
-        function cR() { const r=document.getElementById('rS').value; const g=document.getElementById('gS'); g.innerHTML='<option value="">Grupo</option>'; Object.keys(dbS[r]||{}).forEach(x=>g.innerHTML+=`<option value="${x}">${x}</option>`); g.disabled=false; }
-        function cG() { const r=document.getElementById('rS').value; const g=document.getElementById('gS').value; const m=document.getElementById('mS'); m.innerHTML='<option value="">Material</option>'; (dbS[r][g]||[]).forEach(x=>m.innerHTML+=`<option value='${JSON.stringify(x)}'>${x.nombre}</option>`); m.disabled=false; }
-        function aM() { const raw=document.getElementById('mS').value; if(!raw) return; const m=JSON.parse(raw); its.push({nombre:m.nombre, cantidad:document.getElementById('cnt').value}); const c=document.getElementById('car'); c.innerHTML=""; its.forEach((x,idx)=>c.innerHTML+=`<div>${x.cantidad} x ${x.nombre} <button onclick="its.splice(${idx},1);aM()" class="text-red-500 ml-2">X</button></div>`); }
+        function loadM() { 
+            const r=document.getElementById('rS'); 
+            r.innerHTML='<option value="">Rubro</option>'; 
+            Object.keys(dbS).forEach(x=>r.innerHTML+=`<option value="${x}">${x}</option>`); 
+        }
+
+        function cR() { 
+            const r=document.getElementById('rS').value; 
+            const g=document.getElementById('gS'); 
+            g.innerHTML='<option value="">Grupo</option>'; 
+            Object.keys(dbS[r]||{}).forEach(x=>g.innerHTML+=`<option value="${x}">${x}</option>`); 
+            g.disabled=false; 
+        }
+
+        function cG() { 
+            const r=document.getElementById('rS').value; 
+            const g=document.getElementById('gS').value; 
+            const m=document.getElementById('mS'); 
+            m.innerHTML='<option value="">Material</option>'; 
+            (dbS[r][g]||[]).forEach(x=>m.innerHTML+=`<option value='${JSON.stringify(x)}'>${x.nombre}</option>`); 
+            m.disabled=false; 
+        }
+
+        function aM() { 
+            const raw=document.getElementById('mS').value; 
+            if(!raw) return; 
+            const m=JSON.parse(raw); 
+            its.push({nombre:m.nombre, cantidad:document.getElementById('cnt').value}); 
+            const c=document.getElementById('car'); 
+            c.innerHTML=""; 
+            its.forEach((x,idx)=>c.innerHTML+=`<div>${x.cantidad} x ${x.nombre} <button onclick="its.splice(${idx},1);aM()" class="text-red-500 ml-2">X</button></div>`); 
+        }
 
         async function cOT() {
+            const id = document.getElementById('listaOT').value;
+            if(!id) { alert("Seleccione una OT"); return; }
             showL(true);
-            const p = { action:'cerrarOT', token:PIN_CORRECTO, idOT:document.getElementById('listaOT').value, materiales:its.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), comentario:document.getElementById('obs').value };
-            try { await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload(); } finally { showL(false); }
+            const p = { 
+                action:'cerrarOT', 
+                token:PIN_CORRECTO, 
+                idOT:id, 
+                materiales:its.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), 
+                comentario:document.getElementById('obs').value 
+            };
+            try { 
+                await fetch(URL, {method:'POST', body: JSON.stringify(p)}); 
+                alert("✅ OT cerrada correctamente");
+                location.reload(); 
+            } catch(e) { alert("Error al cerrar"); }
+            finally { showL(false); }
         }
 
         function cargarDatosRel() {
-            const i = JSON.parse(document.getElementById('rel-ubi').value);
-            document.getElementById('r-eq').value = i.eq_aire||""; document.getElementById('r-inv-aire').value = i.inv_aire||"";
-            document.getElementById('r-vent').value = i.vent||""; document.getElementById('r-inv-vent').value = i.inv_vent||"";
-            document.getElementById('r-tlum').value = i.t_lum||""; document.getElementById('r-cart').value = i.c_art||"";
-            document.getElementById('r-clam').value = i.c_lam||""; document.getElementById('r-em').value = i.em||"";
+            const raw = document.getElementById('rel-ubi').value;
+            if(!raw) return;
+            const i = JSON.parse(raw);
+            document.getElementById('r-eq').value = i.eq_aire||""; 
+            document.getElementById('r-inv-aire').value = i.inv_aire||"";
+            document.getElementById('r-vent').value = i.vent||""; 
+            document.getElementById('r-inv-vent').value = i.inv_vent||"";
+            document.getElementById('r-tlum').value = i.t_lum||""; 
+            document.getElementById('r-cart').value = i.c_art||"";
+            document.getElementById('r-clam').value = i.c_lam||""; 
+            document.getElementById('r-em').value = i.em||"";
             document.getElementById('form-rel').classList.remove('hidden');
         }
 
         async function guardarRel() {
             showL(true);
             const u = JSON.parse(document.getElementById('rel-ubi').value);
-            const p = { action:'updateRelevamiento', token:PIN_CORRECTO, edificio:document.getElementById('rel-edificio').value, sector:u.sector, ubi:u.ubi, inv_aire:document.getElementById('r-inv-aire').value, eq_aire:document.getElementById('r-eq').value, t_lum:document.getElementById('r-tlum').value, c_art:document.getElementById('r-cart').value, c_lam:document.getElementById('r-clam').value, em:document.getElementById('r-em').value, vent:document.getElementById('r-vent').value, inv_vent:document.getElementById('r-inv-vent').value };
-            try { await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload(); } finally { showL(false); }
+            const p = { 
+                action:'updateRelevamiento', token:PIN_CORRECTO, 
+                edificio:document.getElementById('rel-edificio').value, 
+                sector:u.sector, ubi:u.ubi, 
+                inv_aire:document.getElementById('r-inv-aire').value, 
+                eq_aire:document.getElementById('r-eq').value, 
+                t_lum:document.getElementById('r-tlum').value, 
+                c_art:document.getElementById('r-cart').value, 
+                c_lam:document.getElementById('r-clam').value, 
+                em:document.getElementById('r-em').value, 
+                vent:document.getElementById('r-vent').value, 
+                inv_vent:document.getElementById('r-inv-vent').value 
+            };
+            try { await fetch(URL, {method:'POST', body: JSON.stringify(p)}); alert("✅ Relevamiento guardado"); location.reload(); } 
+            catch(e) { alert("Error al guardar"); }
+            finally { showL(false); }
         }
 
-        function toggleFiltroOC() { fOC = !fOC; document.getElementById('btn-oc').classList.toggle('bg-orange-800', fOC); renderExtintores(cacheExt); }
+        function toggleFiltroOC() { 
+            fOC = !fOC; 
+            document.getElementById('btn-oc').classList.toggle('bg-orange-800', fOC); 
+            renderExtintores(cacheExt); 
+        }
 
         async function loadExtintores() {
             const ed = document.getElementById('ext-edificio').value; if(!ed) return;
@@ -265,44 +377,52 @@
         }
 
         function renderExtintores(datos) {
-            const cont = document.getElementById('lista-extintores'); cont.innerHTML = "";
+            const cont = document.getElementById('lista-extintores'); 
+            cont.innerHTML = "";
             const hoy = new Date();
             let lista = fOC ? datos.filter(x => {
-                const v = new Date(x.f_venc.split('/')[2], x.f_venc.split('/')[1]-1, x.f_venc.split('/')[0]);
+                const parts = x.f_venc.split('/');
+                const v = new Date(parts[2], parts[1]-1, parts[0]);
                 return (v - hoy) / 86400000 < 30;
             }) : datos;
 
             if(!lista.length) { cont.innerHTML = '<p class="col-span-full text-center text-gray-400 py-10 font-bold">Sin datos para mostrar.</p>'; return; }
 
             lista.forEach(x => {
-                const v = new Date(x.f_venc.split('/')[2], x.f_venc.split('/')[1]-1, x.f_venc.split('/')[0]);
+                const parts = x.f_venc.split('/');
+                const v = new Date(parts[2], parts[1]-1, parts[0]);
                 const diff = (v - hoy) / 86400000;
                 let c = "card-ok"; let b = "✔️ AL DÍA";
                 if(diff < 0) { c="card-vencida"; b="❌ VENCIDO"; } else if(diff < 30) { c="card-proxima"; b="⚠️ OC"; }
                 
                 cont.innerHTML += `
-                    <div class="p-4 rounded-2xl shadow-md border ${c} bg-white">
+                    <div class="p-4 rounded-2xl shadow-md border ${c} bg-white text-left">
                         <div class="flex justify-between items-start">
                             <span class="text-xl font-black text-slate-800">${x.unne}</span>
-                            <span class="text-[9px] font-black uppercase px-2 py-1 rounded bg-white/50">${b} ${x.tipo} ${x.cap}kg</span>
+                            <span class="text-[9px] font-black uppercase px-2 py-1 rounded bg-white/50">${b}</span>
                         </div>
+                        <p class="text-[11px] font-bold text-slate-700 mt-1 uppercase">${x.tipo} ${x.cap}kg</p>
                         <p class="text-[10px] font-bold text-gray-500 uppercase mt-1">${x.planta} - ${x.sector}</p>
                         <div class="grid grid-cols-2 gap-2 pt-2 mt-2 border-t text-[10px]">
-                            <div><p class="text-gray-400">CARGA</p><p class="font-bold">${x.f_carga}</p></div>
-                            <div><p class="text-gray-400">VENCE</p><p class="font-black text-red-600">${x.f_venc}</p></div>
+                            <div><p class="text-gray-400 italic">ÚLTIMA CARGA</p><p class="font-bold">${x.f_carga}</p></div>
+                            <div><p class="text-gray-400 italic">VENCIMIENTO</p><p class="font-black text-slate-900">${x.f_venc}</p></div>
                         </div>
                     </div>`;
             });
         }
 
         async function loadH() {
-            const d = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r=>r.json());
-            document.getElementById('historial-lista').innerHTML = d.map(o => `
-                <div class="bg-gray-50 p-3 rounded-xl border mb-2 text-[10px] border-l-4 border-l-blue-400">
-                    <div class="flex justify-between font-bold text-blue-800 uppercase"><span>${o.id}</span><span>${o.fecha}</span></div>
-                    <p class="font-bold my-1 uppercase text-slate-700">${o.edif} | ${o.tec}</p>
-                    <p class="text-gray-600 italic">"${o.tarea}"</p>
-                </div>`).join("");
+            showL(true);
+            try {
+                const d = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r=>r.json());
+                document.getElementById('historial-lista').innerHTML = d.map(o => `
+                    <div class="bg-gray-50 p-3 rounded-xl border mb-2 text-[10px] border-l-4 border-l-blue-400 text-left">
+                        <div class="flex justify-between font-bold text-blue-800 uppercase"><span>${o.id}</span><span>${o.fecha}</span></div>
+                        <p class="font-bold my-1 uppercase text-slate-700">${o.edif} | ${o.tec}</p>
+                        <p class="text-gray-600 italic">"${o.tarea}"</p>
+                    </div>`).join("");
+            } catch(e) {}
+            finally { showL(false); }
         }
     </script>
 </body>
