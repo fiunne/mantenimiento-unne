@@ -143,8 +143,8 @@
     </div>
 
     <script>
-        // CONFIGURACIÓN: PEGA TU URL DE GOOGLE AQUÍ
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzNs121fvKUl4lpkDGO9mhLgpmCQMK_TqA2716LjT163NYYowWkdtuHc3Rct8WWmw-A/exec"; 
+        // ¡RECUERDA PEGAR TU NUEVA URL AQUÍ DESPUÉS DE CREAR LA NUEVA VERSIÓN!
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4Xc8y6571gwPDhUm2GgamFg8hXZ2r_yMwF51kVV5U0AKJspQc6xLZxVRy72P6G1nxLg/exec"; 
         const TOKEN = "MANTENIMIENTO_FI_2026";
         const PIN_CORRECTO = "2026"; 
         let rawData = [];
@@ -249,10 +249,10 @@
                     method: 'POST', 
                     body: JSON.stringify(payload) 
                 });
-                alert("¡Orden Guardada!");
+                alert("¡Orden Guardada con Éxito!");
                 location.reload();
             } catch (error) { 
-                alert("Orden enviada."); 
+                alert("Orden enviada (se recargará la página)."); 
                 location.reload();
             }
         };
