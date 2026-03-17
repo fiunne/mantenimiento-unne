@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGM PRO 2026 - V2.1</title>
+    <title>SGM PRO 2026 - FINAL</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
@@ -30,7 +30,7 @@
     </div>
 
     <div id="main-content" class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-3 hidden">
-        <div class="flex border-b mb-4 overflow-x-auto text-[10px] font-black uppercase whitespace-nowrap bg-gray-50 rounded-t-lg">
+        <div class="flex border-b mb-4 overflow-x-auto text-[10px] font-black uppercase bg-gray-50 rounded-t-lg">
             <button onclick="tab('nueva')" id="btn-nueva" class="px-5 py-4 tab-active">Nueva OT</button>
             <button onclick="tab('pendientes')" id="btn-pendientes" class="px-5 py-4 text-gray-500">Cerrar OT</button>
             <button onclick="tab('relevamiento')" id="btn-relevamiento" class="px-5 py-4 text-gray-500">Relevamiento</button>
@@ -42,18 +42,12 @@
              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div class="space-y-2">
                     <div class="flex gap-1">
-                        <select id="tipo" class="w-1/3 border p-2 rounded text-xs">
-                            <option value="Correctivo">Correctivo</option>
-                            <option value="Preventivo">Preventivo</option>
-                            <option value="Mejora">Mejora</option>
-                        </select>
+                        <select id="tipo" class="w-1/3 border p-2 rounded text-xs"><option value="Correctivo">Correctivo</option><option value="Preventivo">Preventivo</option><option value="Mejora">Mejora</option></select>
                         <select id="rubro" onchange="checkRefri()" class="w-2/3 border p-2 rounded text-xs bg-blue-50 font-bold">
-                            <option value="General">Mantenimiento General</option>
-                            <option value="Electricidad">Electricidad</option>
-                            <option value="Refrigeración">Refrigeración / Aires</option>
+                            <option value="General">Mantenimiento General</option><option value="Electricidad">Electricidad</option><option value="Refrigeración">Refrigeración / Aires</option>
                         </select>
                     </div>
-                    <select id="edificio" onchange="loadSectores('edificio','sector','ubiSel')" class="w-full border p-2 rounded text-xs"><option value="">Edificio...</option></select>
+                    <select id="edificio" onchange="loadSectores('edificio','sector','ubiSel')" class="w-full border p-2 rounded text-xs"><option value="">Cargando Edificios...</option></select>
                     <select id="sector" onchange="filterUbi('sector','ubiSel')" class="w-full border p-2 rounded text-xs" disabled><option value="">Sector...</option></select>
                     <select id="ubiSel" onchange="setUbi()" class="w-full border p-2 rounded text-xs" disabled><option value="">Ubicación...</option></select>
                     
@@ -67,29 +61,21 @@
                     <div class="flex gap-1">
                         <input type="text" id="rep" placeholder="Reportado por..." class="w-1/2 border p-2 rounded text-xs">
                         <select id="medio" class="w-1/2 border p-2 rounded text-xs bg-green-50">
-                            <option value="WhatsApp">WhatsApp</option>
-                            <option value="Mail">Mail</option>
-                            <option value="Teléfono">Teléfono</option>
-                            <option value="Personal">Personalmente</option>
+                            <option value="WhatsApp">WhatsApp</option><option value="Mail">Mail</option><option value="Teléfono">Teléfono</option><option value="Personal">Personalmente</option>
                         </select>
                     </div>
                     <select id="tec" class="w-full border p-2 rounded text-xs font-bold bg-yellow-50">
-                        <option value="">Asignar Técnico...</option>
-                        <option value="ALG">ALG</option><option value="DSF">DSF</option>
-                        <option value="MAP">MAP</option><option value="RRG">RRG</option>
+                        <option value="">Asignar Técnico...</option><option value="ALG">ALG</option><option value="DSF">DSF</option><option value="MAP">MAP</option><option value="RRG">RRG</option>
                     </select>
                     <textarea id="desc" rows="3" class="w-full border p-2 rounded text-xs" placeholder="Detalle de la tarea..."></textarea>
-                    <button onclick="saveOT()" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-wider">Emitir Orden de Trabajo</button>
+                    <button onclick="saveOT()" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl shadow-lg uppercase">Emitir Orden de Trabajo</button>
                 </div>
             </div>
             <input type="hidden" id="h-u"><input type="hidden" id="h-i"><input type="hidden" id="h-e">
         </div>
 
         <div id="sec-pendientes" class="hidden space-y-3">
-            <p class="text-[9px] font-bold text-gray-400">SELECCIONAR OT ABIERTA:</p>
-            <select id="listaOT" class="w-full border p-3 rounded-xl font-bold text-blue-900 bg-blue-50 border-blue-200">
-                <option value="">Cargando órdenes...</option>
-            </select>
+            <select id="listaOT" class="w-full border p-3 rounded-xl font-bold text-blue-900 bg-blue-50 border-blue-200"><option value="">Cargando órdenes...</option></select>
             <div class="bg-gray-50 p-3 rounded-xl border border-dashed border-gray-300 space-y-2">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
                     <select id="rS" onchange="cR()" class="border p-2 rounded text-xs"><option value="">Rubro</option></select>
@@ -98,12 +84,12 @@
                 </div>
                 <div class="flex gap-2">
                     <input type="number" id="cnt" value="1" min="1" class="w-16 border p-2 rounded text-center font-bold">
-                    <button onclick="aM()" class="flex-1 bg-slate-800 text-white font-bold rounded p-2 text-xs uppercase">Añadir</button>
+                    <button onclick="aM()" class="flex-1 bg-slate-800 text-white font-bold rounded p-2 text-xs uppercase">Añadir Material</button>
                 </div>
                 <div id="car" class="space-y-1 text-[10px] font-bold text-blue-800 bg-white p-2 rounded border min-h-[40px]"></div>
             </div>
             <textarea id="obs" rows="2" class="w-full border p-2 rounded text-xs" placeholder="Observaciones técnicas del cierre..."></textarea>
-            <button onclick="cOT()" class="w-full bg-green-700 text-white font-black py-4 rounded-xl shadow-lg uppercase">Finalizar Tarea</button>
+            <button onclick="cOT()" class="w-full bg-green-700 text-white font-black py-4 rounded-xl shadow-lg uppercase">Finalizar Tarea y Actualizar Stock</button>
         </div>
 
         <div id="sec-relevamiento" class="hidden space-y-3">
@@ -114,34 +100,32 @@
             </div>
             <div id="form-rel" class="hidden p-4 border rounded-2xl bg-white shadow-xl space-y-4">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="space-y-3 p-3 bg-orange-50 rounded-xl border border-orange-100">
-                        <h4 class="font-black text-[10px] text-orange-600 uppercase">Aires y Ventilación</h4>
+                    <div class="space-y-3 p-3 bg-orange-50 rounded-xl border">
+                        <h4 class="font-black text-[10px] text-orange-600 uppercase italic">Aires y Climatización</h4>
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="text" id="r-eq" placeholder="Equipo Aire" class="border p-2 rounded text-xs">
-                            <input type="text" id="r-inv-aire" placeholder="Inv. Aire" class="border p-2 rounded text-xs">
-                            <input type="text" id="r-vent" placeholder="Ventiladores" class="border p-2 rounded text-xs">
-                            <input type="text" id="r-inv-vent" placeholder="Inv. Vent" class="border p-2 rounded text-xs">
+                            <input type="text" id="r-eq" placeholder="Equipo" class="border p-2 rounded text-xs"><input type="text" id="r-inv-aire" placeholder="Inv. Aire" class="border p-2 rounded text-xs">
+                            <input type="text" id="r-vent" placeholder="Ventiladores" class="border p-2 rounded text-xs"><input type="text" id="r-inv-vent" placeholder="Inv. Vent" class="border p-2 rounded text-xs">
                         </div>
                     </div>
-                    <div class="space-y-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
-                        <h4 class="font-black text-[10px] text-blue-600 uppercase">Iluminación / Emergencia</h4>
-                        <input type="text" id="r-tlum" placeholder="Tipo de Luminaria" class="w-full border p-2 rounded text-xs">
+                    <div class="space-y-3 p-3 bg-blue-50 rounded-xl border">
+                        <h4 class="font-black text-[10px] text-blue-600 uppercase italic">Iluminación y Emergencia</h4>
+                        <input type="text" id="r-tlum" placeholder="Tipo Luminaria" class="w-full border p-2 rounded text-xs">
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="number" id="r-cart" placeholder="Cant. Artefactos" class="border p-2 rounded text-xs">
-                            <input type="number" id="r-clam" placeholder="Cant. Lámparas" class="border p-2 rounded text-xs">
+                            <input type="number" id="r-cart" placeholder="Cant. Artefactos" class="border p-2 rounded text-xs"><input type="number" id="r-clam" placeholder="Cant. Lámparas" class="border p-2 rounded text-xs">
                         </div>
-                        <input type="text" id="r-em" placeholder="Luces de Emergencia" class="w-full border p-2 rounded text-xs">
+                        <input type="text" id="r-em" placeholder="Luces Emergencia" class="w-full border p-2 rounded text-xs">
                     </div>
                 </div>
-                <button onclick="guardarRel()" class="w-full bg-blue-800 text-white py-4 rounded-xl font-black uppercase shadow-lg">Guardar Relevamiento</button>
+                <button onclick="guardarRel()" class="w-full bg-blue-800 text-white py-4 rounded-xl font-black uppercase">Guardar Relevamiento</button>
             </div>
         </div>
 
         <div id="sec-extintores" class="hidden space-y-3">
-            <select id="ext-edificio" onchange="loadExtintores()" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-black shadow-lg"><option value="">Ver Edificio...</option></select>
-            <div id="lista-extintores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto p-1 text-center font-bold text-gray-400">
-                Seleccione un edificio para cargar los datos.
+            <div class="flex gap-2">
+                <select id="ext-edificio" onchange="loadExtintores()" class="flex-1 bg-slate-900 text-white p-4 rounded-2xl font-black shadow-lg"><option value="">Ver Edificio...</option></select>
+                <button onclick="toggleFiltroOC()" id="btn-oc" class="bg-orange-500 text-white px-4 rounded-2xl font-black text-[10px] uppercase shadow-lg">Solo OC</button>
             </div>
+            <div id="lista-extintores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto p-1"></div>
         </div>
 
         <div id="sec-historial" class="hidden space-y-2 max-h-[500px] overflow-y-auto">
@@ -150,10 +134,11 @@
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbx9EA5_7uRujxf5mZXkpPaUyKTx2AkZkr4s750YJg5LeeQGAuIzBvTSDPw7jzQeQ7Re/exec"; 
+        const URL = "https://script.google.com/macros/s/AKfycbzW_Wxfi1Lhx-8w_wqzSewocVAGHqDf7Xk4XVKjgSZyICf07TCAtYAnHbATqqSqgKbT/exec"; 
         const PIN_CORRECTO = "4370";
-        let dbU = []; let dbS = {}; let its = [];
+        let dbU = []; let dbS = {}; let its = []; let cacheExt = []; let fOC = false;
 
+        function showL(v) { document.getElementById('loader').style.display = v ? "flex" : "none"; }
         function verificarAcceso() {
             if(document.getElementById('pin-input').value === PIN_CORRECTO) {
                 document.getElementById('login-screen').classList.add('hidden');
@@ -165,15 +150,13 @@
         async function inicializar() {
             showL(true);
             try {
-                const res = await fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`);
-                const d = await res.json();
+                const r = await fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`);
+                const d = await r.json();
                 ['edificio','rel-edificio','ext-edificio'].forEach(id => {
                     const sel = document.getElementById(id);
                     sel.innerHTML = `<option value="">Seleccionar Edificio...</option>`;
                     d.forEach(n => sel.innerHTML += `<option value="${n}">${n}</option>`);
                 });
-                const matRes = await fetch(`${URL}?action=getMateriales&token=${PIN_CORRECTO}`);
-                dbS = await matRes.json();
             } catch(e) { console.error(e); }
             showL(false);
         }
@@ -187,16 +170,17 @@
             if(t==='historial') loadH();
         }
 
-        function showL(v) { document.getElementById('loader').style.display = v ? "flex" : "none"; }
         function checkRefri() { document.getElementById('campos-refri').style.display = document.getElementById('rubro').value === 'Refrigeración' ? 'grid' : 'none'; }
 
         async function loadSectores(edId, secId, ubiId) {
             const ed = document.getElementById(edId).value; if(!ed) return;
             showL(true);
-            dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
-            const s = document.getElementById(secId); s.innerHTML = '<option value="">Sector...</option>';
-            [...new Set(dbU.map(i=>i.sector))].forEach(sec=>s.innerHTML+=`<option value="${sec}">${sec}</option>`);
-            s.disabled = false; document.getElementById(ubiId).disabled = true;
+            try {
+                dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
+                const s = document.getElementById(secId); s.innerHTML = '<option value="">Sector...</option>';
+                [...new Set(dbU.map(i=>i.sector))].forEach(sec=>s.innerHTML+=`<option value="${sec}">${sec}</option>`);
+                s.disabled = false;
+            } catch(e) { alert("Error al cargar sectores"); }
             showL(false);
         }
 
@@ -208,12 +192,10 @@
         }
 
         function setUbi() {
-            const raw = document.getElementById('ubiSel').value; if(!raw) return;
-            const i = JSON.parse(raw);
+            const i = JSON.parse(document.getElementById('ubiSel').value);
             document.getElementById('h-u').value = i.ubi; document.getElementById('h-i').value = i.inv_aire; document.getElementById('h-e').value = i.eq_aire;
             if(document.getElementById('rubro').value === 'Refrigeración') {
-                document.getElementById('ref-equipo').value = i.eq_aire || "";
-                document.getElementById('ref-inv').value = i.inv_aire || "";
+                document.getElementById('ref-equipo').value = i.eq_aire || ""; document.getElementById('ref-inv').value = i.inv_aire || "";
             }
         }
 
@@ -222,39 +204,37 @@
             const p = { 
                 token: PIN_CORRECTO, tipo: document.getElementById('tipo').value, especialidad: document.getElementById('rubro').value,
                 edificio: document.getElementById('edificio').value, sector: document.getElementById('sector').value,
-                ubicacion: document.getElementById('h-u').value, 
-                nInventario: document.getElementById('rubro').value === 'Refrigeración' ? document.getElementById('ref-inv').value : document.getElementById('h-i').value, 
-                equipo: document.getElementById('rubro').value === 'Refrigeración' ? document.getElementById('ref-equipo').value : document.getElementById('h-e').value, 
-                reportadoPor: document.getElementById('rep').value, medioReporte: document.getElementById('medio').value,
-                personal: document.getElementById('tec').value, descripcion: document.getElementById('desc').value, estado: "Abierta" 
+                ubicacion: document.getElementById('h-u').value, nInventario: document.getElementById('h-i').value,
+                equipo: document.getElementById('h-e').value, reportadoPor: document.getElementById('rep').value,
+                medioReporte: document.getElementById('medio').value, personal: document.getElementById('tec').value,
+                descripcion: document.getElementById('desc').value
             };
-            await fetch(URL, {method:'POST', body: JSON.stringify(p)}); 
-            showL(false);
-            alert("OT Creada"); location.reload();
+            try {
+                await fetch(URL, {method:'POST', body: JSON.stringify(p)}); 
+                alert("✅ Orden emitida"); location.reload();
+            } finally { showL(false); }
         }
 
         async function loadA() {
             showL(true);
-            const d = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`).then(r=>r.json());
-            const sel = document.getElementById('listaOT');
-            if(d.length === 0) sel.innerHTML = '<option value="">Sin órdenes abiertas</option>';
-            else sel.innerHTML = d.map(o=>`<option value="${o.id}">${o.detalle}</option>`).join("");
-            
-            const r = document.getElementById('rS'); r.innerHTML='<option value="">Rubro</option>'; 
-            Object.keys(dbS).forEach(x=>r.innerHTML+=`<option value="${x}">${x}</option>`);
-            showL(false);
+            try {
+                const d = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`).then(r=>r.json());
+                const sel = document.getElementById('listaOT');
+                sel.innerHTML = d.length ? d.map(o=>`<option value="${o.id}">${o.detalle}</option>`).join("") : '<option value="">No hay OTs abiertas</option>';
+                if(!Object.keys(dbS).length) dbS = await fetch(`${URL}?action=getMateriales&token=${PIN_CORRECTO}`).then(r=>r.json());
+                loadM();
+            } finally { showL(false); }
         }
 
+        function loadM() { const r=document.getElementById('rS'); r.innerHTML='<option value="">Rubro</option>'; Object.keys(dbS).forEach(x=>r.innerHTML+=`<option value="${x}">${x}</option>`); }
         function cR() { const r=document.getElementById('rS').value; const g=document.getElementById('gS'); g.innerHTML='<option value="">Grupo</option>'; Object.keys(dbS[r]||{}).forEach(x=>g.innerHTML+=`<option value="${x}">${x}</option>`); g.disabled=false; }
         function cG() { const r=document.getElementById('rS').value; const g=document.getElementById('gS').value; const m=document.getElementById('mS'); m.innerHTML='<option value="">Material</option>'; (dbS[r][g]||[]).forEach(x=>m.innerHTML+=`<option value='${JSON.stringify(x)}'>${x.nombre}</option>`); m.disabled=false; }
-        function aM() { const raw=document.getElementById('mS').value; if(!raw) return; const m=JSON.parse(raw); its.push({nombre:m.nombre, cantidad:document.getElementById('cnt').value}); const c=document.getElementById('car'); c.innerHTML=""; its.forEach((x,idx)=>c.innerHTML+=`<div>${x.cantidad} x ${x.nombre} <button onclick="its.splice(${idx},1);aM()" class="text-red-500 font-bold ml-2">X</button></div>`); }
-        
+        function aM() { const raw=document.getElementById('mS').value; if(!raw) return; const m=JSON.parse(raw); its.push({nombre:m.nombre, cantidad:document.getElementById('cnt').value}); const c=document.getElementById('car'); c.innerHTML=""; its.forEach((x,idx)=>c.innerHTML+=`<div>${x.cantidad} x ${x.nombre} <button onclick="its.splice(${idx},1);aM()" class="text-red-500 ml-2">X</button></div>`); }
+
         async function cOT() {
             showL(true);
-            const p = { action: 'cerrarOT', token: PIN_CORRECTO, idOT: document.getElementById('listaOT').value, materiales: its.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), comentario: document.getElementById('obs').value };
-            await fetch(URL, {method:'POST', body: JSON.stringify(p)}); 
-            showL(false);
-            location.reload();
+            const p = { action:'cerrarOT', token:PIN_CORRECTO, idOT:document.getElementById('listaOT').value, materiales:its.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), comentario:document.getElementById('obs').value };
+            try { await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload(); } finally { showL(false); }
         }
 
         function cargarDatosRel() {
@@ -269,53 +249,58 @@
         async function guardarRel() {
             showL(true);
             const u = JSON.parse(document.getElementById('rel-ubi').value);
-            const p = { action: 'updateRelevamiento', token: PIN_CORRECTO, edificio: document.getElementById('rel-edificio').value, sector: u.sector, ubi: u.ubi, inv_aire: document.getElementById('r-inv-aire').value, eq_aire: document.getElementById('r-eq').value, t_lum: document.getElementById('r-tlum').value, c_art: document.getElementById('r-cart').value, c_lam: document.getElementById('r-clam').value, em: document.getElementById('r-em').value, vent: document.getElementById('r-vent').value, inv_vent: document.getElementById('r-inv-vent').value };
-            await fetch(URL, {method:'POST', body: JSON.stringify(p)}); 
-            showL(false);
-            location.reload();
+            const p = { action:'updateRelevamiento', token:PIN_CORRECTO, edificio:document.getElementById('rel-edificio').value, sector:u.sector, ubi:u.ubi, inv_aire:document.getElementById('r-inv-aire').value, eq_aire:document.getElementById('r-eq').value, t_lum:document.getElementById('r-tlum').value, c_art:document.getElementById('r-cart').value, c_lam:document.getElementById('r-clam').value, em:document.getElementById('r-em').value, vent:document.getElementById('r-vent').value, inv_vent:document.getElementById('r-inv-vent').value };
+            try { await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload(); } finally { showL(false); }
         }
+
+        function toggleFiltroOC() { fOC = !fOC; document.getElementById('btn-oc').classList.toggle('bg-orange-800', fOC); renderExtintores(cacheExt); }
 
         async function loadExtintores() {
             const ed = document.getElementById('ext-edificio').value; if(!ed) return;
             showL(true);
-            const dbExt = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
+            try {
+                cacheExt = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
+                renderExtintores(cacheExt);
+            } finally { showL(false); }
+        }
+
+        function renderExtintores(datos) {
             const cont = document.getElementById('lista-extintores'); cont.innerHTML = "";
             const hoy = new Date();
+            let lista = fOC ? datos.filter(x => {
+                const v = new Date(x.f_venc.split('/')[2], x.f_venc.split('/')[1]-1, x.f_venc.split('/')[0]);
+                return (v - hoy) / 86400000 < 30;
+            }) : datos;
 
-            if(dbExt.length === 0) { cont.innerHTML = "No se encontraron datos para este edificio."; showL(false); return; }
+            if(!lista.length) { cont.innerHTML = '<p class="col-span-full text-center text-gray-400 py-10 font-bold">Sin datos para mostrar.</p>'; return; }
 
-            dbExt.forEach(x => {
-                const parts = x.f_venc.split('/');
-                const venc = new Date(parts[2], parts[1]-1, parts[0]);
-                const diff = (venc - hoy) / (1000 * 60 * 60 * 24);
-                let clase = "card-ok"; let badge = "✔️ AL DÍA";
-                if(diff < 0) { clase = "card-vencida"; badge = "❌ VENCIDO"; }
-                else if(diff < 30) { clase = "card-proxima"; badge = "⚠️ POR VENCER"; }
-
+            lista.forEach(x => {
+                const v = new Date(x.f_venc.split('/')[2], x.f_venc.split('/')[1]-1, x.f_venc.split('/')[0]);
+                const diff = (v - hoy) / 86400000;
+                let c = "card-ok"; let b = "✔️ AL DÍA";
+                if(diff < 0) { c="card-vencida"; b="❌ VENCIDO"; } else if(diff < 30) { c="card-proxima"; b="⚠️ OC"; }
+                
                 cont.innerHTML += `
-                    <div class="p-4 rounded-2xl shadow-md border ${clase} text-left">
-                        <div class="flex justify-between items-start mb-2">
+                    <div class="p-4 rounded-2xl shadow-md border ${c} bg-white">
+                        <div class="flex justify-between items-start">
                             <span class="text-xl font-black text-slate-800">${x.unne}</span>
-                            <span class="text-[9px] font-black uppercase bg-white/50 px-2 py-1 rounded">${badge}</span>
+                            <span class="text-[9px] font-black uppercase px-2 py-1 rounded bg-white/50">${b} ${x.tipo} ${x.cap}kg</span>
                         </div>
-                        <p class="text-[10px] font-bold text-gray-500 uppercase mb-2 leading-tight">${x.planta} - ${x.sector}</p>
-                        <div class="grid grid-cols-2 gap-2 pt-2 border-t text-[10px]">
+                        <p class="text-[10px] font-bold text-gray-500 uppercase mt-1">${x.planta} - ${x.sector}</p>
+                        <div class="grid grid-cols-2 gap-2 pt-2 mt-2 border-t text-[10px]">
                             <div><p class="text-gray-400">CARGA</p><p class="font-bold">${x.f_carga}</p></div>
-                            <div><p class="text-gray-400">VENCE</p><p class="font-black text-slate-900">${x.f_venc}</p></div>
-                            <div><p class="text-gray-400">PH</p><p class="font-bold">${x.ph}</p></div>
-                            <div class="text-right"><p class="text-gray-400">TIPO</p><p class="font-bold uppercase">${x.tipo} ${x.cap}kg</p></div>
+                            <div><p class="text-gray-400">VENCE</p><p class="font-black text-red-600">${x.f_venc}</p></div>
                         </div>
                     </div>`;
             });
-            showL(false);
         }
 
         async function loadH() {
             const d = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r=>r.json());
             document.getElementById('historial-lista').innerHTML = d.map(o => `
-                <div class="bg-gray-50 p-3 rounded-xl border mb-2 text-[10px] border-l-4 border-l-slate-400">
+                <div class="bg-gray-50 p-3 rounded-xl border mb-2 text-[10px] border-l-4 border-l-blue-400">
                     <div class="flex justify-between font-bold text-blue-800 uppercase"><span>${o.id}</span><span>${o.fecha}</span></div>
-                    <p class="font-bold my-1 uppercase text-slate-700">${o.edif} | ${o.tec} | ${o.est}</p>
+                    <p class="font-bold my-1 uppercase text-slate-700">${o.edif} | ${o.tec}</p>
                     <p class="text-gray-600 italic">"${o.tarea}"</p>
                 </div>`).join("");
         }
