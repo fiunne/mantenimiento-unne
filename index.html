@@ -3,36 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGM - Gestión Integral FI</title>
+    <title>SGM PRO 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
-        .tab-active { border-bottom: 4px solid #1e40af; color: #1e40af; font-weight: bold; }
-        .vencido { border-top: 8px solid #ef4444 !important; background: #fef2f2; }
-        .al-dia { border-top: 8px solid #22c55e !important; background: #ffffff; }
+        .tab-active { border-bottom: 4px solid #1e40af; color: #1e40af; font-weight: bold; background: white; }
+        .card-ext { border-l: 6px solid #ef4444; transition: all 0.2s; }
+        .card-ext:hover { transform: scale(1.02); }
     </style>
 </head>
 <body class="bg-gray-100 p-2 text-gray-800">
 
     <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-[2000] p-4">
         <div class="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm text-center space-y-6">
-            <h2 class="font-black text-xl text-slate-800 uppercase">Acceso Restringido</h2>
-            <input type="password" id="pin-input" placeholder="PIN" class="w-full border-2 p-4 rounded-2xl text-center text-2xl tracking-[0.5em] outline-none">
+            <h2 class="font-black text-xl text-slate-800 uppercase tracking-widest">SGM LOGIN</h2>
+            <input type="password" id="pin-input" placeholder="PIN" class="w-full border-2 p-4 rounded-2xl text-center text-3xl tracking-[0.5em] outline-none border-gray-200 focus:border-blue-500">
             <button onclick="verificarAcceso()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl shadow-lg">ENTRAR</button>
             <p id="login-error" class="text-red-500 font-bold text-xs hidden">❌ PIN INCORRECTO</p>
         </div>
     </div>
 
     <div id="loader" class="loading-overlay font-bold italic text-blue-600">
-        <div class="mb-2 text-lg">⚙️ Sincronizando...</div>
+        <div class="mb-2 text-lg animate-bounce">⚙️ Procesando...</div>
     </div>
 
     <div id="main-content" class="max-w-6xl mx-auto bg-white rounded-xl shadow-lg p-3 hidden">
-        <div class="flex border-b mb-4 overflow-x-auto text-[10px] font-bold uppercase whitespace-nowrap bg-gray-50 rounded-t-lg">
+        <div class="flex border-b mb-4 overflow-x-auto text-[10px] font-black uppercase whitespace-nowrap bg-gray-50 rounded-t-lg">
             <button onclick="tab('nueva')" id="btn-nueva" class="px-5 py-4 tab-active">Nueva OT</button>
             <button onclick="tab('pendientes')" id="btn-pendientes" class="px-5 py-4 text-gray-500">Cerrar OT</button>
             <button onclick="tab('relevamiento')" id="btn-relevamiento" class="px-5 py-4 text-gray-500">Relevamiento</button>
-            <button onclick="tab('extintores')" id="btn-extintores" class="px-5 py-4 text-red-600">🛡️ Extintores</button>
+            <button onclick="tab('extintores')" id="btn-extintores" class="px-5 py-4 text-red-600 border-l border-r">🛡️ Extintores</button>
             <button onclick="tab('historial')" id="btn-historial" class="px-5 py-4 text-gray-500">Historial</button>
         </div>
 
@@ -43,41 +43,70 @@
                         <select id="tipo" class="w-1/2 border p-2 rounded text-xs"><option value="Correctivo">Correctivo</option><option value="Preventivo">Preventivo</option></select>
                         <select id="rubro" class="w-1/2 border p-2 rounded text-xs bg-blue-50 font-bold"><option value="General">General</option><option value="Electricidad">Electricidad</option><option value="Refrigeración">Refrigeración</option></select>
                     </div>
-                    <select id="edificio" onchange="loadSectores('edificio','sector','ubiSel')" class="w-full border p-2 rounded text-xs"><option value="">Edificio...</option></select>
+                    <select id="edificio" onchange="loadSectores('edificio','sector','ubiSel')" class="w-full border p-2 rounded text-xs"><option value="">Seleccionar Edificio...</option></select>
                     <select id="sector" onchange="filterUbi('sector','ubiSel')" class="w-full border p-2 rounded text-xs" disabled><option value="">Sector...</option></select>
                     <select id="ubiSel" onchange="setUbi()" class="w-full border p-2 rounded text-xs" disabled><option value="">Ubicación...</option></select>
                 </div>
                 <div class="space-y-2">
                     <input type="text" id="rep" placeholder="Reportado por..." class="w-full border p-2 rounded text-xs">
-                    <select id="tec" class="w-full border p-2 rounded text-xs font-bold"><option value="">Técnico...</option><option value="ALG">ALG</option><option value="DSF">DSF</option><option value="MAP">MAP</option><option value="RRG">RRG</option></select>
-                    <textarea id="desc" rows="2" class="w-full border p-2 rounded text-xs" placeholder="Tarea..."></textarea>
-                    <button onclick="saveOT()" class="w-full bg-blue-600 text-white font-bold py-2 rounded">GUARDAR ORDEN</button>
+                    <select id="tec" class="w-full border p-2 rounded text-xs font-bold bg-yellow-50"><option value="">Técnico...</option><option value="ALG">ALG</option><option value="DSF">DSF</option><option value="MAP">MAP</option><option value="RRG">RRG</option></select>
+                    <textarea id="desc" rows="2" class="w-full border p-2 rounded text-xs" placeholder="Tarea a realizar..."></textarea>
+                    <button onclick="saveOT()" class="w-full bg-blue-600 text-white font-black py-3 rounded-lg shadow-md uppercase">Guardar Orden</button>
                 </div>
             </div>
             <input type="hidden" id="h-u"><input type="hidden" id="h-i"><input type="hidden" id="h-e">
         </div>
 
         <div id="sec-pendientes" class="hidden space-y-3">
-            <select id="listaOT" class="w-full border p-3 rounded font-bold text-blue-900 bg-blue-50"></select>
-            <p class="text-center text-gray-400 text-xs">Módulo de cierre en desarrollo...</p>
+            <select id="listaOT" class="w-full border p-3 rounded-xl font-bold text-blue-900 bg-blue-50 border-blue-200"></select>
+            <div class="bg-gray-50 p-3 rounded-xl border space-y-2">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-2">
+                    <select id="rS" onchange="cR()" class="border p-2 rounded text-xs"><option value="">Rubro</option></select>
+                    <select id="gS" onchange="cG()" class="border p-2 rounded text-xs" disabled><option value="">Grupo</option></select>
+                    <select id="mS" class="border p-2 rounded text-xs" disabled><option value="">Material</option></select>
+                </div>
+                <div class="flex gap-2">
+                    <input type="number" id="cnt" value="1" class="w-16 border p-2 rounded text-center font-bold">
+                    <button onclick="aM()" class="flex-1 bg-slate-800 text-white font-bold rounded p-2">AGREGAR MATERIAL</button>
+                </div>
+                <div id="car" class="space-y-1 text-[10px] font-bold text-blue-800"></div>
+            </div>
+            <textarea id="obs" rows="2" class="w-full border p-2 rounded text-xs" placeholder="Comentario técnico final..."></textarea>
+            <button onclick="cOT()" class="w-full bg-green-700 text-white font-black py-4 rounded-xl shadow-lg uppercase">Cerrar y Descontar</button>
         </div>
 
         <div id="sec-relevamiento" class="hidden space-y-3">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 bg-blue-50 p-3 rounded-lg border">
-                <select id="rel-edificio" onchange="loadSectores('rel-edificio','rel-sector','rel-ubi')" class="border p-2 rounded text-xs"><option value="">Edificio...</option></select>
+            <div class="bg-blue-50 p-3 rounded-xl border grid grid-cols-1 md:grid-cols-3 gap-2">
+                <select id="rel-edificio" onchange="loadSectores('rel-edificio','rel-sector','rel-ubi')" class="border p-2 rounded text-xs font-bold"><option value="">Edificio...</option></select>
                 <select id="rel-sector" onchange="filterUbi('rel-sector','rel-ubi')" class="border p-2 rounded text-xs" disabled><option value="">Sector...</option></select>
                 <select id="rel-ubi" onchange="cargarDatosRel()" class="border p-2 rounded text-xs" disabled><option value="">Ubicación...</option></select>
             </div>
-            <div id="form-rel" class="hidden grid grid-cols-2 gap-2 text-xs border p-3 rounded-lg bg-white shadow">
-                <div><label>Equipo Aire</label><input type="text" id="r-eq" class="w-full border p-1 rounded"></div>
-                <div><label>Inventario (C)</label><input type="text" id="r-inv-aire" class="w-full border p-1 rounded bg-yellow-50"></div>
-                <button onclick="guardarRel()" class="col-span-2 bg-blue-800 text-white py-2 mt-2 rounded font-bold">ACTUALIZAR FICHA</button>
+            <div id="form-rel" class="hidden p-4 border rounded-2xl bg-white shadow-xl space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-3 p-3 bg-orange-50 rounded-xl border border-orange-100">
+                        <h4 class="font-black text-[10px] text-orange-600 uppercase">Climatización</h4>
+                        <input type="text" id="r-eq" placeholder="Equipo Aire" class="w-full border p-2 rounded text-xs">
+                        <input type="text" id="r-inv-aire" placeholder="Inventario Aire" class="w-full border p-2 rounded text-xs bg-white">
+                        <input type="text" id="r-vent" placeholder="Ventiladores (Techo/Pared)" class="w-full border p-2 rounded text-xs">
+                        <input type="text" id="r-inv-vent" placeholder="Inv. Ventiladores" class="w-full border p-2 rounded text-xs bg-white">
+                    </div>
+                    <div class="space-y-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+                        <h4 class="font-black text-[10px] text-blue-600 uppercase">Iluminación y Emergencia</h4>
+                        <input type="text" id="r-tlum" placeholder="Tipo de Luminaria" class="w-full border p-2 rounded text-xs">
+                        <div class="flex gap-2">
+                            <input type="number" id="r-cart" placeholder="Cant. Art" class="w-1/2 border p-2 rounded text-xs">
+                            <input type="number" id="r-clam" placeholder="Cant. Lam" class="w-1/2 border p-2 rounded text-xs">
+                        </div>
+                        <input type="text" id="r-em" placeholder="Luces de Emergencia" class="w-full border p-2 rounded text-xs">
+                    </div>
+                </div>
+                <button onclick="guardarRel()" class="w-full bg-blue-800 text-white py-4 rounded-xl font-black uppercase shadow-lg">Actualizar Ficha Técnica</button>
             </div>
         </div>
 
         <div id="sec-extintores" class="hidden space-y-3">
-            <select id="ext-edificio" onchange="loadExtintores()" class="w-full bg-slate-800 text-white p-3 rounded-lg font-bold"><option value="">Seleccionar Edificio...</option></select>
-            <div id="lista-extintores" class="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[500px] overflow-y-auto"></div>
+            <select id="ext-edificio" onchange="loadExtintores()" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-black"><option value="">Seleccionar Edificio...</option></select>
+            <div id="lista-extintores" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-[600px] overflow-y-auto p-1"></div>
         </div>
 
         <div id="sec-historial" class="hidden space-y-2 max-h-[500px] overflow-y-auto">
@@ -86,9 +115,9 @@
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbyz7gX2Vftgesb-gqdp-2bttBLvJxPotSbR-Ig-dJ6JFI97mVeAPFm5UqjxfyvZ5eQw/exec"; 
+        const URL = "https://script.google.com/macros/s/AKfycbxm3LB41-F7O_r5XUsTJTcpFl5yerZFI9EbRZlUPcWDhSX3Lhj5dX0IP8aQPXPNxm7D/exec"; 
         const PIN_CORRECTO = "4370";
-        let dbU = []; let dbExt = [];
+        let dbU = []; let dbExt = []; let dbS = {}; let its = [];
 
         function verificarAcceso() {
             if(document.getElementById('pin-input').value === PIN_CORRECTO) {
@@ -107,6 +136,7 @@
                 });
                 document.getElementById('loader').style.display="none";
             });
+            fetch(`${URL}?action=getMateriales&token=${PIN_CORRECTO}`).then(r=>r.json()).then(d=>dbS=d);
         }
 
         function tab(t) {
@@ -114,10 +144,11 @@
                 document.getElementById('sec-'+id).classList.toggle('hidden', id!==t);
                 document.getElementById('btn-'+id).classList.toggle('tab-active', id===t);
             });
-            if(t==='pendientes') loadA(); if(t==='historial') loadH();
+            if(t==='pendientes') { loadA(); loadM(); }
+            if(t==='historial') loadH();
         }
 
-        // --- LÓGICA DE UBICACIONES COMPARTIDA ---
+        // --- LÓGICA DE UBICACIONES ---
         async function loadSectores(edId, secId, ubiId) {
             const ed = document.getElementById(edId).value; if(!ed) return;
             document.getElementById('loader').style.display="flex";
@@ -135,24 +166,64 @@
             u.disabled = false;
         }
 
-        // --- EXTINTORES ---
+        // --- CERRAR OT CON MATERIALES ---
+        async function loadA() {
+            const d = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`).then(r=>r.json());
+            document.getElementById('listaOT').innerHTML = d.map(o=>`<option value="${o.id}">${o.detalle}</option>`).join("");
+        }
+        function loadM() { const r = document.getElementById('rS'); r.innerHTML='<option value="">Rubro</option>'; Object.keys(dbS).forEach(x=>r.innerHTML+=`<option value="${x}">${x}</option>`); }
+        function cR() { const r=document.getElementById('rS').value; const g=document.getElementById('gS'); g.innerHTML='<option value="">Grupo</option>'; Object.keys(dbS[r]||{}).forEach(x=>g.innerHTML+=`<option value="${x}">${x}</option>`); g.disabled=false; }
+        function cG() { const r=document.getElementById('rS').value; const g=document.getElementById('gS').value; const m=document.getElementById('mS'); m.innerHTML='<option value="">Material</option>'; (dbS[r][g]||[]).forEach(x=>m.innerHTML+=`<option value='${JSON.stringify(x)}'>${x.nombre}</option>`); m.disabled=false; }
+        function aM() { const raw=document.getElementById('mS').value; if(!raw) return; const m=JSON.parse(raw); its.push({nombre:m.nombre, cantidad:document.getElementById('cnt').value}); const c=document.getElementById('car'); c.innerHTML=""; its.forEach((x,idx)=>c.innerHTML+=`<div>${x.cantidad} x ${x.nombre} <button onclick="its.splice(${idx},1);aM()" class="text-red-500">[X]</button></div>`); }
+        
+        async function cOT() {
+            const id = document.getElementById('listaOT').value; if(!id) return;
+            document.getElementById('loader').style.display="flex";
+            const p = { action: 'cerrarOT', token: PIN_CORRECTO, idOT: id, materiales: its.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), comentario: document.getElementById('obs').value };
+            await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload();
+        }
+
+        // --- RELEVAMIENTO ---
+        function cargarDatosRel() {
+            const i = JSON.parse(document.getElementById('rel-ubi').value);
+            document.getElementById('r-eq').value = i.eq_aire||""; document.getElementById('r-inv-aire').value = i.inv_aire||"";
+            document.getElementById('r-vent').value = i.vent||""; document.getElementById('r-inv-vent').value = i.inv_vent||"";
+            document.getElementById('r-tlum').value = i.t_lum||""; document.getElementById('r-cart').value = i.c_art||"";
+            document.getElementById('r-clam').value = i.c_lam||""; document.getElementById('r-em').value = i.em||"";
+            document.getElementById('form-rel').classList.remove('hidden');
+        }
+        async function guardarRel() {
+            document.getElementById('loader').style.display="flex";
+            const u = JSON.parse(document.getElementById('rel-ubi').value);
+            const p = { action: 'updateRelevamiento', token: PIN_CORRECTO, edificio: document.getElementById('rel-edificio').value, sector: u.sector, ubi: u.ubi, inv_aire: document.getElementById('r-inv-aire').value, eq_aire: document.getElementById('r-eq').value, t_lum: document.getElementById('r-tlum').value, c_art: document.getElementById('r-cart').value, c_lam: document.getElementById('r-clam').value, em: document.getElementById('r-em').value, vent: document.getElementById('r-vent').value, inv_vent: document.getElementById('r-inv-vent').value };
+            await fetch(URL, {method:'POST', body: JSON.stringify(p)}); location.reload();
+        }
+
+        // --- EXTINTORES FULL INFO ---
         async function loadExtintores() {
-            const ed = document.getElementById('ext-edificio').value;
+            const ed = document.getElementById('ext-edificio').value; if(!ed) return;
             document.getElementById('loader').style.display="flex";
             dbExt = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
             const cont = document.getElementById('lista-extintores'); cont.innerHTML = "";
             dbExt.forEach(x => {
                 cont.innerHTML += `
-                    <div class="p-3 rounded-lg shadow border-t-8 ${x.obs?'vencido':'al-dia'} bg-white">
-                        <div class="flex justify-between font-bold"><span>${x.unne}</span><span class="text-[9px]">${x.tipo}</span></div>
-                        <div class="text-[10px] text-gray-500">${x.sector}</div>
-                        <div class="text-xs mt-2">Vence: <b>${x.f_venc}</b></div>
+                    <div class="p-4 rounded-2xl shadow-md border card-ext bg-white">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xl font-black text-slate-800">${x.unne}</span>
+                            <span class="bg-slate-100 px-2 py-1 rounded text-[9px] font-bold uppercase">${x.tipo} ${x.cap}kg</span>
+                        </div>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter mb-2 leading-none">${x.planta} - ${x.sector}</p>
+                        <div class="grid grid-cols-2 gap-2 mt-2 pt-2 border-t text-[10px]">
+                            <div><p class="text-gray-400">CARGA</p><p class="font-bold">${x.f_carga}</p></div>
+                            <div><p class="text-red-500">VENCE</p><p class="font-black text-red-600">${x.f_venc}</p></div>
+                            <div><p class="text-gray-400">PRUEBA HIDR.</p><p class="font-bold">${x.ph}</p></div>
+                            <div class="text-right"><p class="text-gray-400">ESTADO</p><p class="font-bold text-green-600">OK</p></div>
+                        </div>
                     </div>`;
             });
             document.getElementById('loader').style.display="none";
         }
 
-        // --- RESTO DE FUNCIONES ---
         function setUbi() {
             const i = JSON.parse(document.getElementById('ubiSel').value);
             document.getElementById('h-u').value = i.ubi; document.getElementById('h-i').value = i.inv_aire; document.getElementById('h-e').value = i.eq_aire;
@@ -164,12 +235,12 @@
         }
         async function loadH() {
             const d = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r=>r.json());
-            document.getElementById('historial-lista').innerHTML = d.map(o => `<div class="bg-white p-2 border mb-1 text-[10px]"><b>${o.id}</b> - ${o.fecha} - ${o.edif} (${o.estado})</div>`).join("");
-        }
-        function cargarDatosRel() {
-            const i = JSON.parse(document.getElementById('rel-ubi').value);
-            document.getElementById('r-eq').value = i.eq_aire; document.getElementById('r-inv-aire').value = i.inv_aire;
-            document.getElementById('form-rel').classList.remove('hidden');
+            document.getElementById('historial-lista').innerHTML = d.map(o => `
+                <div class="bg-gray-50 p-3 rounded-xl border mb-2 text-[10px]">
+                    <div class="flex justify-between font-bold text-blue-800"><span>${o.id}</span><span>${o.fecha}</span></div>
+                    <p class="font-bold my-1 uppercase">${o.edif} | ${o.tec}</p>
+                    <p class="text-gray-600">${o.tarea}</p>
+                </div>`).join("");
         }
     </script>
 </body>
