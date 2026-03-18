@@ -114,7 +114,7 @@
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbzmWHR9SPtvP9KMtRSKs2Db4XMzmReeU5FoQWqmvZrOUH7_VujIw-9qXumY2jZMPBO2/exec"; 
+        const URL = "https://script.google.com/macros/s/AKfycbyXSN4MAyX-DevGPsppyczD7Zb42GVxRvM0JCKJsXwPwSBLReKj12PraLPwDvHiDrPU/exec"; 
         const PIN_CORRECTO = "4370";
         let dbU = [], dbR = [], dbM = {}, cesta = [], dbH = [];
 
@@ -195,19 +195,42 @@
         function renderCesta() { document.getElementById('cesta').innerHTML = cesta.map((x,i)=>`<div class="flex justify-between bg-blue-600 text-white p-2 rounded-xl text-[9px] font-bold mb-1"><span>${x.cantidad} x ${x.nombre}</span><button onclick="cesta.splice(${i},1);renderCesta()">X</button></div>`).join(""); }
         
         async function cerrarOT() {
-            const idOT = document.getElementById('c-lista').value;
-            if(!idOT) return alert("Seleccione una OT");
-            showL(true);
-            const data = { action: 'cerrarOT', token: PIN_CORRECTO, idOT: idOT, materialesUsados: cesta.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), listaParaDescontar: cesta, comentarioFinal: document.getElementById('c-obs').value };
-            try {
-                await fetch(URL, { method: 'POST', body: JSON.stringify(data) });
-                alert("OT CERRADA Y STOCK ACTUALIZADO");
-                location.reload();
-            } catch(e) {
-                alert("Proceso finalizado. Verifique el cierre en la planilla.");
-                location.reload();
-            }
+    const idOT = document.getElementById('c-lista').value;
+    if(!idOT) return alert("Seleccione una OT");
+    
+    showL(true);
+    const data = {
+        action: 'cerrarOT',
+        token: PIN_CORRECTO,
+        idOT: idOT,
+        materialesUsados: cesta.map(x => `${x.cantidad} ${x.nombre}`).join(", "),
+        listaParaDescontar: cesta,
+        comentarioFinal: document.getElementById('c-obs').value
+    };
+
+    try {
+        // Usamos una petición más directa
+        const response = await fetch(URL, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.text();
+        
+        if (result.trim() === "Ok") {
+            alert("¡ÉXITO! OT #" + idOT + " cerrada y stock actualizado.");
+            location.reload();
+        } else {
+            alert("AVISO DEL SERVIDOR: " + result);
+            showL(false);
         }
+    } catch(e) {
+        // En Google Apps Script, a veces el POST da error de red pero se ejecuta. 
+        // Damos un margen de 2 segundos y recargamos.
+        alert("Petición enviada. Verifique en segundos si la OT desaparece de la lista.");
+        setTimeout(() => { location.reload(); }, 2000);
+    }
+}
 
         // --- RELEVAMIENTO ---
         function fillRelev() {
