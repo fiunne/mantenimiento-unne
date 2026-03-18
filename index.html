@@ -11,7 +11,7 @@
         .card-vencida { border-left: 8px solid #ef4444; background: #fff1f2; }
         .card-proxima { border-left: 8px solid #f59e0b; background: #fffbeb; }
         .card-ok { border-left: 8px solid #22c55e; background: #f0fdf4; }
-        .seccion-refrigeracion { display: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-gray-100 p-2 text-gray-800 font-sans">
@@ -49,71 +49,66 @@
 
         <section id="s1" class="space-y-4">
             <div class="bg-white p-6 rounded-[32px] shadow-md border border-gray-100">
-                <h3 class="font-black text-blue-800 mb-6 uppercase flex items-center gap-2"><span class="w-2 h-6 bg-blue-600 rounded-full"></span>Nueva Orden de Trabajo</h3>
+                <h3 class="font-black text-blue-800 mb-6 uppercase flex items-center gap-2"><span class="w-2 h-6 bg-blue-600 rounded-full"></span>Emisión de OT</h3>
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="col-span-1"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Tipo</label><select id="tipo" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"><option>Preventivo</option><option>Correctivo</option><option>Mejora</option><option>Emergencia</option></select></div>
-                    <div class="col-span-1"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Prioridad</label><select id="prioridad" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"><option>Baja</option><option selected>Media</option><option>Alta</option><option>Urgente</option></select></div>
+                    <div><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Tipo</label><select id="tipo" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm outline-none"><option>Preventivo</option><option selected>Correctivo</option><option>Mejora</option><option>Emergencia</option></select></div>
+                    <div><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Prioridad</label><select id="prioridad" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm outline-none"><option>Baja</option><option selected>Media</option><option>Alta</option><option>Urgente</option></select></div>
                 </div>
-                <div class="mt-4"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Especialidad (Rubro)</label><select id="rubro" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500"><option>Electricidad</option><option>Aire Acondicionado</option><option>Sanitarios</option><option>Edificio</option><option>Gas</option><option>Otros</option></select></div>
-                <div class="mt-4"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase tracking-widest">Edificio</label><select id="edificio" onchange="loadS()" class="w-full p-4 bg-gray-100 border-2 border-blue-200 rounded-2xl text-sm font-bold text-blue-900 outline-none focus:border-blue-600"><option value="">Seleccione edificio...</option></select></div>
-                <div id="sel-sect" class="mt-4 hidden"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase tracking-widest text-blue-600">Sector / Área</label><select id="sector" class="w-full p-4 bg-blue-50 border-2 border-blue-400 rounded-2xl text-sm font-bold outline-none"></select></div>
+                <div class="mt-4"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Especialidad</label><select id="rubro" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm outline-none"><option>Electricidad</option><option>Aire Acondicionado</option><option>Sanitarios</option><option>Edificio</option><option>Gas</option><option>Otros</option></select></div>
+                <div class="mt-4"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase tracking-widest text-blue-600">Edificio</label><select id="edificio" onchange="loadS()" class="w-full p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl text-sm font-bold outline-none focus:border-blue-600"><option value="">Seleccione edificio...</option></select></div>
+                <div id="sel-sect" class="mt-4 hidden"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Sector / Área</label><select id="sector" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm font-bold"></select></div>
+                
                 <div class="grid grid-cols-2 gap-4 mt-4">
-                    <div><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Ubicación</label><input id="h-u" readonly class="w-full p-4 bg-gray-200 border border-gray-200 rounded-2xl text-xs text-gray-600"></div>
-                    <div><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">N° Inventario</label><input id="h-i" readonly class="w-full p-4 bg-gray-200 border border-gray-200 rounded-2xl text-xs text-gray-600"></div>
+                    <div><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Ubicación</label><input id="h-u" readonly class="w-full p-4 bg-gray-100 border rounded-2xl text-xs"></div>
+                    <div><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">N° Inventario</label><input id="h-i" readonly class="w-full p-4 bg-gray-100 border rounded-2xl text-xs"></div>
                 </div>
-                <div class="mt-4"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Equipo Detectado</label><input id="h-e" readonly class="w-full p-4 bg-gray-200 border border-gray-200 rounded-2xl text-xs text-gray-600"></div>
+                
+                <div class="mt-4"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Personal Técnico Asignado</label><select id="tec" class="w-full p-4 bg-gray-100 border-2 border-blue-300 rounded-2xl text-sm font-bold"><option>Téc. Arrieta</option><option>Téc. Coria</option><option>Téc. Orellano</option><option>Téc. Sosa</option><option>Mantenimiento General</option></select></div>
+                
                 <div class="grid grid-cols-2 gap-4 mt-4">
-                    <div><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Reportado Por</label><input id="rep" placeholder="Nombre" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm outline-none"></div>
-                    <div><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Medio</label><select id="medio" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm outline-none"><option>WhatsApp</option><option>Email</option><option>Personalmente</option><option>Teléfono</option></select></div>
+                    <div><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Reportado Por</label><input id="rep" placeholder="Nombre" class="w-full p-4 bg-gray-50 border rounded-2xl text-sm"></div>
+                    <div><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Medio</label><select id="medio" class="w-full p-4 bg-gray-50 border rounded-2xl text-sm"><option>WhatsApp</option><option>Email</option><option>Personalmente</option></select></div>
                 </div>
-                <div class="mt-4"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase tracking-widest">Personal Técnico</label><select id="tec" class="w-full p-4 bg-gray-100 border border-blue-300 rounded-2xl text-sm font-bold text-slate-700"><option>Téc. Arrieta</option><option>Téc. Coria</option><option>Téc. Orellano</option><option>Téc. Sosa</option><option>Mantenimiento General</option></select></div>
-                <div class="mt-4"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase tracking-widest">Descripción de Tarea</label><textarea id="desc" rows="4" placeholder="Detalle el trabajo realizado o solicitado..." class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea></div>
-                <button onclick="saveOT()" class="w-full bg-blue-600 text-white p-5 rounded-3xl font-bold text-lg mt-8 shadow-xl shadow-blue-200 active:scale-95 transition-all">EMITIR ORDEN</button>
+
+                <div class="mt-4"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase tracking-widest">Descripción del Problema</label><textarea id="desc" rows="3" class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm outline-none"></textarea></div>
+                <button onclick="saveOT()" class="w-full bg-blue-600 text-white p-5 rounded-3xl font-bold text-lg mt-8 shadow-xl active:scale-95 transition-all">EMITIR ORDEN</button>
             </div>
         </section>
 
-        <section id="s2" class="hidden">
+        <section id="s2" class="hidden space-y-4">
             <div class="bg-white p-6 rounded-[32px] shadow-md border border-gray-100">
-                <h3 class="font-black text-blue-800 mb-6 uppercase flex items-center gap-2"><span class="w-2 h-6 bg-red-500 rounded-full"></span>Cierre de Orden de Trabajo</h3>
-                <label class="text-[10px] font-bold text-gray-400 ml-2 uppercase tracking-widest">Seleccionar OT Abierta</label>
-                <select id="abiertas-list" class="w-full p-5 bg-blue-50 border-2 border-blue-400 rounded-2xl text-sm font-bold text-blue-900 outline-none mb-4"></select>
-                <div class="mt-4"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase tracking-widest">Materiales Utilizados</label><textarea id="c-mat" rows="3" placeholder="Ej: 2 tubos led, cinta aisladora..." class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm outline-none"></textarea></div>
-                <div class="mt-4"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase tracking-widest text-red-600 italic">Comentario de Finalización</label><textarea id="c-com" rows="4" placeholder="Explique qué se hizo finalmente..." class="w-full p-4 bg-gray-50 border border-gray-200 rounded-2xl text-sm outline-none"></textarea></div>
-                <button onclick="cerrarOT()" class="w-full bg-red-600 text-white p-5 rounded-3xl font-bold text-lg mt-8 shadow-xl shadow-red-200 active:scale-95 transition-all">CERRAR Y GUARDAR</button>
+                <h3 class="font-black text-blue-800 mb-6 uppercase flex items-center gap-2"><span class="w-2 h-6 bg-red-500 rounded-full"></span>Cierre de Órdenes</h3>
+                <label class="text-[10px] font-bold text-gray-400 ml-2 uppercase tracking-widest text-red-600">Pendientes en Registro OT</label>
+                <select id="abiertas-list" class="w-full p-5 bg-red-50 border-2 border-red-200 rounded-2xl text-sm font-bold text-red-900 outline-none mb-4"></select>
+                <div class="mt-4"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Materiales Utilizados</label><textarea id="c-mat" rows="2" class="w-full p-4 bg-gray-50 border rounded-2xl text-sm"></textarea></div>
+                <div class="mt-4"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase">Comentario Final</label><textarea id="c-com" rows="3" class="w-full p-4 bg-gray-50 border rounded-2xl text-sm"></textarea></div>
+                <button onclick="cerrarOT()" class="w-full bg-red-600 text-white p-5 rounded-3xl font-bold text-lg mt-8 shadow-xl active:scale-95 transition-all">FINALIZAR Y ARCHIVAR</button>
             </div>
         </section>
 
         <section id="s3" class="hidden">
             <div class="bg-white p-6 rounded-[32px] shadow-md border border-gray-100">
-                <h3 class="font-black text-blue-800 mb-6 uppercase flex items-center gap-2"><span class="w-2 h-6 bg-green-500 rounded-full"></span>Relevamiento de Campo</h3>
-                <p class="text-[10px] text-gray-500 mb-4 px-2 italic font-bold">Seleccione un edificio para actualizar el inventario y estado de los equipos.</p>
-                <select id="rel-edif" onchange="loadRelS()" class="w-full p-4 bg-gray-100 border-2 border-green-200 rounded-2xl text-sm font-bold text-green-900 outline-none mb-4 tracking-tighter"></select>
-                <div id="rel-sect-container" class="hidden"><label class="text-[10px] font-bold text-gray-400 ml-2 uppercase tracking-widest text-green-600">Sector / Área</label><select id="rel-sector" onchange="fillRel()" class="w-full p-4 bg-green-50 border-2 border-green-400 rounded-2xl text-sm font-bold outline-none mb-6"></select>
-                    <div class="space-y-4 p-2 bg-gray-50 rounded-2xl border border-dashed border-green-300">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div><label class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Eq. Aire</label><input id="r-ea" class="w-full p-3 bg-white border rounded-xl text-xs font-bold text-slate-800"></div>
-                            <div><label class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Inv. Aire</label><input id="r-ia" class="w-full p-3 bg-white border rounded-xl text-xs font-bold text-slate-800"></div>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2">
-                            <div><label class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Tub. Leds</label><input type="number" id="r-tl" class="w-full p-3 bg-white border rounded-xl text-xs text-center font-bold"></div>
-                            <div><label class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Artic</label><input type="number" id="r-ca" class="w-full p-3 bg-white border rounded-xl text-xs text-center font-bold"></div>
-                            <div><label class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Lámparas</label><input type="number" id="r-cl" class="w-full p-3 bg-white border rounded-xl text-xs text-center font-bold"></div>
-                        </div>
-                        <div class="grid grid-cols-3 gap-2 border-t pt-4">
-                            <div><label class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter italic">Emergencia</label><input type="number" id="r-em" class="w-full p-3 bg-white border rounded-xl text-xs text-center font-bold"></div>
-                            <div><label class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter italic">Ventilador</label><input type="number" id="r-ve" class="w-full p-3 bg-white border rounded-xl text-xs text-center font-bold"></div>
-                            <div><label class="text-[10px] font-bold text-gray-500 uppercase tracking-tighter italic">Inv. Vent</label><input id="r-iv" class="w-full p-3 bg-white border rounded-xl text-xs font-bold"></div>
-                        </div>
-                        <button onclick="updateRel()" class="w-full bg-green-600 text-white p-5 rounded-2xl font-bold mt-4 shadow-lg active:scale-95 transition-all uppercase tracking-widest text-sm">Actualizar Datos</button>
+                <h3 class="font-black text-blue-800 mb-6 uppercase flex items-center gap-2"><span class="w-2 h-6 bg-green-500 rounded-full"></span>Relevamiento</h3>
+                <select id="rel-edif" onchange="loadRelS()" class="w-full p-4 bg-green-50 border-2 border-green-200 rounded-2xl text-sm font-bold text-green-900 mb-4"></select>
+                <div id="rel-sect-container" class="hidden space-y-4">
+                    <select id="rel-sector" onchange="fillRel()" class="w-full p-4 bg-white border-2 border-green-400 rounded-2xl text-sm font-bold"></select>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input id="r-ea" placeholder="Equipo Aire" class="p-3 bg-gray-50 border rounded-xl text-xs">
+                        <input id="r-ia" placeholder="Inv. Aire" class="p-3 bg-gray-50 border rounded-xl text-xs">
                     </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <input type="number" id="r-tl" placeholder="Teds" class="p-3 bg-gray-50 border rounded-xl text-xs text-center">
+                        <input type="number" id="r-ca" placeholder="Art" class="p-3 bg-gray-50 border rounded-xl text-xs text-center">
+                        <input type="number" id="r-cl" placeholder="Lám" class="p-3 bg-gray-50 border rounded-xl text-xs text-center">
+                    </div>
+                    <button onclick="updateRel()" class="w-full bg-green-600 text-white p-4 rounded-2xl font-bold shadow-lg uppercase text-xs">Actualizar</button>
                 </div>
             </div>
         </section>
 
         <section id="s4" class="hidden">
             <div class="bg-white p-6 rounded-[32px] shadow-md border border-gray-100 min-h-[400px]">
-                <h3 class="font-black text-blue-800 mb-6 uppercase flex items-center gap-2"><span class="w-2 h-6 bg-red-600 rounded-full"></span>Estado de Extintores</h3>
-                <p class="text-[10px] text-gray-400 mb-4 font-bold">Sincronizado con Central de Seguridad.</p>
+                <h3 class="font-black text-blue-800 mb-6 uppercase flex items-center gap-2"><span class="w-2 h-6 bg-red-600 rounded-full"></span>Extintores</h3>
                 <select id="ext-edif" onchange="loadExt()" class="w-full p-4 bg-gray-100 border-2 border-red-200 rounded-2xl text-sm font-bold text-red-900 outline-none mb-4"></select>
                 <div id="ext-lista" class="space-y-3"></div>
             </div>
@@ -121,21 +116,19 @@
 
         <section id="s5" class="hidden">
             <div class="bg-white p-6 rounded-[32px] shadow-md border border-gray-100">
-                <h3 class="font-black text-blue-800 mb-6 uppercase flex items-center gap-2"><span class="w-2 h-6 bg-indigo-500 rounded-full"></span>Historial de Órdenes</h3>
-                <div id="historial-lista" class="space-y-4"></div>
+                <h3 class="font-black text-blue-800 mb-6 uppercase flex items-center gap-2"><span class="w-2 h-6 bg-indigo-500 rounded-full"></span>Historial</h3>
+                <div id="historial-lista" class="space-y-3"></div>
             </div>
         </section>
     </div>
 
     <div id="loader" class="loading-overlay">
         <div class="w-16 h-16 border-8 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
-        <p class="mt-4 font-bold text-blue-800 tracking-tighter uppercase text-sm animate-pulse">Procesando con SGM...</p>
+        <p class="mt-4 font-bold text-blue-800 uppercase text-xs animate-pulse tracking-widest">Sincronizando con Google...</p>
     </div>
 
     <script>
-        // --- 1. REEMPLAZA ESTA URL POR LA TUYA DE GOOGLE APPS SCRIPT ---
-        const URL = "https://script.google.com/macros/s/AKfycby4EAzGh-9KkydYc0ZdLayy54bO-iOfbqf9ty4FstGoE3RO_eihI76mXGtlRksaL0OX9w/exec"; 
-        
+        const URL = "https://script.google.com/macros/s/AKfycby4EAzGh-9KkydYc0ZdLayy54bO-iOfbqf9ty4FstGoE3RO_eihI76mXGtlRksaL0OX9w/exec"; // <--- PEGA TU ENLACE AQUÍ
         const PIN_CORRECTO = "4370";
         let SECTORES = [];
         let REL_SECTORES = [];
@@ -152,11 +145,9 @@
             for(let i=1; i<=5; i++) {
                 document.getElementById('s'+i).classList.add('hidden');
                 document.getElementById('t'+i).classList.remove('tab-active');
-                document.getElementById('t'+i).classList.add('bg-white');
             }
             document.getElementById('s'+n).classList.remove('hidden');
             document.getElementById('t'+n).classList.add('tab-active');
-            document.getElementById('t'+n).classList.remove('bg-white');
         }
 
         function showL(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
@@ -166,10 +157,10 @@
             try {
                 const res = await fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`).then(r=>r.json());
                 const h = res.map(e => `<option value="${e}">${e}</option>`).join('');
-                document.getElementById('edificio').innerHTML = '<option value="">Seleccione edificio...</option>' + h;
-                document.getElementById('rel-edif').innerHTML = '<option value="">Edificio para Relevamiento...</option>' + h;
-                document.getElementById('ext-edif').innerHTML = '<option value="">Edificio para Extintores...</option>' + h;
-            } catch(e) { alert("❌ Error al cargar edificios"); }
+                document.getElementById('edificio').innerHTML = '<option value="">Edificios...</option>' + h;
+                document.getElementById('rel-edif').innerHTML = '<option value="">Edificios...</option>' + h;
+                document.getElementById('ext-edif').innerHTML = '<option value="">Edificios...</option>' + h;
+            } catch(e) { console.error(e); }
             showL(false);
         }
 
@@ -184,19 +175,17 @@
                 document.getElementById('sel-sect').classList.remove('hidden');
                 document.getElementById('sector').onchange = (e) => {
                     const s = SECTORES[e.target.options[e.target.selectedIndex].dataset.idx];
-                    document.getElementById('h-u').value = s.ubi || "S/E";
-                    document.getElementById('h-i').value = s.inv_aire || "S/I";
-                    document.getElementById('h-e').value = s.eq_aire || "S/D";
+                    document.getElementById('h-u').value = s.ubi || "";
+                    document.getElementById('h-i').value = s.inv_aire || "";
                 };
                 document.getElementById('sector').dispatchEvent(new Event('change'));
-            } catch(e) { alert("❌ Error al cargar sectores"); }
+            } catch(e) { alert("Error sectores"); }
             showL(false);
         }
 
         async function saveOT() {
             const edif = document.getElementById('edificio').value;
-            if(!edif) { alert("⚠️ Seleccione un edificio"); return; }
-            
+            if(!edif) { alert("⚠️ Seleccione edificio"); return; }
             showL(true);
             const p = { 
                 token: PIN_CORRECTO, 
@@ -208,34 +197,24 @@
                 sector: document.getElementById('sector').value,
                 ubicacion: document.getElementById('h-u').value, 
                 nInventario: document.getElementById('h-i').value, 
-                equipo: document.getElementById('h-e').value, 
                 reportadoPor: document.getElementById('rep').value, 
                 medioReporte: document.getElementById('medio').value, 
                 personal: document.getElementById('tec').value,
                 descripcion: document.getElementById('desc').value
             };
-
             try {
-                // Usamos POST directo
-                await fetch(URL, {
-                    method: 'POST',
-                    body: JSON.stringify(p)
-                }); 
-                alert("✅ Orden de Trabajo emitida con éxito"); 
+                await fetch(URL, { method: 'POST', body: JSON.stringify(p) }); 
+                alert("✅ OT Guardada"); 
                 location.reload();
-            } catch(e) { 
-                alert("✅ Orden emitida (Sincronización completa)"); 
-                location.reload();
-            } finally { showL(false); }
+            } catch(e) { location.reload(); }
         }
 
         async function loadAbiertas() {
             showL(true);
             try {
                 const res = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`).then(r=>r.json());
-                if(res.error) { alert(res.error); return; }
                 document.getElementById('abiertas-list').innerHTML = res.map(o => `<option value="${o.id}">${o.detalle}</option>`).join('');
-            } catch(e) { alert("❌ Error al cargar OTs abiertas"); }
+            } catch(e) { alert("Error cargando abiertas"); }
             showL(false);
         }
 
@@ -243,99 +222,28 @@
             const idOT = document.getElementById('abiertas-list').value;
             if(!idOT) return;
             showL(true);
-            const p = {
-                token: PIN_CORRECTO,
-                action: 'cerrarOT',
-                idOT: idOT,
-                materiales: document.getElementById('c-mat').value,
-                comentario: document.getElementById('c-com').value
-            };
+            const p = { token: PIN_CORRECTO, action: 'cerrarOT', idOT: idOT, materiales: document.getElementById('c-mat').value, comentario: document.getElementById('c-com').value };
             try {
                 await fetch(URL, { method: 'POST', body: JSON.stringify(p) });
-                alert("✅ OT Cerrada y archivada");
+                alert("✅ OT Cerrada");
                 location.reload();
             } catch(e) { location.reload(); }
         }
 
-        async function loadRelS() {
-            const edif = document.getElementById('rel-edif').value;
-            if(!edif) return;
-            showL(true);
-            try {
-                const res = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(edif)}&token=${PIN_CORRECTO}`).then(r=>r.json());
-                REL_SECTORES = res;
-                document.getElementById('rel-sector').innerHTML = res.map((s,i) => `<option value="${s.sector}" data-idx="${i}">${s.sector}</option>`).join('');
-                document.getElementById('rel-sect-container').classList.remove('hidden');
-                fillRel();
-            } catch(e) { alert("❌ Error"); }
-            showL(false);
-        }
-
-        function fillRel() {
-            const s = REL_SECTORES[document.getElementById('rel-sector').options[document.getElementById('rel-sector').selectedIndex].dataset.idx];
-            document.getElementById('r-ea').value = s.eq_aire;
-            document.getElementById('r-ia').value = s.inv_aire;
-            document.getElementById('r-tl').value = s.t_lum;
-            document.getElementById('r-ca').value = s.c_art;
-            document.getElementById('r-cl').value = s.c_lam;
-            document.getElementById('r-em').value = s.em;
-            document.getElementById('r-ve').value = s.vent;
-            document.getElementById('r-iv').value = s.inv_vent;
-        }
-
-        async function updateRel() {
-            showL(true);
-            const p = {
-                token: PIN_CORRECTO,
-                action: 'updateRelevamiento',
-                edificio: document.getElementById('rel-edif').value,
-                sector: document.getElementById('rel-sector').value,
-                ubi: REL_SECTORES[document.getElementById('rel-sector').selectedIndex].ubi,
-                eq_aire: document.getElementById('r-ea').value,
-                inv_aire: document.getElementById('r-ia').value,
-                t_lum: document.getElementById('r-tl').value,
-                c_art: document.getElementById('r-ca').value,
-                c_lam: document.getElementById('r-cl').value,
-                em: document.getElementById('r-em').value,
-                vent: document.getElementById('r-ve').value,
-                inv_vent: document.getElementById('r-iv').value
-            };
-            try {
-                await fetch(URL, { method: 'POST', body: JSON.stringify(p) });
-                alert("✅ Relevamiento Actualizado");
-            } catch(e) { alert("✅ Datos guardados"); }
-            showL(false);
-        }
-
+        // --- Funciones de Historial y Extintores (Simplificadas) ---
         async function loadExt() {
             const edif = document.getElementById('ext-edif').value;
             if(!edif) return;
             showL(true);
             try {
                 const res = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(edif)}&token=${PIN_CORRECTO}`).then(r=>r.json());
-                let h = "";
-                res.forEach(x => {
-                    const v = new Date(x.f_venc.split('/').reverse().join('-'));
-                    const hoy = new Date();
-                    const dif = (v - hoy) / (1000*60*60*24);
-                    let cls = "card-ok";
-                    if(dif < 0) cls = "card-vencida";
-                    else if(dif < 30) cls = "card-proxima";
-                    h += `<div class="p-4 rounded-2xl border shadow-sm ${cls}">
-                        <div class="flex justify-between items-start">
-                            <span class="bg-slate-800 text-white text-[10px] px-2 py-1 rounded-lg font-bold">${x.unne}</span>
-                            <span class="text-[9px] font-black uppercase text-gray-400">Piso: ${x.planta}</span>
-                        </div>
-                        <p class="text-sm font-bold text-slate-700 mt-1 uppercase">${x.tipo} ${x.cap}kg</p>
-                        <p class="text-[10px] font-bold text-gray-500 uppercase mt-1">${x.planta} - ${x.sector}</p>
-                        <div class="grid grid-cols-2 gap-2 pt-2 mt-2 border-t text-[10px]">
-                            <div><p class="text-gray-400 italic uppercase">Última Carga</p><p class="font-bold">${x.f_carga}</p></div>
-                            <div><p class="text-gray-400 italic uppercase">Vencimiento</p><p class="font-black text-slate-900">${x.f_venc}</p></div>
-                        </div>
-                    </div>`;
-                });
-                document.getElementById('ext-lista').innerHTML = h || '<p class="text-center text-xs text-gray-400 py-10">No se encontraron equipos registrados.</p>';
-            } catch(e) { alert("❌ Error al cargar extintores"); }
+                document.getElementById('ext-lista').innerHTML = res.map(x => `
+                    <div class="p-4 rounded-2xl border bg-white shadow-sm border-l-4 border-l-blue-500">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase">${x.unne} - ${x.sector}</p>
+                        <p class="text-sm font-bold text-slate-700">${x.tipo} ${x.cap}kg</p>
+                        <p class="text-[10px] font-bold mt-2">Vencimiento: ${x.f_venc}</p>
+                    </div>`).join('');
+            } catch(e) { }
             showL(false);
         }
 
@@ -344,12 +252,11 @@
             try {
                 const d = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r=>r.json());
                 document.getElementById('historial-lista').innerHTML = d.map(o => `
-                    <div class="bg-gray-50 p-3 rounded-xl border mb-2 text-[10px] border-l-4 border-l-blue-400 text-left">
-                        <div class="flex justify-between font-bold text-blue-800 uppercase"><span>${o.id}</span><span>${o.fecha}</span></div>
-                        <p class="font-bold my-1 text-slate-700 uppercase">${o.edif} - ${o.tarea}</p>
-                        <div class="flex justify-between text-gray-500 italic"><span>Téc: ${o.tec}</span><span class="text-blue-600 font-bold">${o.est}</span></div>
+                    <div class="bg-white p-4 rounded-2xl border text-[10px] border-l-4 border-l-indigo-400">
+                        <div class="flex justify-between font-bold text-indigo-800 mb-1"><span>${o.id}</span><span>${o.fecha}</span></div>
+                        <p class="font-bold uppercase">${o.edif} - ${o.tarea}</p>
                     </div>`).join('');
-            } catch(e) { alert("❌ Error al cargar historial"); }
+            } catch(e) { }
             showL(false);
         }
     </script>
