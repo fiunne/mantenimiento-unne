@@ -123,45 +123,47 @@
         </div>
     </div>
 
-    <script>
-        const URL = "https://script.google.com/macros/s/AKfycbzAsvCo6XYWYNE-yMmNVmolxSVUqYXVR56mWmpK_h-SPa-YPs4n56U5kdXJDEI-mojy/exec"; // REEMPLAZAR
-        const PIN_CORRECTO = "4370";
-        let dbU = [], dbR = [], dbM = {}, dbE = [], cesta = [], dbH = [];
+<script>
+    const URL = "https://script.google.com/macros/s/AKfycbxdP4_wxw40IYtsxvlZRxkrXT_5n-TzodL7ezw4eAUqnuxpK4TuEzXSWo4uKoEWpfaQ/exec"; 
+    const PIN_CORRECTO = "4370";
+    const TOKEN = "4370"; // AHORA COINCIDE CON EL SCRIPT
+    
+    let dbStock = {}; // Aquí guardaremos los materiales
 
-        function showL(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
+    // Función para cargar materiales al entrar a la pestaña de Cierre
+    async function loadMateriales() {
+        showL(true);
+        try {
+            const res = await fetch(`${URL}?action=getMateriales&token=${TOKEN}`);
+            dbStock = await res.json();
+            const rSel = document.getElementById('m-rub');
+            rSel.innerHTML = '<option value="">Rubro Material</option>' + 
+                             Object.keys(dbStock).map(x => `<option value="${x}">${x}</option>`).join("");
+        } catch (e) { alert("Error al cargar materiales"); }
+        showL(false);
+    }
+    
+    // Al cambiar de Rubro (Hoja)
+    function loadG() {
+        const rubro = document.getElementById('m-rub').value;
+        const gSel = document.getElementById('m-gru');
+        gSel.innerHTML = '<option value="">Grupo...</option>' + 
+                         Object.keys(dbStock[rubro]).map(x => `<option value="${x}">${x}</option>`).join("");
+        gSel.disabled = false;
+    }
 
-        // --- MANEJO DE SESIÓN ---
-        window.onload = () => {
-            if(localStorage.getItem('sgm_session') === PIN_CORRECTO) {
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-                init();
-            }
-        };
-
-        function verificarAcceso() {
-            const pin = document.getElementById('pin-input').value;
-            if(pin === PIN_CORRECTO) {
-                localStorage.setItem('sgm_session', PIN_CORRECTO);
-                document.getElementById('login-screen').classList.add('hidden');
-                document.getElementById('main-content').classList.remove('hidden');
-                init();
-            } else alert("PIN Incorrecto");
-        }
-
-        async function init() {
-            showL(true);
-            try {
-                const eds = await fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`).then(r=>r.json());
-                ['n-edif','e-edif','r-edif'].forEach(id => {
-                    document.getElementById(id).innerHTML = '<option value="">Seleccione Edificio...</option>' + eds.map(e=>`<option value="${e}">${e}</option>`).join("");
-                });
-                // Carga de materiales robusta
-                dbM = await fetch(`${URL}?action=getMateriales&token=${PIN_CORRECTO}`).then(r=>r.json());
-                document.getElementById('m-rub').innerHTML = '<option value="">Seleccionar Rubro</option>' + Object.keys(dbM).map(x=>`<option value="${x}">${x}</option>`).join("");
-            } catch(e) { console.error(e); }
-            showL(false);
-        }
+    // Al cambiar de Grupo
+    function loadI() {
+        const rubro = document.getElementById('m-rub').value;
+        const grupo = document.getElementById('m-gru').value;
+        const iSel = document.getElementById('m-ite');
+        iSel.innerHTML = '<option value="">Item...</option>' + 
+                         dbStock[rubro][grupo].map(x => `<option value='${JSON.stringify(x)}'>${x.nombre} (S:${x.stock})</option>`).join("");
+        iSel.disabled = false;
+    }
+    
+    // ... resto de funciones (addItem, cerrarOT, tab, etc)
+</script>
 
         function tab(t) {
             ['nueva','pendientes','relev','extintores','historial'].forEach(s => {
