@@ -13,7 +13,7 @@
         .card-cerrada { border-left: 5px solid #10b981; opacity: 0.8; }
     </style>
 </head>
-<body class="bg-slate-100 p-2 text-slate-800">
+<body class="bg-slate-100 p-2 text-slate-800 font-sans">
 
     <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-[2000] p-4">
         <div class="bg-white p-10 rounded-[45px] shadow-2xl w-full max-w-sm text-center">
@@ -25,10 +25,10 @@
 
     <div id="loader" class="loading-overlay">
         <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 font-black text-blue-900 text-[10px] uppercase tracking-widest">Procesando datos...</p>
+        <p class="mt-4 font-black text-blue-900 text-[10px] uppercase tracking-widest text-center px-4">Sincronizando con base de datos...</p>
     </div>
 
-    <div id="main-content" class="max-w-4xl mx-auto bg-white rounded-[40px] shadow-xl p-4 hidden mt-2 mb-10">
+    <div id="main-content" class="max-w-4xl mx-auto bg-white rounded-[40px] shadow-xl p-4 hidden mt-2 mb-10 min-h-[80vh]">
         
         <div class="flex border-b mb-6 overflow-x-auto no-scrollbar text-[10px] font-black uppercase whitespace-nowrap sticky top-0 bg-white z-50">
             <button onclick="tab('nueva')" id="btn-nueva" class="flex-1 py-5 tab-active">Nueva OT</button>
@@ -52,7 +52,7 @@
             </div>
             <input id="n-rep" placeholder="Reportó..." class="w-full p-4 border rounded-2xl text-xs bg-slate-50">
             <select id="n-tec" class="w-full p-4 border-2 border-yellow-200 rounded-2xl text-xs font-black bg-yellow-50"><option value="">Técnico...</option><option>DSF</option><option>AGL</option><option>MAP</option><option>RRG</option></select>
-            <textarea id="n-desc" placeholder="Descripción de la falla..." class="w-full p-4 border rounded-2xl bg-slate-50 text-xs" rows="3"></textarea>
+            <textarea id="n-desc" placeholder="Descripción de la falla o tarea..." class="w-full p-4 border rounded-2xl bg-slate-50 text-xs" rows="3"></textarea>
             <button onclick="saveOT()" class="w-full bg-blue-700 text-white p-5 rounded-3xl font-black uppercase shadow-lg">Registrar OT</button>
         </div>
 
@@ -98,7 +98,7 @@
         <div id="sec-extintores" class="hidden space-y-4">
             <div class="flex gap-2">
                 <select id="e-edif" onchange="loadExtintores()" class="flex-1 p-4 border-2 border-red-100 rounded-2xl text-xs font-black bg-red-50"></select>
-                <button onclick="window.open('URL_DE_TU_FORMULARIO_AQUI')" class="bg-slate-900 text-white px-4 rounded-2xl text-[9px] font-black uppercase">Orden Compra</button>
+                <button onclick="generarOrdenCompra()" class="bg-slate-900 text-white px-4 rounded-2xl text-[9px] font-black uppercase shadow-lg active:bg-red-600">Generar TXT Compra</button>
             </div>
             <div id="ext-lista" class="grid grid-cols-1 gap-3"></div>
         </div>
@@ -112,13 +112,23 @@
     </div>
 
     <script>
+        // ACTUALIZA ESTA URL CON TU URL DE IMPLEMENTACIÓN DE GOOGLE
         const URL = "https://script.google.com/macros/s/AKfycbyALUU--qMV981OYeLVJHRQLBhuF3rNqxjA9na1oGfDcbP4KxuUrpcWSPvEEHzq7w7a/exec"; 
         const PIN_CORRECTO = "4370";
+        
         let dbU = [], dbM = {}, cesta = [], filtroSoloAbiertas = false, currentRelevFila = null;
 
         function showL(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
         window.onload = () => { if(localStorage.getItem('sgm_session') === PIN_CORRECTO) loginExitoso(); };
-        function verificarAcceso() { if(document.getElementById('pin-input').value === PIN_CORRECTO) { localStorage.setItem('sgm_session', PIN_CORRECTO); loginExitoso(); } else alert("PIN Incorrecto"); }
+        
+        function verificarAcceso() { 
+            if(document.getElementById('pin-input').value === PIN_CORRECTO) { 
+                localStorage.setItem('sgm_session', PIN_CORRECTO); 
+                loginExitoso(); 
+            } else {
+                alert("PIN Incorrecto"); 
+            }
+        }
 
         function loginExitoso() {
             document.getElementById('login-screen').classList.add('hidden');
@@ -130,13 +140,14 @@
             showL(true);
             try {
                 const eds = await fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`).then(r=>r.json());
-                const opt = '<option value="">Edificio...</option>' + eds.map(e=>`<option value="${e}">${e}</option>`).join("");
+                const opt = '<option value="">Seleccionar Edificio...</option>' + eds.map(e=>`<option value="${e}">${e}</option>`).join("");
                 document.getElementById('n-edif').innerHTML = opt;
                 document.getElementById('r-edif').innerHTML = opt;
                 document.getElementById('e-edif').innerHTML = opt;
+                
                 dbM = await fetch(`${URL}?action=getMateriales&token=${PIN_CORRECTO}`).then(r=>r.json());
                 document.getElementById('m-rub').innerHTML = '<option value="">1. Rubro (Hoja)</option>' + Object.keys(dbM).map(x=>`<option value="${x}">${x}</option>`).join("");
-            } catch(e) { console.error(e); }
+            } catch(e) { console.error("Error inicializando:", e); }
             showL(false);
         }
 
@@ -149,7 +160,7 @@
             if(t==='historial') loadHistorial();
         }
 
-        // --- HISTORIAL ---
+        // --- LÓGICA HISTORIAL ---
         function toggleFiltroHistorial() {
             filtroSoloAbiertas = !filtroSoloAbiertas;
             document.getElementById('btn-filtro-ot').innerText = filtroSoloAbiertas ? "Mostrar Todas" : "Mostrar solo Abiertas";
@@ -172,12 +183,15 @@
             showL(false);
         }
 
-        // --- RELEVAMIENTO ---
+        // --- LÓGICA RELEVAMIENTO ---
         async function loadCascadaRelev() {
-            const ed = document.getElementById('r-edif').value; showL(true);
+            const ed = document.getElementById('r-edif').value; if(!ed) return;
+            showL(true);
             dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
             document.getElementById('r-sec').innerHTML = '<option value="">Sector...</option>' + [...new Set(dbU.map(x=>x.sector))].map(s=>`<option value="${s}">${s}</option>`).join("");
-            document.getElementById('r-sec').disabled = false; showL(false);
+            document.getElementById('r-sec').disabled = false;
+            document.getElementById('relev-form').classList.add('hidden');
+            showL(false);
         }
         function filterUbiRelev() {
             const s = document.getElementById('r-sec').value;
@@ -201,10 +215,11 @@
             showL(true);
             const data = { action: 'updateRelevamiento', token: PIN_CORRECTO, edificio: document.getElementById('r-edif').value, fila: currentRelevFila, inv_aire: document.getElementById('r-inv-a').value, eq_aire: document.getElementById('r-eq-a').value, t_lum: document.getElementById('r-t-lum').value, c_art: document.getElementById('r-c-art').value, c_lam: document.getElementById('r-c-lam').value, em: document.getElementById('r-em').value, vent: document.getElementById('r-vent').value, inv_vent: document.getElementById('r-inv-v').value };
             await fetch(URL, { method: 'POST', body: JSON.stringify(data) });
-            alert("DATOS ACTUALIZADOS CORRECTAMENTE"); showL(false);
+            alert("DATOS ACTUALIZADOS EN PLANILLA");
+            showL(false);
         }
 
-        // --- EXTINTORES ---
+        // --- LÓGICA EXTINTORES ---
         async function loadExtintores() {
             const ed = document.getElementById('e-edif').value; if(!ed) return;
             showL(true);
@@ -213,12 +228,46 @@
                 let col = "border-green-500 bg-green-50"; 
                 if (x.f_venc.includes("2024")) col = "border-red-600 bg-red-50 animate-pulse";
                 else if (x.f_venc.includes("2025")) col = "border-yellow-500 bg-yellow-50";
-                return `<div class="p-4 border-l-8 rounded-3xl shadow-sm text-[11px] ${col}"><div class="flex justify-between font-black uppercase"><span>S/N: ${x.serie}</span><span>${x.tipo} ${x.cap}</span></div><p class="text-slate-600">${x.sector} - ${x.ubi}</p><p class="mt-2 font-black text-slate-800">VENCE: ${x.f_venc}</p></div>`;
+                return `
+                    <div class="p-4 border-l-8 rounded-3xl shadow-sm text-[11px] ${col}">
+                        <div class="flex justify-between font-black uppercase">
+                            <span>S/N: ${x.serie}</span>
+                            <span>${x.tipo} ${x.cap}</span>
+                        </div>
+                        <p class="text-slate-600">${x.sector} - ${x.ubi}</p>
+                        <p class="mt-2 font-black text-slate-800 uppercase">Vencimiento: ${x.f_venc}</p>
+                    </div>`;
             }).join("");
             showL(false);
         }
 
-        // --- LÓGICA DE OT ---
+        function generarOrdenCompra() {
+            const contenedor = document.getElementById('ext-lista');
+            const tarjetas = contenedor.querySelectorAll('.border-red-600');
+            if (tarjetas.length === 0) return alert("No hay extintores vencidos (Rojos) para comprar.");
+
+            let conteoEquipos = {}, detalleEquipos = "";
+            tarjetas.forEach(tarjeta => {
+                const nSerie = tarjeta.querySelector('.font-black.uppercase').children[0].innerText;
+                const tipoCap = tarjeta.querySelector('.font-black.uppercase').children[1].innerText;
+                const ubi = tarjeta.querySelector('.text-slate-600').innerText;
+                conteoEquipos[tipoCap] = (conteoEquipos[tipoCap] || 0) + 1;
+                detalleEquipos += `- ${nSerie} | ${tipoCap} | ${ubi}\n`;
+            });
+
+            let txt = `SGM INGENIERÍA - ORDEN DE COMPRA\nEDIFICIO: ${document.getElementById('e-edif').value}\nFECHA: ${new Date().toLocaleDateString()}\n`;
+            txt += `==========================================\nRESUMEN:\n`;
+            for (const [m, c] of Object.entries(conteoEquipos)) txt += `${c} unid. de ${m}\n`;
+            txt += `==========================================\nDETALLE:\n${detalleEquipos}\nTOTAL: ${tarjetas.length} EQUIPOS.`;
+
+            const blob = new Blob([txt], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.download = `Compra_Extintores_${document.getElementById('e-edif').value}.txt`;
+            link.href = window.URL.createObjectURL(blob);
+            link.click();
+        }
+
+        // --- LÓGICA OT (NUEVA Y CIERRE) ---
         async function loadAbiertas() { showL(true); const res = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`); const data = await res.json(); document.getElementById('c-lista').innerHTML = data.map(o => `<option value="${o.id}">${o.detalle}</option>`).join(""); showL(false); }
         async function loadCascada(edId, secId, ubiId) { const ed = document.getElementById(edId).value; showL(true); dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json()); document.getElementById(secId).innerHTML = '<option value="">Sector...</option>' + [...new Set(dbU.map(x=>x.sector))].map(s=>`<option value="${s}">${s}</option>`).join(""); document.getElementById(secId).disabled = false; showL(false); }
         function filterUbi(secId, ubiId) { const s = document.getElementById(secId).value; document.getElementById(ubiId).innerHTML = '<option value="">Ubi...</option>' + dbU.filter(x=>x.sector===s).map(x=>`<option value='${JSON.stringify(x)}'>${x.ubi}</option>`).join(""); document.getElementById(ubiId).disabled = false; }
@@ -228,8 +277,24 @@
         function loadI() { const r = document.getElementById('m-rub').value, g = document.getElementById('m-gru').value; document.getElementById('m-ite').innerHTML = '<option value="">3. Item...</option>' + dbM[r][g].map(x=>`<option value='${JSON.stringify(x)}'>${x.nombre} (Stock: ${x.stock})</option>`).join(""); document.getElementById('m-ite').disabled = false; }
         function addItem() { const it = JSON.parse(document.getElementById('m-ite').value); cesta.push({nombre: it.nombre, cantidad: document.getElementById('m-cant').value, hoja: it.hoja}); renderCesta(); }
         function renderCesta() { document.getElementById('cesta').innerHTML = cesta.map((x,i)=>`<div class="flex justify-between bg-blue-600 text-white p-2 rounded-xl text-[9px] mb-1"><span>${x.cantidad} x ${x.nombre}</span><button onclick="cesta.splice(${i},1);renderCesta()">X</button></div>`).join(""); }
-        async function cerrarOT() { const idOT = document.getElementById('c-lista').value; if(!idOT) return alert("Seleccione OT"); showL(true); const data = { action: 'cerrarOT', token: PIN_CORRECTO, idOT: idOT, materialesUsados: cesta.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), listaParaDescontar: cesta, comentarioFinal: document.getElementById('c-obs').value }; const res = await fetch(URL, { method: 'POST', body: JSON.stringify(data) }); const txt = await res.text(); if(txt.trim() === "Ok") { alert("¡ÉXITO!"); location.reload(); } else { alert(txt); showL(false); } }
-        async function saveOT() { showL(true); const u = JSON.parse(document.getElementById('n-ubi').value); const p = { action: 'nuevaOT', token: PIN_CORRECTO, tipo: document.getElementById('n-tipo').value, especialidad: document.getElementById('n-rubro').value, edificio: document.getElementById('n-edif').value, sector: u.sector, ubicacion: u.ubi, nInventario: document.getElementById('n-inv').value, equipo: document.getElementById('n-eq').value, reportadoPor: document.getElementById('n-rep').value, personal: document.getElementById('n-tec').value, descripcion: document.getElementById('n-desc').value }; await fetch(URL, {method:'POST', body: JSON.stringify(p)}); alert("OT REGISTRADA"); location.reload(); }
+        
+        async function cerrarOT() { 
+            const idOT = document.getElementById('c-lista').value; if(!idOT) return alert("Seleccione OT"); 
+            showL(true); 
+            const data = { action: 'cerrarOT', token: PIN_CORRECTO, idOT: idOT, materialesUsados: cesta.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), listaParaDescontar: cesta, comentarioFinal: document.getElementById('c-obs').value }; 
+            const res = await fetch(URL, { method: 'POST', body: JSON.stringify(data) }); 
+            const txt = await res.text(); 
+            if(txt.trim() === "Ok") { alert("OT CERRADA Y STOCK ACTUALIZADO"); location.reload(); } else { alert(txt); showL(false); } 
+        }
+
+        async function saveOT() { 
+            if(!document.getElementById('n-tec').value || !document.getElementById('n-edif').value) return alert("Complete los campos obligatorios");
+            showL(true); 
+            const u = JSON.parse(document.getElementById('n-ubi').value); 
+            const p = { action: 'nuevaOT', token: PIN_CORRECTO, tipo: document.getElementById('n-tipo').value, especialidad: document.getElementById('n-rubro').value, edificio: document.getElementById('n-edif').value, sector: u.sector, ubicacion: u.ubi, nInventario: document.getElementById('n-inv').value, equipo: document.getElementById('n-eq').value, reportadoPor: document.getElementById('n-rep').value, personal: document.getElementById('n-tec').value, descripcion: document.getElementById('n-desc').value }; 
+            await fetch(URL, {method:'POST', body: JSON.stringify(p)}); 
+            alert("NUEVA OT REGISTRADA"); location.reload(); 
+        }
     </script>
 </body>
 </html>
