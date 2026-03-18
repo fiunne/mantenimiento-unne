@@ -6,129 +6,159 @@
     <title>SGM PRO 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
-        .tab-active { border-bottom: 4px solid #1e40af; color: #1e40af; font-weight: bold; background: #f1f5f9; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(255,255,255,0.9); display: none; justify-content: center; align-items: center; z-index: 1000; flex-direction: column; }
+        .tab-active { border-bottom: 4px solid #1e40af; color: #1e40af; font-weight: bold; background: #f8fafc; }
+        .card-vencida { border-left: 8px solid #ef4444; background: #fff1f2; }
+        .card-proxima { border-left: 8px solid #f59e0b; background: #fffbeb; }
+        .card-ok { border-left: 8px solid #22c55e; background: #f0fdf4; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        input, select, textarea { font-size: 14px !important; }
     </style>
 </head>
 <body class="bg-slate-100 p-2 text-slate-800">
 
     <div id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center z-[2000] p-4">
         <div class="bg-white p-10 rounded-[45px] shadow-2xl w-full max-w-sm text-center">
-            <h2 class="font-black text-2xl mb-8 uppercase tracking-tighter">SGM INGENIERÍA</h2>
-            <input type="password" id="pin-input" placeholder="PIN" class="w-full border-2 p-5 rounded-3xl text-center text-4xl mb-6 outline-none focus:border-blue-500">
-            <button onclick="verificarAcceso()" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl uppercase">Entrar</button>
+            <h2 class="font-black text-2xl mb-8 uppercase tracking-tighter text-blue-900">SGM INGENIERÍA</h2>
+            <input type="password" id="pin-input" placeholder="PIN ACCESO" class="w-full border-2 p-5 rounded-3xl text-center text-4xl mb-6 outline-none focus:border-blue-500">
+            <button onclick="verificarAcceso()" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl uppercase shadow-lg">Entrar</button>
         </div>
     </div>
 
     <div id="loader" class="loading-overlay">
         <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 font-black text-blue-900 text-[10px] uppercase animate-pulse">Procesando Base de Datos...</p>
+        <p class="mt-4 font-black text-blue-900 text-[10px] uppercase animate-pulse">Sincronizando Sistema...</p>
     </div>
 
     <div id="main-content" class="max-w-4xl mx-auto bg-white rounded-[40px] shadow-xl p-4 hidden mt-2 mb-10 overflow-hidden">
         
-        <div class="flex border-b mb-6 overflow-x-auto no-scrollbar text-[10px] font-black uppercase whitespace-nowrap bg-white">
+        <div class="flex border-b mb-6 overflow-x-auto no-scrollbar text-[10px] font-black uppercase whitespace-nowrap bg-white sticky top-0 z-50">
             <button onclick="tab('nueva')" id="btn-nueva" class="flex-1 py-5 tab-active">Nueva OT</button>
             <button onclick="tab('pendientes')" id="btn-pendientes" class="flex-1 py-5 text-slate-400">Cerrar OT</button>
-            <button onclick="tab('relev')" id="btn-relev" class="flex-1 py-5 text-blue-600 font-bold">📋 Relevamiento</button>
+            <button onclick="tab('relev')" id="btn-relev" class="flex-1 py-5 text-blue-600">📋 Relevamiento</button>
             <button onclick="tab('extintores')" id="btn-extintores" class="flex-1 py-5 text-red-500">🛡️ Extintores</button>
             <button onclick="tab('historial')" id="btn-historial" class="flex-1 py-5 text-slate-400">Historial</button>
         </div>
 
         <div id="sec-nueva" class="space-y-4">
             <div class="grid grid-cols-2 gap-2">
-                <select id="n-tipo" class="p-4 bg-slate-50 border rounded-2xl"><option>Correctivo</option><option>Preventivo</option><option>Mejora</option></select>
-                <select id="n-rubro" onchange="checkRefrig()" class="p-4 bg-slate-50 border rounded-2xl"><option>Electricidad</option><option>General</option><option>Refrigeración</option></select>
+                <select id="n-tipo" class="p-4 bg-slate-50 border rounded-2xl text-xs font-bold"><option>Correctivo</option><option>Preventivo</option><option>Mejora</option></select>
+                <select id="n-rubro" onchange="checkRefrig()" class="p-4 bg-slate-50 border rounded-2xl text-xs font-bold"><option>Electricidad</option><option>General</option><option>Refrigeración</option><option>Herrería</option></select>
             </div>
-            <select id="n-edif" onchange="loadCascada('n-edif','n-sec','n-ubi','dbU')" class="w-full p-4 border rounded-2xl font-black bg-blue-50"></select>
-            <select id="n-sec" onchange="filterUbi('n-sec','n-ubi','dbU')" class="w-full p-4 border rounded-2xl" disabled><option>Sector...</option></select>
-            <select id="n-ubi" onchange="autoFill()" class="w-full p-4 border rounded-2xl font-bold" disabled><option>Ubicación...</option></select>
-            <div id="div-refrig" class="hidden grid grid-cols-2 gap-2 bg-blue-50 p-4 rounded-2xl">
-                <input id="n-inv" placeholder="Inv" class="p-3 border rounded-xl bg-white" readonly>
-                <input id="n-eq" placeholder="Equipo" class="p-3 border rounded-xl bg-white" readonly>
+            <select id="n-edif" onchange="loadCascada('n-edif','n-sec','n-ubi','dbU')" class="w-full p-4 border-2 border-blue-100 rounded-2xl text-xs font-black bg-blue-50"></select>
+            <select id="n-sec" onchange="filterUbi('n-sec','n-ubi','dbU')" class="w-full p-4 border rounded-2xl text-xs" disabled><option>Sector...</option></select>
+            <select id="n-ubi" onchange="autoFill()" class="w-full p-4 border rounded-2xl text-xs font-bold" disabled><option>Ubicación...</option></select>
+            
+            <div id="div-refrig" class="hidden grid grid-cols-2 gap-2 bg-blue-50 p-4 rounded-2xl border border-blue-100">
+                <input id="n-inv" placeholder="N° Inv" class="p-3 border rounded-xl bg-white text-xs" readonly>
+                <input id="n-eq" placeholder="Equipo" class="p-3 border rounded-xl bg-white text-xs" readonly>
             </div>
-            <input id="n-rep" placeholder="Reportado por" class="w-full p-4 border rounded-2xl bg-slate-50">
-            <select id="n-tec" class="w-full p-4 border-2 border-yellow-200 rounded-2xl font-black bg-yellow-50"><option value="">Técnico...</option><option>DSF</option><option>AGL</option><option>MAP</option><option>RRG</option></select>
-            <textarea id="n-desc" placeholder="Descripción..." class="w-full p-4 border rounded-2xl bg-slate-50" rows="2"></textarea>
-            <button onclick="saveOT()" class="w-full bg-blue-700 text-white p-5 rounded-3xl font-black uppercase">Registrar OT</button>
+
+            <div class="grid grid-cols-2 gap-2">
+                <input id="n-rep" placeholder="Reportó..." class="p-4 border rounded-2xl text-xs bg-slate-50">
+                <select id="n-tec" class="p-4 border-2 border-yellow-200 rounded-2xl text-xs font-black bg-yellow-50"><option value="">Técnico...</option><option>DSF</option><option>AGL</option><option>MAP</option><option>RRG</option></select>
+            </div>
+            <textarea id="n-desc" placeholder="Descripción de la falla o tarea..." class="w-full p-4 border rounded-2xl bg-slate-50 text-xs" rows="3"></textarea>
+            <button onclick="saveOT()" class="w-full bg-blue-700 text-white p-5 rounded-3xl font-black uppercase shadow-lg active:scale-95 transition-all">Generar Orden de Trabajo</button>
         </div>
 
         <div id="sec-pendientes" class="hidden space-y-4">
-            <select id="c-lista" class="w-full p-4 border rounded-2xl font-black bg-green-50"></select>
-            <div class="p-5 bg-slate-50 rounded-[35px] border-2 border-dashed space-y-3">
-                <select id="m-rub" onchange="loadG()" class="w-full p-3 border rounded-xl bg-white font-bold"></select>
+            <select id="c-lista" class="w-full p-4 border-2 border-green-100 rounded-2xl font-black bg-green-50 text-xs"></select>
+            
+            <div class="p-5 bg-slate-50 rounded-[35px] border-2 border-dashed border-slate-200 space-y-3">
+                <p class="text-[9px] font-black text-slate-400 uppercase text-center">Insumos de Almacén</p>
+                <select id="m-rub" onchange="loadG()" class="w-full p-3 border rounded-xl bg-white text-xs font-bold"></select>
                 <div class="grid grid-cols-2 gap-2">
-                    <select id="m-gru" onchange="loadI()" class="p-3 border rounded-xl bg-white" disabled><option>Grupo</option></select>
-                    <select id="m-ite" class="p-3 border rounded-xl bg-white text-[10px]" disabled><option>Item</option></select>
+                    <select id="m-gru" onchange="loadI()" class="p-3 border rounded-xl bg-white text-xs" disabled><option>Grupo...</option></select>
+                    <select id="m-ite" class="p-3 border rounded-xl bg-white text-[10px]" disabled><option>Item...</option></select>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex gap-2 items-center">
                     <input type="number" id="m-cant" value="1" class="w-20 p-3 border-2 border-blue-200 rounded-xl text-center font-black">
-                    <button onclick="addItem()" class="flex-1 bg-slate-800 text-white rounded-xl font-bold uppercase text-[10px]">Añadir Material</button>
+                    <button onclick="addItem()" class="flex-1 bg-slate-800 text-white p-3 rounded-xl font-black text-[10px] uppercase">Añadir</button>
                 </div>
-                <div id="cesta" class="text-[10px] space-y-1 font-bold"></div>
+                <div id="cesta" class="space-y-1"></div>
             </div>
-            <textarea id="c-obs" placeholder="Observaciones cierre..." class="w-full p-4 border rounded-2xl bg-slate-50" rows="2"></textarea>
-            <button onclick="cerrarOT()" class="w-full bg-green-600 text-white p-5 rounded-3xl font-black uppercase">Finalizar Orden</button>
+
+            <textarea id="c-obs" placeholder="Observaciones finales del técnico..." class="w-full p-4 border rounded-2xl bg-slate-50 text-xs" rows="3"></textarea>
+            <button onclick="cerrarOT()" class="w-full bg-green-600 text-white p-6 rounded-[35px] font-black uppercase shadow-lg active:scale-95 transition-all">Cerrar Orden y Actualizar Stock</button>
         </div>
 
-        <div id="sec-relev" class="hidden space-y-3">
-            <p class="text-[10px] font-black text-blue-600 uppercase text-center">Actualización de Ficha Técnica</p>
-            <select id="r-edif" onchange="loadCascada('r-edif','r-sec','r-ubi','dbR')" class="w-full p-4 border-2 border-blue-200 rounded-2xl font-black bg-blue-50"></select>
+        <div id="sec-relev" class="hidden space-y-4">
+            <select id="r-edif" onchange="loadCascada('r-edif','r-sec','r-ubi','dbR')" class="w-full p-4 border-2 border-blue-200 rounded-2xl font-black bg-blue-50 text-xs"></select>
             <div class="grid grid-cols-2 gap-2">
                 <select id="r-sec" onchange="filterUbi('r-sec','r-ubi','dbR')" class="p-4 border rounded-2xl text-xs" disabled><option>Sector...</option></select>
                 <select id="r-ubi" onchange="fillRelev()" class="p-4 border rounded-2xl text-xs" disabled><option>Ubicación...</option></select>
             </div>
-            <div id="form-relev" class="grid grid-cols-1 gap-3 p-4 bg-slate-50 rounded-3xl border">
+            
+            <div class="grid grid-cols-1 gap-3 p-5 bg-slate-50 rounded-[35px] border">
                 <div class="grid grid-cols-2 gap-2">
-                    <input id="r-inv-a" placeholder="Inv. Aire" class="p-3 border rounded-xl bg-white">
-                    <input id="r-eq-a" placeholder="Equipo Aire" class="p-3 border rounded-xl bg-white">
+                    <div class="space-y-1"><label class="text-[8px] font-bold ml-2">INV. AIRE</label><input id="r-inv-a" class="w-full p-3 border rounded-xl text-xs"></div>
+                    <div class="space-y-1"><label class="text-[8px] font-bold ml-2">EQUIPO AIRE</label><input id="r-eq-a" class="w-full p-3 border rounded-xl text-xs"></div>
                 </div>
-                <input id="r-tlum" placeholder="Tipo Artef. Iluminación" class="p-3 border rounded-xl bg-white">
+                <div class="space-y-1"><label class="text-[8px] font-bold ml-2">TIPO ILUMINACIÓN</label><input id="r-tlum" class="w-full p-3 border rounded-xl text-xs"></div>
                 <div class="grid grid-cols-2 gap-2">
-                    <input id="r-cart" type="number" placeholder="Cant. Artef." class="p-3 border rounded-xl bg-white">
-                    <input id="r-clam" type="number" placeholder="Cant. Lámparas" class="p-3 border rounded-xl bg-white">
+                    <div class="space-y-1"><label class="text-[8px] font-bold ml-2">CANT. ARTEF.</label><input id="r-cart" type="number" class="w-full p-3 border rounded-xl text-xs"></div>
+                    <div class="space-y-1"><label class="text-[8px] font-bold ml-2">CANT. LÁMP.</label><input id="r-clam" type="number" class="w-full p-3 border rounded-xl text-xs"></div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <input id="r-em" placeholder="Emergencias" class="p-3 border rounded-xl bg-white">
-                    <input id="r-vent" placeholder="Ventiladores" class="p-3 border rounded-xl bg-white">
+                    <div class="space-y-1"><label class="text-[8px] font-bold ml-2">EMERGENCIAS</label><input id="r-em" class="w-full p-3 border rounded-xl text-xs"></div>
+                    <div class="space-y-1"><label class="text-[8px] font-bold ml-2">VENTILADORES</label><input id="r-vent" class="w-full p-3 border rounded-xl text-xs"></div>
                 </div>
-                <input id="r-inv-v" placeholder="Inventario Vent." class="p-3 border rounded-xl bg-white">
-                <button onclick="updateRelev()" class="w-full bg-blue-600 text-white p-5 rounded-3xl font-black uppercase shadow-lg">Actualizar Ficha</button>
+                <div class="space-y-1"><label class="text-[8px] font-bold ml-2">INV. VENTILADORES</label><input id="r-inv-v" class="w-full p-3 border rounded-xl text-xs"></div>
+                
+                <button onclick="updateRelev()" class="w-full bg-blue-600 text-white p-5 rounded-3xl font-black uppercase mt-4">Actualizar Ficha Técnica</button>
             </div>
         </div>
 
         <div id="sec-extintores" class="hidden space-y-4">
-            <select id="e-edif" onchange="loadExt()" class="w-full p-5 bg-slate-900 text-white rounded-[25px] font-black"></select>
-            <button onclick="downloadOC()" class="w-full bg-red-600 text-white p-4 rounded-2xl font-black text-[10px] uppercase">Generar Orden Compra</button>
-            <div id="e-lista" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-96 overflow-y-auto"></div>
+            <div class="flex flex-col gap-2">
+                <select id="e-edif" onchange="loadExt()" class="w-full p-5 bg-slate-900 text-white rounded-[25px] font-black text-sm outline-none"></select>
+                <button onclick="downloadOC()" class="w-full bg-red-600 text-white p-4 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-lg">📄 Generar Orden de Compra</button>
+            </div>
+            <div id="e-lista" class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-h-[60vh] overflow-y-auto pr-2"></div>
         </div>
 
         <div id="sec-historial" class="hidden space-y-3">
-            <input type="text" id="h-search" onkeyup="filterHist()" placeholder="Buscar OT o Estado..." class="w-full p-4 border rounded-[25px] bg-slate-50 font-bold">
-            <div id="hist-lista" class="space-y-2 max-h-[60vh] overflow-y-auto"></div>
+            <input type="text" id="h-search" onkeyup="filterHist()" placeholder="Buscar por OT o Estado..." class="w-full p-4 border rounded-[25px] bg-slate-50 font-bold text-xs">
+            <div id="hist-lista" class="space-y-2 max-h-[60vh] overflow-y-auto pr-2"></div>
         </div>
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbwU8g9PFoPHCpG0A2Xtk_E76puf8l0AaqbBUw1TrTwexOBtnyfTC1q_FPHRfLCmtwoc/exec"; // REEMPLAZAR
+        const URL = "https://script.google.com/macros/s/AKfycbzAsvCo6XYWYNE-yMmNVmolxSVUqYXVR56mWmpK_h-SPa-YPs4n56U5kdXJDEI-mojy/exec"; // REEMPLAZAR
         const PIN_CORRECTO = "4370";
         let dbU = [], dbR = [], dbM = {}, dbE = [], cesta = [], dbH = [];
 
         function showL(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
 
-        // Sesión
-        window.onload = () => { if(localStorage.getItem('sgm_session') === PIN_CORRECTO) { document.getElementById('login-screen').classList.add('hidden'); document.getElementById('main-content').classList.remove('hidden'); init(); } };
-        function verificarAcceso() { const p = document.getElementById('pin-input').value; if(p === PIN_CORRECTO) { localStorage.setItem('sgm_session', PIN_CORRECTO); document.getElementById('login-screen').classList.add('hidden'); document.getElementById('main-content').classList.remove('hidden'); init(); } else alert("PIN Error"); }
+        // --- MANEJO DE SESIÓN ---
+        window.onload = () => {
+            if(localStorage.getItem('sgm_session') === PIN_CORRECTO) {
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                init();
+            }
+        };
+
+        function verificarAcceso() {
+            const pin = document.getElementById('pin-input').value;
+            if(pin === PIN_CORRECTO) {
+                localStorage.setItem('sgm_session', PIN_CORRECTO);
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-content').classList.remove('hidden');
+                init();
+            } else alert("PIN Incorrecto");
+        }
 
         async function init() {
             showL(true);
             try {
                 const eds = await fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`).then(r=>r.json());
-                ['n-edif','e-edif','r-edif'].forEach(id => { document.getElementById(id).innerHTML = '<option value="">Edificio...</option>' + eds.map(e=>`<option value="${e}">${e}</option>`).join(""); });
+                ['n-edif','e-edif','r-edif'].forEach(id => {
+                    document.getElementById(id).innerHTML = '<option value="">Seleccione Edificio...</option>' + eds.map(e=>`<option value="${e}">${e}</option>`).join("");
+                });
+                // Carga de materiales robusta
                 dbM = await fetch(`${URL}?action=getMateriales&token=${PIN_CORRECTO}`).then(r=>r.json());
-                document.getElementById('m-rub').innerHTML = '<option value="">Rubro Material</option>' + Object.keys(dbM).map(x=>`<option value="${x}">${x}</option>`).join("");
+                document.getElementById('m-rub').innerHTML = '<option value="">Seleccionar Rubro</option>' + Object.keys(dbM).map(x=>`<option value="${x}">${x}</option>`).join("");
             } catch(e) { console.error(e); }
             showL(false);
         }
@@ -142,7 +172,92 @@
             if(t==='historial') loadHist();
         }
 
-        // Cascada Universal
+        // --- LÓGICA EXTINTORES (RESTAURADA) ---
+        async function loadExt() {
+            const ed = document.getElementById('e-edif').value; if(!ed) return;
+            showL(true);
+            dbE = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
+            const list = document.getElementById('e-lista'); list.innerHTML = "";
+            const hoy = new Date();
+            
+            dbE.forEach(x => {
+                const partes = x.f_venc.split('/');
+                const fv = new Date(partes[2], partes[1]-1, partes[0]);
+                const diff = (fv - hoy) / (1000 * 60 * 60 * 24);
+                
+                let cls = "card-ok";
+                if(diff < 0) cls = "card-vencida";
+                else if(diff < 30) cls = "card-proxima";
+                
+                list.innerHTML += `
+                <div class="p-4 rounded-[25px] border shadow-sm text-left ${cls} transition-all">
+                    <div class="flex justify-between font-black text-[11px] text-slate-900">
+                        <span>${x.unne}</span>
+                        <span class="bg-white/50 px-2 rounded-lg border text-[9px]">S/N: ${x.serie}</span>
+                    </div>
+                    <p class="text-[9px] font-bold text-slate-600 mt-1 uppercase">${x.ubi}</p>
+                    <div class="mt-2 text-[9px] font-bold flex gap-2">
+                        <span class="bg-white/30 px-2 py-0.5 rounded-md">TIPO: ${x.tipo}</span>
+                        <span class="bg-white/30 px-2 py-0.5 rounded-md">${x.cap} KG</span>
+                    </div>
+                    <p class="text-[10px] mt-2 font-black border-t border-black/5 pt-2">VENCIMIENTO: ${x.f_venc}</p>
+                </div>`;
+            });
+            showL(false);
+        }
+
+        function downloadOC() {
+            const resumen = {};
+            dbE.forEach(x => {
+                const partes = x.f_venc.split('/');
+                const fv = new Date(partes[2], partes[1]-1, partes[0]);
+                if(fv < new Date()) {
+                    const clave = `${x.tipo}_${x.cap}`;
+                    if(!resumen[clave]) resumen[clave] = { tipo: x.tipo, cap: x.cap, cant: 0 };
+                    resumen[clave].cant++;
+                }
+            });
+            if(Object.keys(resumen).length === 0) return alert("No hay extintores vencidos");
+            let txt = "ORDEN DE RECARGA - " + document.getElementById('e-edif').value + "\n=========================\n";
+            Object.values(resumen).forEach(r => txt += `CANT: ${r.cant} | TIPO: ${r.tipo} | CAP: ${r.cap}KG\n`);
+            const blob = new Blob([txt], {type: "text/plain"});
+            const a = document.createElement("a");
+            a.href = window.URL.createObjectURL(blob);
+            a.download = "OC_Extintores.txt"; a.click();
+        }
+
+        // --- RELEVAMIENTO ---
+        function fillRelev() {
+            const d = JSON.parse(document.getElementById('r-ubi').value);
+            document.getElementById('r-inv-a').value = d.inv_aire || "";
+            document.getElementById('r-eq-a').value = d.eq_aire || "";
+            document.getElementById('r-tlum').value = d.t_lum || "";
+            document.getElementById('r-cart').value = d.c_art || "";
+            document.getElementById('r-clam').value = d.c_lam || "";
+            document.getElementById('r-em').value = d.em || "";
+            document.getElementById('r-vent').value = d.vent || "";
+            document.getElementById('r-inv-v').value = d.inv_vent || "";
+        }
+
+        async function updateRelev() {
+            const ed = document.getElementById('r-edif').value;
+            const ubiVal = document.getElementById('r-ubi').value;
+            if(!ed || !ubiVal) return alert("Seleccione Edificio y Ubicación");
+            showL(true);
+            const sel = JSON.parse(ubiVal);
+            const p = {
+                action: 'updateRelevamiento', token: PIN_CORRECTO,
+                edificio: ed, fila: sel.fila, sector: sel.sector, ubi: sel.ubi,
+                inv_aire: document.getElementById('r-inv-a').value, eq_aire: document.getElementById('r-eq-a').value,
+                t_lum: document.getElementById('r-tlum').value, c_art: document.getElementById('r-cart').value,
+                c_lam: document.getElementById('r-clam').value, em: document.getElementById('r-em').value,
+                vent: document.getElementById('r-vent').value, inv_vent: document.getElementById('r-inv-v').value
+            };
+            await fetch(URL, {method:'POST', body: JSON.stringify(p)});
+            alert("FICHA TÉCNICA ACTUALIZADA"); location.reload();
+        }
+
+        // --- FUNCIONES COMUNES ---
         async function loadCascada(edId, secId, ubiId, dbName) {
             const ed = document.getElementById(edId).value; if(!ed) return;
             showL(true);
@@ -160,70 +275,99 @@
             document.getElementById(ubiId).disabled = false;
         }
 
-        // Relevamiento
-        function fillRelev() {
-            const d = JSON.parse(document.getElementById('r-ubi').value);
-            document.getElementById('r-inv-a').value = d.inv_aire;
-            document.getElementById('r-eq-a').value = d.eq_aire;
-            document.getElementById('r-tlum').value = d.t_lum;
-            document.getElementById('r-cart').value = d.c_art;
-            document.getElementById('r-clam').value = d.c_lam;
-            document.getElementById('r-em').value = d.em;
-            document.getElementById('r-vent').value = d.vent;
-            document.getElementById('r-inv-v').value = d.inv_vent;
+        function autoFill() {
+            const d = JSON.parse(document.getElementById('n-ubi').value);
+            document.getElementById('n-inv').value = d.inv_aire || "N/A";
+            document.getElementById('n-eq').value = d.eq_aire || "N/A";
         }
 
-        async function updateRelev() {
+        function checkRefrig() { document.getElementById('div-refrig').classList.toggle('hidden', document.getElementById('n-rubro').value !== "Refrigeración"); }
+
+        async function saveOT() {
+            const ubiVal = document.getElementById('n-ubi').value;
+            if(!ubiVal) return alert("Faltan datos");
             showL(true);
-            const sel = JSON.parse(document.getElementById('r-ubi').value);
+            const u = JSON.parse(ubiVal);
             const p = {
-                action: 'updateRelevamiento', token: PIN_CORRECTO,
-                edificio: document.getElementById('r-edif').value,
-                fila: sel.fila, sector: sel.sector, ubi: sel.ubi,
-                inv_aire: document.getElementById('r-inv-a').value, eq_aire: document.getElementById('r-eq-a').value,
-                t_lum: document.getElementById('r-tlum').value, c_art: document.getElementById('r-cart').value,
-                c_lam: document.getElementById('r-clam').value, em: document.getElementById('r-em').value,
-                vent: document.getElementById('r-vent').value, inv_vent: document.getElementById('r-inv-v').value
+                action: 'nuevaOT', token: PIN_CORRECTO,
+                tipo: document.getElementById('n-tipo').value, especialidad: document.getElementById('n-rubro').value,
+                edificio: document.getElementById('n-edif').value, sector: u.sector, ubicacion: u.ubi,
+                nInventario: document.getElementById('n-inv').value, equipo: document.getElementById('n-eq').value,
+                reportadoPor: document.getElementById('n-rep').value, personal: document.getElementById('n-tec').value,
+                descripcion: document.getElementById('n-desc').value
             };
             await fetch(URL, {method:'POST', body: JSON.stringify(p)});
-            alert("FICHA ACTUALIZADA"); location.reload();
+            alert("OT REGISTRADA"); location.reload();
         }
 
-        // Cierre y Stock
-        async function loadAbiertas() { showL(true); const d = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`).then(r=>r.json()); document.getElementById('c-lista').innerHTML = d.map(o=>`<option value="${o.id}">${o.detalle}</option>`).join(""); showL(false); }
-        function loadG() { const r = document.getElementById('m-rub').value; document.getElementById('m-gru').innerHTML = '<option>Grupo</option>' + Object.keys(dbM[r]).map(x=>`<option value="${x}">${x}</option>`).join(""); document.getElementById('m-gru').disabled = false; }
-        function loadI() { const r = document.getElementById('m-rub').value, g = document.getElementById('m-gru').value; document.getElementById('m-ite').innerHTML = '<option>Item</option>' + dbM[r][g].map(x=>`<option value='${JSON.stringify(x)}'>${x.nombre} (Stock:${x.stock})</option>`).join(""); document.getElementById('m-ite').disabled = false; }
-        function addItem() { const it = JSON.parse(document.getElementById('m-ite').value); cesta.push({nombre: it.nombre, cantidad: document.getElementById('m-cant').value, hoja: it.hoja}); renderCesta(); }
-        function renderCesta() { document.getElementById('cesta').innerHTML = cesta.map((x,i)=>`<div class="bg-blue-600 text-white p-2 rounded-lg flex justify-between"><span>${x.cantidad} x ${x.nombre}</span><button onclick="cesta.splice(${i},1);renderCesta()">X</button></div>`).join(""); }
-
-        async function cerrarOT() {
+        // --- CIERRE OT ---
+        async function loadAbiertas() {
             showL(true);
-            const p = { action:'cerrarOT', token:PIN_CORRECTO, idOT:document.getElementById('c-lista').value, materialesUsados:cesta.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), listaParaDescontar:cesta, comentarioFinal:document.getElementById('c-obs').value };
-            await fetch(URL, {method:'POST', body: JSON.stringify(p)});
-            alert("OT CERRADA"); location.reload();
-        }
-
-        // Extras
-        function autoFill() { const d = JSON.parse(document.getElementById('n-ubi').value); document.getElementById('n-inv').value = d.inv_aire; document.getElementById('n-eq').value = d.eq_aire; }
-        function checkRefrig() { document.getElementById('div-refrig').classList.toggle('hidden', document.getElementById('n-rubro').value !== "Refrigeración"); }
-        async function saveOT() { showL(true); const u = JSON.parse(document.getElementById('n-ubi').value); const p = { action:'nuevaOT', token:PIN_CORRECTO, tipo:document.getElementById('n-tipo').value, especialidad:document.getElementById('n-rubro').value, edificio:document.getElementById('n-edif').value, sector:u.sector, ubicacion:u.ubi, nInventario:document.getElementById('n-inv').value, equipo:document.getElementById('n-eq').value, reportadoPor:document.getElementById('n-rep').value, personal:document.getElementById('n-tec').value, descripcion:document.getElementById('n-desc').value }; await fetch(URL, {method:'POST', body: JSON.stringify(p)}); alert("OT CREADA"); location.reload(); }
-        
-        async function loadExt() {
-            const ed = document.getElementById('e-edif').value; if(!ed) return; showL(true);
-            dbE = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
-            const list = document.getElementById('e-lista'); list.innerHTML = "";
-            dbE.forEach(x => {
-                list.innerHTML += `<div class="p-3 rounded-2xl border shadow-sm text-left bg-slate-50 border-l-8 border-l-blue-500">
-                    <p class="font-black text-xs">${x.unne} (${x.serie})</p>
-                    <p class="text-[9px] font-bold text-slate-500">${x.ubi}</p>
-                    <p class="text-[9px] font-black uppercase mt-1">Vence: ${x.f_venc}</p>
-                </div>`;
-            });
+            const d = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`).then(r=>r.json());
+            document.getElementById('c-lista').innerHTML = d.map(o=>`<option value="${o.id}">${o.detalle}</option>`).join("");
             showL(false);
         }
 
-        async function loadHist() { showL(true); dbH = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r=>r.json()); filterHist(); showL(false); }
-        function filterHist() { const q = document.getElementById('h-search').value.toLowerCase(); const list = document.getElementById('hist-lista'); list.innerHTML = dbH.filter(o => o.est.toLowerCase().includes(q) || o.edif.toLowerCase().includes(q)).map(o => `<div class="bg-white p-3 rounded-2xl border-l-8 ${o.est==='Abierta'?'border-orange-500':'border-blue-500'} text-[10px] shadow-sm"><p class="font-black">#${o.id} - ${o.est}</p><p class="uppercase font-bold">${o.edif}</p><p class="text-slate-500">${o.tarea}</p></div>`).join(""); }
+        function loadG() {
+            const r = document.getElementById('m-rub').value;
+            document.getElementById('m-gru').innerHTML = '<option>Grupo...</option>' + Object.keys(dbM[r]).map(x=>`<option value="${x}">${x}</option>`).join("");
+            document.getElementById('m-gru').disabled = false;
+        }
+
+        function loadI() {
+            const r = document.getElementById('m-rub').value, g = document.getElementById('m-gru').value;
+            document.getElementById('m-ite').innerHTML = '<option>Item...</option>' + dbM[r][g].map(x=>`<option value='${JSON.stringify(x)}'>${x.nombre} (S:${x.stock})</option>`).join("");
+            document.getElementById('m-ite').disabled = false;
+        }
+
+        function addItem() {
+            const raw = document.getElementById('m-ite').value; if(raw.includes('Item')) return;
+            const it = JSON.parse(raw);
+            cesta.push({nombre: it.nombre, cantidad: document.getElementById('m-cant').value, hoja: it.hoja});
+            renderCesta();
+        }
+
+        function renderCesta() {
+            document.getElementById('cesta').innerHTML = cesta.map((x,i)=>`
+            <div class="flex justify-between items-center bg-blue-600 text-white p-2 rounded-xl text-[9px] font-bold">
+                <span>${x.cantidad} x ${x.nombre}</span>
+                <button onclick="cesta.splice(${i},1);renderCesta()" class="bg-white text-blue-600 w-5 h-5 rounded-full font-black">X</button>
+            </div>`).join("");
+        }
+
+        async function cerrarOT() {
+            const id = document.getElementById('c-lista').value; if(!id) return;
+            showL(true);
+            const p = { 
+                action: 'cerrarOT', token: PIN_CORRECTO, idOT: id, 
+                materialesUsados: cesta.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), 
+                listaParaDescontar: cesta, comentarioFinal: document.getElementById('c-obs').value 
+            };
+            const res = await fetch(URL, {method:'POST', body: JSON.stringify(p)}).then(r=>r.text());
+            if(res.includes("Ok")) { alert("OT FINALIZADA"); location.reload(); }
+            else { alert("Error al guardar"); showL(false); }
+        }
+
+        // --- HISTORIAL ---
+        async function loadHist() {
+            showL(true);
+            dbH = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r=>r.json());
+            filterHist();
+            showL(false);
+        }
+
+        function filterHist() {
+            const q = document.getElementById('h-search').value.toLowerCase();
+            const list = document.getElementById('hist-lista');
+            list.innerHTML = dbH.filter(o => o.est.toLowerCase().includes(q) || o.edif.toLowerCase().includes(q) || o.id.toString().includes(q))
+                .map(o => `
+                <div class="bg-white p-3 rounded-2xl border-l-8 shadow-sm text-[10px] ${o.est==='Abierta'?'border-orange-500':'border-blue-500'}">
+                    <div class="flex justify-between font-black"><span>#${o.id}</span><span class="uppercase">${o.est}</span></div>
+                    <p class="font-bold uppercase">${o.edif}</p>
+                    <p class="text-slate-500">${o.tarea}</p>
+                    <div class="flex justify-between mt-1 text-[8px] font-bold text-slate-400"><span>${o.tec}</span><span>${o.fecha}</span></div>
+                </div>`).join("");
+        }
     </script>
 </body>
 </html>
