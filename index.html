@@ -11,6 +11,8 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .card-ot { border-left: 5px solid #3b82f6; }
         .card-cerrada { border-left: 5px solid #10b981; opacity: 0.8; }
+        @keyframes pulse-red { 0%, 100% { background-color: #fef2f2; } 50% { background-color: #fee2e2; } }
+        .vencido-anim { animation: pulse-red 2s infinite; border-left: 8px solid #dc2626 !important; }
     </style>
 </head>
 <body class="bg-slate-100 p-2 text-slate-800 font-sans">
@@ -25,7 +27,7 @@
 
     <div id="loader" class="loading-overlay">
         <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p class="mt-4 font-black text-blue-900 text-[10px] uppercase tracking-widest text-center px-4">Sincronizando con base de datos...</p>
+        <p class="mt-4 font-black text-blue-900 text-[10px] uppercase tracking-widest text-center px-4">Sincronizando base de datos...</p>
     </div>
 
     <div id="main-content" class="max-w-4xl mx-auto bg-white rounded-[40px] shadow-xl p-4 hidden mt-2 mb-10 min-h-[80vh]">
@@ -52,7 +54,7 @@
             </div>
             <input id="n-rep" placeholder="Reportó..." class="w-full p-4 border rounded-2xl text-xs bg-slate-50">
             <select id="n-tec" class="w-full p-4 border-2 border-yellow-200 rounded-2xl text-xs font-black bg-yellow-50"><option value="">Técnico...</option><option>DSF</option><option>AGL</option><option>MAP</option><option>RRG</option></select>
-            <textarea id="n-desc" placeholder="Descripción de la falla o tarea..." class="w-full p-4 border rounded-2xl bg-slate-50 text-xs" rows="3"></textarea>
+            <textarea id="n-desc" placeholder="Descripción de la falla..." class="w-full p-4 border rounded-2xl bg-slate-50 text-xs" rows="3"></textarea>
             <button onclick="saveOT()" class="w-full bg-blue-700 text-white p-5 rounded-3xl font-black uppercase shadow-lg">Registrar OT</button>
         </div>
 
@@ -70,7 +72,7 @@
                 </div>
                 <div id="cesta" class="space-y-1"></div>
             </div>
-            <textarea id="c-obs" placeholder="Observaciones técnicas del cierre..." class="w-full p-4 border rounded-2xl bg-slate-50 text-xs" rows="3"></textarea>
+            <textarea id="c-obs" placeholder="Observaciones técnicas..." class="w-full p-4 border rounded-2xl bg-slate-50 text-xs" rows="3"></textarea>
             <button onclick="cerrarOT()" class="w-full bg-green-600 text-white p-6 rounded-[35px] font-black uppercase shadow-lg">Finalizar Cierre</button>
         </div>
 
@@ -78,246 +80,15 @@
             <select id="r-edif" onchange="loadCascadaRelev()" class="w-full p-4 border-2 border-blue-100 rounded-2xl text-xs font-black bg-blue-50"></select>
             <select id="r-sec" onchange="filterUbiRelev()" class="w-full p-4 border rounded-2xl text-xs" disabled><option>Sector...</option></select>
             <select id="r-ubi" onchange="fillRelevFields()" class="w-full p-4 border rounded-2xl text-xs font-bold" disabled><option>Ubicación...</option></select>
-            
             <div id="relev-form" class="hidden bg-white p-6 rounded-[40px] border shadow-inner space-y-4">
-                <p class="text-[10px] font-black text-blue-600 uppercase tracking-widest">Información Técnica del Local</p>
                 <div class="grid grid-cols-2 gap-3">
-                    <div class="space-y-1"><label class="text-[9px] font-bold ml-2">Inv. Aire</label><input id="r-inv-a" class="w-full p-3 border rounded-xl text-xs bg-slate-50"></div>
-                    <div class="space-y-1"><label class="text-[9px] font-bold ml-2">Equipo Aire</label><input id="r-eq-a" class="w-full p-3 border rounded-xl text-xs bg-slate-50"></div>
-                    <div class="space-y-1"><label class="text-[9px] font-bold ml-2">Tipo Lum.</label><input id="r-t-lum" class="w-full p-3 border rounded-xl text-xs bg-slate-50"></div>
-                    <div class="space-y-1"><label class="text-[9px] font-bold ml-2">Cant Art.</label><input id="r-c-art" type="number" class="w-full p-3 border rounded-xl text-xs bg-slate-50"></div>
-                    <div class="space-y-1"><label class="text-[9px] font-bold ml-2">Cant Lám.</label><input id="r-c-lam" type="number" class="w-full p-3 border rounded-xl text-xs bg-slate-50"></div>
-                    <div class="space-y-1"><label class="text-[9px] font-bold ml-2">Emergencia</label><input id="r-em" class="w-full p-3 border rounded-xl text-xs bg-slate-50"></div>
-                    <div class="space-y-1"><label class="text-[9px] font-bold ml-2">Ventilador</label><input id="r-vent" class="w-full p-3 border rounded-xl text-xs bg-slate-50"></div>
-                    <div class="space-y-1"><label class="text-[9px] font-bold ml-2">Inv. Vent</label><input id="r-inv-v" class="w-full p-3 border rounded-xl text-xs bg-slate-50"></div>
+                    <div class="space-y-1"><label class="text-[9px] font-bold">Inv. Aire</label><input id="r-inv-a" class="w-full p-3 border rounded-xl text-xs"></div>
+                    <div class="space-y-1"><label class="text-[9px] font-bold">Equipo Aire</label><input id="r-eq-a" class="w-full p-3 border rounded-xl text-xs"></div>
+                    <div class="space-y-1"><label class="text-[9px] font-bold">Tipo Lum.</label><input id="r-t-lum" class="w-full p-3 border rounded-xl text-xs"></div>
+                    <div class="space-y-1"><label class="text-[9px] font-bold">Cant Lám.</label><input id="r-c-lam" type="number" class="w-full p-3 border rounded-xl text-xs"></div>
                 </div>
-                <button onclick="saveRelevamiento()" class="w-full bg-blue-600 text-white p-5 rounded-3xl font-black uppercase text-xs shadow-md">Guardar Actualización</button>
+                <button onclick="saveRelevamiento()" class="w-full bg-blue-600 text-white p-5 rounded-3xl font-black uppercase text-xs">Guardar</button>
             </div>
         </div>
 
-        <div id="sec-extintores" class="hidden space-y-4">
-            <div class="flex gap-2">
-                <select id="e-edif" onchange="loadExtintores()" class="flex-1 p-4 border-2 border-red-100 rounded-2xl text-xs font-black bg-red-50"></select>
-                <button onclick="generarOrdenCompra()" class="bg-slate-900 text-white px-4 rounded-2xl text-[9px] font-black uppercase shadow-lg active:bg-red-600">Generar TXT Compra</button>
-            </div>
-            <div id="ext-lista" class="grid grid-cols-1 gap-3"></div>
-        </div>
-
-        <div id="sec-historial" class="hidden space-y-4">
-            <div class="flex justify-center p-2">
-                <button id="btn-filtro-ot" onclick="toggleFiltroHistorial()" class="bg-blue-100 text-blue-700 px-6 py-3 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">Mostrar solo Abiertas</button>
-            </div>
-            <div id="historial-container" class="space-y-3"></div>
-        </div>
-    </div>
-
-    <script>
-        const URL = "https://script.google.com/macros/s/AKfycbyALUU--qMV981OYeLVJHRQLBhuF3rNqxjA9na1oGfDcbP4KxuUrpcWSPvEEHzq7w7a/exec"; 
-        const PIN_CORRECTO = "4370";
-        
-        let dbU = [], dbM = {}, cesta = [], filtroSoloAbiertas = false, currentRelevFila = null;
-
-        function showL(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
-        window.onload = () => { if(localStorage.getItem('sgm_session') === PIN_CORRECTO) loginExitoso(); };
-        
-        function verificarAcceso() { 
-            if(document.getElementById('pin-input').value === PIN_CORRECTO) { 
-                localStorage.setItem('sgm_session', PIN_CORRECTO); 
-                loginExitoso(); 
-            } else {
-                alert("PIN Incorrecto"); 
-            }
-        }
-
-        function loginExitoso() {
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-content').classList.remove('hidden');
-            init();
-        }
-
-        async function init() {
-            showL(true);
-            try {
-                const eds = await fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`).then(r=>r.json());
-                const opt = '<option value="">Seleccionar Edificio...</option>' + eds.map(e=>`<option value="${e}">${e}</option>`).join("");
-                document.getElementById('n-edif').innerHTML = opt;
-                document.getElementById('r-edif').innerHTML = opt;
-                document.getElementById('e-edif').innerHTML = opt;
-                
-                dbM = await fetch(`${URL}?action=getMateriales&token=${PIN_CORRECTO}`).then(r=>r.json());
-                document.getElementById('m-rub').innerHTML = '<option value="">1. Rubro (Hoja)</option>' + Object.keys(dbM).map(x=>`<option value="${x}">${x}</option>`).join("");
-            } catch(e) { console.error("Error inicializando:", e); }
-            showL(false);
-        }
-
-        function tab(t) {
-            ['nueva','pendientes','relev','extintores','historial'].forEach(s => {
-                document.getElementById('sec-'+s).classList.toggle('hidden', s!==t);
-                document.getElementById('btn-'+s).classList.toggle('tab-active', s===t);
-            });
-            if(t==='pendientes') loadAbiertas();
-            if(t==='historial') loadHistorial();
-        }
-
-        // --- LÓGICA HISTORIAL ---
-        function toggleFiltroHistorial() {
-            filtroSoloAbiertas = !filtroSoloAbiertas;
-            document.getElementById('btn-filtro-ot').innerText = filtroSoloAbiertas ? "Mostrar Todas" : "Mostrar solo Abiertas";
-            document.getElementById('btn-filtro-ot').classList.toggle('bg-green-100');
-            loadHistorial();
-        }
-
-        async function loadHistorial() {
-            showL(true);
-            const d = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r=>r.json());
-            let dataFiltrada = filtroSoloAbiertas ? d.filter(h => h.est === 'Abierta') : d;
-            document.getElementById('historial-container').innerHTML = dataFiltrada.map(h => `
-                <div class="p-4 bg-white rounded-2xl shadow-sm text-[10px] ${h.est === 'Cerrada' ? 'card-cerrada' : 'card-ot'}">
-                    <div class="flex justify-between font-black"><span>#${h.id}</span><span>${h.fecha}</span></div>
-                    <p class="uppercase font-bold text-blue-900 mt-1">${h.edif}</p>
-                    <p class="text-slate-600">${h.tarea}</p>
-                    <div class="flex justify-between mt-2 italic text-slate-400"><span>Téc: ${h.tec}</span><span>ESTADO: ${h.est}</span></div>
-                </div>
-            `).join("");
-            showL(false);
-        }
-
-        // --- LÓGICA RELEVAMIENTO ---
-        async function loadCascadaRelev() {
-            const ed = document.getElementById('r-edif').value; if(!ed) return;
-            showL(true);
-            dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
-            document.getElementById('r-sec').innerHTML = '<option value="">Sector...</option>' + [...new Set(dbU.map(x=>x.sector))].map(s=>`<option value="${s}">${s}</option>`).join("");
-            document.getElementById('r-sec').disabled = false;
-            document.getElementById('relev-form').classList.add('hidden');
-            showL(false);
-        }
-        function filterUbiRelev() {
-            const s = document.getElementById('r-sec').value;
-            document.getElementById('r-ubi').innerHTML = '<option value="">Ubicación...</option>' + dbU.filter(x=>x.sector===s).map(x=>`<option value='${JSON.stringify(x)}'>${x.ubi}</option>`).join("");
-            document.getElementById('r-ubi').disabled = false;
-        }
-        function fillRelevFields() {
-            const d = JSON.parse(document.getElementById('r-ubi').value);
-            currentRelevFila = d.fila;
-            document.getElementById('r-inv-a').value = d.inv_aire;
-            document.getElementById('r-eq-a').value = d.eq_aire;
-            document.getElementById('r-t-lum').value = d.t_lum;
-            document.getElementById('r-c-art').value = d.c_art;
-            document.getElementById('r-c-lam').value = d.c_lam;
-            document.getElementById('r-em').value = d.em;
-            document.getElementById('r-vent').value = d.vent;
-            document.getElementById('r-inv-v').value = d.inv_vent;
-            document.getElementById('relev-form').classList.remove('hidden');
-        }
-        async function saveRelevamiento() {
-            showL(true);
-            const data = { action: 'updateRelevamiento', token: PIN_CORRECTO, edificio: document.getElementById('r-edif').value, fila: currentRelevFila, inv_aire: document.getElementById('r-inv-a').value, eq_aire: document.getElementById('r-eq-a').value, t_lum: document.getElementById('r-t-lum').value, c_art: document.getElementById('r-c-art').value, c_lam: document.getElementById('r-c-lam').value, em: document.getElementById('r-em').value, vent: document.getElementById('r-vent').value, inv_vent: document.getElementById('r-inv-v').value };
-            await fetch(URL, { method: 'POST', body: JSON.stringify(data) });
-            alert("DATOS ACTUALIZADOS EN PLANILLA");
-            showL(false);
-        }
-
-        // --- LÓGICA EXTINTORES (CORRECCIÓN DE COLORES 2026) ---
-        async function loadExtintores() {
-            const ed = document.getElementById('e-edif').value; if(!ed) return;
-            showL(true);
-            const d = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
-            
-            // Fecha de hoy anclada
-            const hoy = new Date();
-            hoy.setHours(0,0,0,0); 
-
-            document.getElementById('ext-lista').innerHTML = d.map(x => {
-                // Parseamos MM/AAAA (Ej: 03/2026)
-                const partes = x.f_venc.split("/");
-                // Creamos fecha al primer día de ese mes para comparar
-                const fechaVenc = new Date(partes[1], partes[0] - 1, 1);
-                
-                let col = "border-green-500 bg-green-50"; // Por defecto VERDE (Vigente)
-                
-                if (fechaVenc < hoy) {
-                    // VENCIDO -> ROJO PARPADEANTE
-                    col = "border-red-600 bg-red-50 animate-pulse";
-                } else {
-                    // Si falta menos de 30 días para vencer -> AMARILLO
-                    const difMs = fechaVenc - hoy;
-                    const difDias = difMs / (1000 * 60 * 60 * 24);
-                    if (difDias <= 30) col = "border-yellow-500 bg-yellow-50";
-                }
-
-                return `
-                    <div class="p-4 border-l-8 rounded-3xl shadow-sm text-[11px] ${col}">
-                        <div class="flex justify-between font-black uppercase">
-                            <span>S/N: ${x.serie}</span>
-                            <span>${x.tipo} ${x.cap}</span>
-                        </div>
-                        <p class="text-slate-600">${x.sector} - ${x.ubi}</p>
-                        <p class="mt-2 font-black text-slate-800 uppercase">Vencimiento: ${x.f_venc}</p>
-                    </div>`;
-            }).join("");
-            showL(false);
-        }
-
-        function generarOrdenCompra() {
-            const contenedor = document.getElementById('ext-lista');
-            const tarjetas = contenedor.querySelectorAll('.border-red-600');
-            if (tarjetas.length === 0) return alert("No hay extintores vencidos (Rojos) para comprar.");
-
-            let agrupado = {};
-            tarjetas.forEach(tarjeta => {
-                const infoFull = tarjeta.querySelector('.font-black.uppercase').children[1].innerText;
-                agrupado[infoFull] = (agrupado[infoFull] || 0) + 1;
-            });
-
-            let txt = `ORDEN DE COMPRA Y CARGA - SGM 2026\n`;
-            txt += `EDIFICIO: ${document.getElementById('e-edif').value}\n`;
-            txt += `----------------------------------------------------------\n\n`;
-
-            for (const [modelo, cantidad] of Object.entries(agrupado)) {
-                const partes = modelo.split(" ");
-                const agente = partes[0];
-                const capacidad = partes.slice(1).join(" ");
-                txt += `CANTIDAD: ${cantidad.toString().padEnd(3)} | AGENTE: ${agente.padEnd(8)} | CAPACIDAD: ${capacidad}\n`;
-            }
-
-            txt += `\n\nFirma Responsable Mantenimiento`;
-
-            const blob = new Blob([txt], { type: 'text/plain' });
-            const link = document.createElement('a');
-            link.download = `OC_Extintores_${document.getElementById('e-edif').value}.txt`;
-            link.href = window.URL.createObjectURL(blob);
-            link.click();
-        }
-
-        // --- LÓGICA OT ---
-        async function loadAbiertas() { showL(true); const res = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`); const data = await res.json(); document.getElementById('c-lista').innerHTML = data.map(o => `<option value="${o.id}">${o.detalle}</option>`).join(""); showL(false); }
-        async function loadCascada(edId, secId, ubiId) { const ed = document.getElementById(edId).value; showL(true); dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json()); document.getElementById(secId).innerHTML = '<option value="">Sector...</option>' + [...new Set(dbU.map(x=>x.sector))].map(s=>`<option value="${s}">${s}</option>`).join(""); document.getElementById(secId).disabled = false; showL(false); }
-        function filterUbi(secId, ubiId) { const s = document.getElementById(secId).value; document.getElementById(ubiId).innerHTML = '<option value="">Ubi...</option>' + dbU.filter(x=>x.sector===s).map(x=>`<option value='${JSON.stringify(x)}'>${x.ubi}</option>`).join(""); document.getElementById(ubiId).disabled = false; }
-        function autoFill() { const d = JSON.parse(document.getElementById('n-ubi').value); document.getElementById('n-inv').value = d.inv_aire || "N/A"; document.getElementById('n-eq').value = d.eq_aire || "N/A"; }
-        function checkRefrig() { document.getElementById('div-refrig').classList.toggle('hidden', document.getElementById('n-rubro').value !== "Refrigeración"); }
-        function loadG() { const r = document.getElementById('m-rub').value; document.getElementById('m-gru').innerHTML = '<option value="">2. Grupo...</option>' + Object.keys(dbM[r]).map(x=>`<option value="${x}">${x}</option>`).join(""); document.getElementById('m-gru').disabled = false; }
-        function loadI() { const r = document.getElementById('m-rub').value, g = document.getElementById('m-gru').value; document.getElementById('m-ite').innerHTML = '<option value="">3. Item...</option>' + dbM[r][g].map(x=>`<option value='${JSON.stringify(x)}'>${x.nombre} (Stock: ${x.stock})</option>`).join(""); document.getElementById('m-ite').disabled = false; }
-        function addItem() { const it = JSON.parse(document.getElementById('m-ite').value); cesta.push({nombre: it.nombre, cantidad: document.getElementById('m-cant').value, hoja: it.hoja}); renderCesta(); }
-        function renderCesta() { document.getElementById('cesta').innerHTML = cesta.map((x,i)=>`<div class="flex justify-between bg-blue-600 text-white p-2 rounded-xl text-[9px] mb-1"><span>${x.cantidad} x ${x.nombre}</span><button onclick="cesta.splice(${i},1);renderCesta()">X</button></div>`).join(""); }
-        
-        async function cerrarOT() { 
-            const idOT = document.getElementById('c-lista').value; if(!idOT) return alert("Seleccione OT"); 
-            showL(true); 
-            const data = { action: 'cerrarOT', token: PIN_CORRECTO, idOT: idOT, materialesUsados: cesta.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), listaParaDescontar: cesta, comentarioFinal: document.getElementById('c-obs').value }; 
-            const res = await fetch(URL, { method: 'POST', body: JSON.stringify(data) }); 
-            const txt = await res.text(); 
-            if(txt.trim() === "Ok") { alert("OT CERRADA Y STOCK ACTUALIZADO"); location.reload(); } else { alert(txt); showL(false); } 
-        }
-
-        async function saveOT() { 
-            if(!document.getElementById('n-tec').value || !document.getElementById('n-edif').value) return alert("Complete los campos obligatorios");
-            showL(true); 
-            const u = JSON.parse(document.getElementById('n-ubi').value); 
-            const p = { action: 'nuevaOT', token: PIN_CORRECTO, tipo: document.getElementById('n-tipo').value, especialidad: document.getElementById('n-rubro').value, edificio: document.getElementById('n-edif').value, sector: u.sector, ubicacion: u.ubi, nInventario: document.getElementById('n-inv').value, equipo: document.getElementById('n-eq').value, reportadoPor: document.getElementById('n-rep').value, personal: document.getElementById('n-tec').value, descripcion: document.getElementById('n-desc').value }; 
-            await fetch(URL, {method:'POST', body: JSON.stringify(p)}); 
-            alert("NUEVA OT REGISTRADA"); location.reload(); 
-        }
-    </script>
-</body>
-</html>
+        <div id="sec-extint
