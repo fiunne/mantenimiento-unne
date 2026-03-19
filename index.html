@@ -91,4 +91,151 @@
             </div>
         </div>
 
-        <div id="sec-extint
+        <div id="sec-extintores" class="hidden space-y-4">
+            <div class="flex gap-2">
+                <select id="e-edif" onchange="loadExtintores()" class="flex-1 p-4 border-2 border-red-100 rounded-2xl text-xs font-black bg-red-50"></select>
+                <button onclick="generarOrdenCompra()" class="bg-slate-900 text-white px-4 rounded-2xl text-[9px] font-black uppercase">Generar OC</button>
+            </div>
+            <div id="ext-lista" class="grid grid-cols-1 gap-3"></div>
+        </div>
+
+        <div id="sec-historial" class="hidden space-y-4">
+            <div class="flex justify-center p-2">
+                <button onclick="toggleFiltroHistorial()" id="btn-filtro-ot" class="bg-blue-100 text-blue-700 px-6 py-3 rounded-full text-[10px] font-black uppercase">Filtro: Todas</button>
+            </div>
+            <div id="historial-container" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <script>
+        const URL = "https://script.google.com/macros/s/AKfycbyALUU--qMV981OYeLVJHRQLBhuF3rNqxjA9na1oGfDcbP4KxuUrpcWSPvEEHzq7w7a/exec"; 
+        const PIN_CORRECTO = "4370";
+        let dbU = [], dbM = {}, cesta = [], filtroSoloAbiertas = false, currentRelevFila = null;
+
+        function showL(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
+        window.onload = () => { if(localStorage.getItem('sgm_session') === PIN_CORRECTO) loginExitoso(); };
+        
+        function verificarAcceso() { 
+            if(document.getElementById('pin-input').value === PIN_CORRECTO) { 
+                localStorage.setItem('sgm_session', PIN_CORRECTO); 
+                loginExitoso(); 
+            } else { alert("PIN Incorrecto"); }
+        }
+
+        function loginExitoso() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            init();
+        }
+
+        async function init() {
+            showL(true);
+            try {
+                const eds = await fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`).then(r=>r.json());
+                const opt = '<option value="">Seleccionar Edificio...</option>' + eds.map(e=>`<option value="${e}">${e}</option>`).join("");
+                document.getElementById('n-edif').innerHTML = opt;
+                document.getElementById('r-edif').innerHTML = opt;
+                document.getElementById('e-edif').innerHTML = opt;
+                dbM = await fetch(`${URL}?action=getMateriales&token=${PIN_CORRECTO}`).then(r=>r.json());
+                document.getElementById('m-rub').innerHTML = '<option value="">1. Rubro</option>' + Object.keys(dbM).map(x=>`<option value="${x}">${x}</option>`).join("");
+            } catch(e) { console.error(e); }
+            showL(false);
+        }
+
+        function tab(t) {
+            ['nueva','pendientes','relev','extintores','historial'].forEach(s => {
+                document.getElementById('sec-'+s).classList.toggle('hidden', s!==t);
+                document.getElementById('btn-'+s).classList.toggle('tab-active', s===t);
+            });
+            if(t==='pendientes') loadAbiertas();
+            if(t==='historial') loadHistorial();
+        }
+
+        // --- LÓGICA DE COLORES PRECISA ---
+        async function loadExtintores() {
+            const ed = document.getElementById('e-edif').value; if(!ed) return;
+            showL(true);
+            const d = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
+            
+            // Fecha de hoy: 18 de Marzo de 2026
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+
+            document.getElementById('ext-lista').innerHTML = d.map(x => {
+                // Parseamos DD/MM/AAAA (Ej: 25/03/2026)
+                const p = x.f_venc.split("/");
+                const fechaVenc = new Date(p[2], p[1]-1, p[0]);
+                
+                let estilo = "border-green-500 bg-green-50"; // Por defecto: Vigente (Verde)
+                
+                if (fechaVenc < hoy) {
+                    // YA PASÓ LA FECHA -> ROJO PARPADEANTE
+                    estilo = "vencido-anim";
+                } else {
+                    // SI FALTA MENOS DE 15 DÍAS -> AMARILLO (Alerta)
+                    const diffDias = (fechaVenc - hoy) / (1000 * 60 * 60 * 24);
+                    if (diffDias <= 15) estilo = "border-yellow-500 bg-yellow-50";
+                }
+
+                return `
+                    <div class="p-4 border-l-8 rounded-3xl shadow-sm text-[11px] ${estilo}">
+                        <div class="flex justify-between font-black uppercase">
+                            <span>S/N: ${x.serie}</span>
+                            <span>${x.tipo} ${x.cap}</span>
+                        </div>
+                        <p class="text-slate-600">${x.sector} - ${x.ubi}</p>
+                        <p class="mt-2 font-black text-slate-800 uppercase">Vencimiento: ${x.f_venc}</p>
+                    </div>`;
+            }).join("");
+            showL(false);
+        }
+
+        function generarOrdenCompra() {
+            const vencidos = document.querySelectorAll('.vencido-anim');
+            if(vencidos.length === 0) return alert("No hay extintores vencidos hoy.");
+            let res = {};
+            vencidos.forEach(v => {
+                const m = v.querySelector('.font-black.uppercase').children[1].innerText;
+                res[m] = (res[m]||0) + 1;
+            });
+            let txt = `OC - SGM 2026\nEDIFICIO: ${document.getElementById('e-edif').value}\n\n`;
+            for (const [k, v] of Object.entries(res)) txt += `${v} x ${k}\n`;
+            const b = new Blob([txt], {type:'text/plain'});
+            const a = document.createElement('a');
+            a.download = `OC_${document.getElementById('e-edif').value}.txt`;
+            a.href = window.URL.createObjectURL(b);
+            a.click();
+        }
+
+        // --- FUNCIONES AUXILIARES ---
+        async function loadHistorial() {
+            showL(true);
+            const d = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r=>r.json());
+            let filtrada = filtroSoloAbiertas ? d.filter(h=>h.est==='Abierta') : d;
+            document.getElementById('historial-container').innerHTML = filtrada.map(h => `
+                <div class="p-4 bg-white rounded-2xl shadow-sm text-[10px] ${h.est==='Cerrada'?'card-cerrada':'card-ot'}">
+                    <div class="flex justify-between font-black"><span>#${h.id}</span><span>${h.fecha}</span></div>
+                    <p class="uppercase font-bold text-blue-900 mt-1">${h.edif} - ${h.tarea}</p>
+                    <div class="flex justify-between mt-2 italic text-slate-400"><span>Téc: ${h.tec}</span><span>${h.est}</span></div>
+                </div>`).join("");
+            showL(false);
+        }
+        function toggleFiltroHistorial() { filtroSoloAbiertas = !filtroSoloAbiertas; document.getElementById('btn-filtro-ot').innerText = filtroSoloAbiertas ? "Filtro: Abiertas" : "Filtro: Todas"; loadHistorial(); }
+        async function loadAbiertas() { showL(true); const d = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`).then(r=>r.json()); document.getElementById('c-lista').innerHTML = d.map(o=>`<option value="${o.id}">${o.detalle}</option>`).join(""); showL(false); }
+        async function loadCascada(eI, sI, uI) { const ed = document.getElementById(eI).value; showL(true); dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json()); document.getElementById(sI).innerHTML = '<option value="">Sector...</option>' + [...new Set(dbU.map(x=>x.sector))].map(s=>`<option value="${s}">${s}</option>`).join(""); document.getElementById(sI).disabled = false; showL(false); }
+        function filterUbi(sI, uI) { const s = document.getElementById(sI).value; document.getElementById(uI).innerHTML = '<option value="">Ubi...</option>' + dbU.filter(x=>x.sector===s).map(x=>`<option value='${JSON.stringify(x)}'>${x.ubi}</option>`).join(""); document.getElementById(uI).disabled = false; }
+        function autoFill() { const d = JSON.parse(document.getElementById('n-ubi').value); document.getElementById('n-inv').value = d.inv_aire||"N/A"; document.getElementById('n-eq').value = d.eq_aire||"N/A"; }
+        function checkRefrig() { document.getElementById('div-refrig').classList.toggle('hidden', document.getElementById('n-rubro').value !== "Refrigeración"); }
+        function loadG() { const r = document.getElementById('m-rub').value; document.getElementById('m-gru').innerHTML = '<option value="">2. Grupo</option>' + Object.keys(dbM[r]).map(x=>`<option value="${x}">${x}</option>`).join(""); document.getElementById('m-gru').disabled = false; }
+        function loadI() { const r = document.getElementById('m-rub').value, g = document.getElementById('m-gru').value; document.getElementById('m-ite').innerHTML = '<option value="">3. Item</option>' + dbM[r][g].map(x=>`<option value='${JSON.stringify(x)}'>${x.nombre} (Stock: ${x.stock})</option>`).join(""); document.getElementById('m-ite').disabled = false; }
+        function addItem() { const it = JSON.parse(document.getElementById('m-ite').value); cesta.push({nombre: it.nombre, cantidad: document.getElementById('m-cant').value, hoja: it.hoja}); renderCesta(); }
+        function renderCesta() { document.getElementById('cesta').innerHTML = cesta.map((x,i)=>`<div class="flex justify-between bg-blue-600 text-white p-2 rounded-xl text-[9px] mb-1"><span>${x.cantidad} x ${x.nombre}</span><button onclick="cesta.splice(${i},1);renderCesta()">X</button></div>`).join(""); }
+        async function cerrarOT() { const id = document.getElementById('c-lista').value; if(!id) return; showL(true); await fetch(URL, {method:'POST', body: JSON.stringify({action:'cerrarOT', token:PIN_CORRECTO, idOT:id, materialesUsados:cesta.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), listaParaDescontar:cesta, comentarioFinal:document.getElementById('c-obs').value})}); location.reload(); }
+        async function saveOT() { showL(true); const u = JSON.parse(document.getElementById('n-ubi').value); await fetch(URL, {method:'POST', body: JSON.stringify({action:'nuevaOT', token:PIN_CORRECTO, tipo:document.getElementById('n-tipo').value, especialidad:document.getElementById('n-rubro').value, edificio:document.getElementById('n-edif').value, sector:u.sector, ubicacion:u.ubi, nInventario:document.getElementById('n-inv').value, equipo:document.getElementById('n-eq').value, reportadoPor:document.getElementById('n-rep').value, personal:document.getElementById('n-tec').value, descripcion:document.getElementById('n-desc').value})}); location.reload(); }
+        async function loadCascadaRelev() { const ed = document.getElementById('r-edif').value; showL(true); dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json()); document.getElementById('r-sec').innerHTML = '<option value="">Sector...</option>' + [...new Set(dbU.map(x=>x.sector))].map(s=>`<option value="${s}">${s}</option>`).join(""); document.getElementById('r-sec').disabled = false; showL(false); }
+        function filterUbiRelev() { const s = document.getElementById('r-sec').value; document.getElementById('r-ubi').innerHTML = '<option value="">Ubi...</option>' + dbU.filter(x=>x.sector===s).map(x=>`<option value='${JSON.stringify(x)}'>${x.ubi}</option>`).join(""); document.getElementById('r-ubi').disabled = false; }
+        function fillRelevFields() { const d = JSON.parse(document.getElementById('r-ubi').value); currentRelevFila = d.fila; document.getElementById('r-inv-a').value = d.inv_aire||""; document.getElementById('r-eq-a').value = d.eq_aire||""; document.getElementById('r-t-lum').value = d.t_lum||""; document.getElementById('r-c-lam').value = d.c_lam||""; document.getElementById('relev-form').classList.remove('hidden'); }
+        async function saveRelevamiento() { showL(true); await fetch(URL, {method:'POST', body: JSON.stringify({action:'updateRelevamiento', token:PIN_CORRECTO, edificio:document.getElementById('r-edif').value, fila:currentRelevFila, inv_aire:document.getElementById('r-inv-a').value, eq_aire:document.getElementById('r-eq-a').value, t_lum:document.getElementById('r-t-lum').value, c_lam:document.getElementById('r-c-lam').value})}); alert("OK"); showL(false); }
+    </script>
+</body>
+</html>
