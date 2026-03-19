@@ -112,7 +112,6 @@
     </div>
 
     <script>
-        // URL DE IMPLEMENTACIÓN
         const URL = "https://script.google.com/macros/s/AKfycbyALUU--qMV981OYeLVJHRQLBhuF3rNqxjA9na1oGfDcbP4KxuUrpcWSPvEEHzq7w7a/exec"; 
         const PIN_CORRECTO = "4370";
         
@@ -219,24 +218,32 @@
             showL(false);
         }
 
-        // --- LÓGICA EXTINTORES (COLORES MEJORADOS 2026) ---
+        // --- LÓGICA EXTINTORES (CORRECCIÓN DE COLORES 2026) ---
         async function loadExtintores() {
             const ed = document.getElementById('e-edif').value; if(!ed) return;
             showL(true);
             const d = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
+            
+            // Fecha de hoy anclada
             const hoy = new Date();
+            hoy.setHours(0,0,0,0); 
 
             document.getElementById('ext-lista').innerHTML = d.map(x => {
-                // Convertimos "MM/AAAA" a objeto fecha
+                // Parseamos MM/AAAA (Ej: 03/2026)
                 const partes = x.f_venc.split("/");
+                // Creamos fecha al primer día de ese mes para comparar
                 const fechaVenc = new Date(partes[1], partes[0] - 1, 1);
                 
-                let col = "border-green-500 bg-green-50"; 
+                let col = "border-green-500 bg-green-50"; // Por defecto VERDE (Vigente)
+                
                 if (fechaVenc < hoy) {
+                    // VENCIDO -> ROJO PARPADEANTE
                     col = "border-red-600 bg-red-50 animate-pulse";
                 } else {
-                    const difDias = (fechaVenc - hoy) / (1000 * 60 * 60 * 24);
-                    if (difDias < 60) col = "border-yellow-500 bg-yellow-50";
+                    // Si falta menos de 30 días para vencer -> AMARILLO
+                    const difMs = fechaVenc - hoy;
+                    const difDias = difMs / (1000 * 60 * 60 * 24);
+                    if (difDias <= 30) col = "border-yellow-500 bg-yellow-50";
                 }
 
                 return `
@@ -252,7 +259,6 @@
             showL(false);
         }
 
-        // GENERAR OC RESUMIDA (COMO LA AMARILLA)
         function generarOrdenCompra() {
             const contenedor = document.getElementById('ext-lista');
             const tarjetas = contenedor.querySelectorAll('.border-red-600');
