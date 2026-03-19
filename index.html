@@ -112,7 +112,7 @@
     </div>
 
     <script>
-        // ACTUALIZA ESTA URL CON TU URL DE IMPLEMENTACIÓN DE GOOGLE
+        // URL DE IMPLEMENTACIÓN
         const URL = "https://script.google.com/macros/s/AKfycbyALUU--qMV981OYeLVJHRQLBhuF3rNqxjA9na1oGfDcbP4KxuUrpcWSPvEEHzq7w7a/exec"; 
         const PIN_CORRECTO = "4370";
         
@@ -219,15 +219,26 @@
             showL(false);
         }
 
-        // --- LÓGICA EXTINTORES ---
+        // --- LÓGICA EXTINTORES (COLORES MEJORADOS 2026) ---
         async function loadExtintores() {
             const ed = document.getElementById('e-edif').value; if(!ed) return;
             showL(true);
             const d = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
+            const hoy = new Date();
+
             document.getElementById('ext-lista').innerHTML = d.map(x => {
+                // Convertimos "MM/AAAA" a objeto fecha
+                const partes = x.f_venc.split("/");
+                const fechaVenc = new Date(partes[1], partes[0] - 1, 1);
+                
                 let col = "border-green-500 bg-green-50"; 
-                if (x.f_venc.includes("2024")) col = "border-red-600 bg-red-50 animate-pulse";
-                else if (x.f_venc.includes("2025")) col = "border-yellow-500 bg-yellow-50";
+                if (fechaVenc < hoy) {
+                    col = "border-red-600 bg-red-50 animate-pulse";
+                } else {
+                    const difDias = (fechaVenc - hoy) / (1000 * 60 * 60 * 24);
+                    if (difDias < 60) col = "border-yellow-500 bg-yellow-50";
+                }
+
                 return `
                     <div class="p-4 border-l-8 rounded-3xl shadow-sm text-[11px] ${col}">
                         <div class="flex justify-between font-black uppercase">
@@ -241,33 +252,39 @@
             showL(false);
         }
 
+        // GENERAR OC RESUMIDA (COMO LA AMARILLA)
         function generarOrdenCompra() {
             const contenedor = document.getElementById('ext-lista');
             const tarjetas = contenedor.querySelectorAll('.border-red-600');
             if (tarjetas.length === 0) return alert("No hay extintores vencidos (Rojos) para comprar.");
 
-            let conteoEquipos = {}, detalleEquipos = "";
+            let agrupado = {};
             tarjetas.forEach(tarjeta => {
-                const nSerie = tarjeta.querySelector('.font-black.uppercase').children[0].innerText;
-                const tipoCap = tarjeta.querySelector('.font-black.uppercase').children[1].innerText;
-                const ubi = tarjeta.querySelector('.text-slate-600').innerText;
-                conteoEquipos[tipoCap] = (conteoEquipos[tipoCap] || 0) + 1;
-                detalleEquipos += `- ${nSerie} | ${tipoCap} | ${ubi}\n`;
+                const infoFull = tarjeta.querySelector('.font-black.uppercase').children[1].innerText;
+                agrupado[infoFull] = (agrupado[infoFull] || 0) + 1;
             });
 
-            let txt = `SGM INGENIERÍA - ORDEN DE COMPRA\nEDIFICIO: ${document.getElementById('e-edif').value}\nFECHA: ${new Date().toLocaleDateString()}\n`;
-            txt += `==========================================\nRESUMEN:\n`;
-            for (const [m, c] of Object.entries(conteoEquipos)) txt += `${c} unid. de ${m}\n`;
-            txt += `==========================================\nDETALLE:\n${detalleEquipos}\nTOTAL: ${tarjetas.length} EQUIPOS.`;
+            let txt = `ORDEN DE COMPRA Y CARGA - SGM 2026\n`;
+            txt += `EDIFICIO: ${document.getElementById('e-edif').value}\n`;
+            txt += `----------------------------------------------------------\n\n`;
+
+            for (const [modelo, cantidad] of Object.entries(agrupado)) {
+                const partes = modelo.split(" ");
+                const agente = partes[0];
+                const capacidad = partes.slice(1).join(" ");
+                txt += `CANTIDAD: ${cantidad.toString().padEnd(3)} | AGENTE: ${agente.padEnd(8)} | CAPACIDAD: ${capacidad}\n`;
+            }
+
+            txt += `\n\nFirma Responsable Mantenimiento`;
 
             const blob = new Blob([txt], { type: 'text/plain' });
             const link = document.createElement('a');
-            link.download = `Compra_Extintores_${document.getElementById('e-edif').value}.txt`;
+            link.download = `OC_Extintores_${document.getElementById('e-edif').value}.txt`;
             link.href = window.URL.createObjectURL(blob);
             link.click();
         }
 
-        // --- LÓGICA OT (NUEVA Y CIERRE) ---
+        // --- LÓGICA OT ---
         async function loadAbiertas() { showL(true); const res = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`); const data = await res.json(); document.getElementById('c-lista').innerHTML = data.map(o => `<option value="${o.id}">${o.detalle}</option>`).join(""); showL(false); }
         async function loadCascada(edId, secId, ubiId) { const ed = document.getElementById(edId).value; showL(true); dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json()); document.getElementById(secId).innerHTML = '<option value="">Sector...</option>' + [...new Set(dbU.map(x=>x.sector))].map(s=>`<option value="${s}">${s}</option>`).join(""); document.getElementById(secId).disabled = false; showL(false); }
         function filterUbi(secId, ubiId) { const s = document.getElementById(secId).value; document.getElementById(ubiId).innerHTML = '<option value="">Ubi...</option>' + dbU.filter(x=>x.sector===s).map(x=>`<option value='${JSON.stringify(x)}'>${x.ubi}</option>`).join(""); document.getElementById(ubiId).disabled = false; }
