@@ -301,6 +301,47 @@
                 alert("Datos sincronizados.");
                 location.reload();
             } catch(e) { alert("Error al guardar."); showL(false); }
+        }function generarOrdenCompra() { 
+            const edif = document.getElementById('e-edif').value;
+            if(!edif) return alert("Seleccione un edificio primero.");
+            
+            // Buscamos los elementos que tienen la animación de vencido (clase vencido-anim)
+            const vencidos = document.querySelectorAll('.vencido-anim'); 
+            
+            if(vencidos.length === 0) {
+                return alert("No hay equipos vencidos en este edificio para generar un requerimiento."); 
+            }
+            
+            let conteo = {}; 
+            vencidos.forEach(el => { 
+                // Extrae el tipo de extintor del título h4
+                const tipoEquipo = el.querySelector('h4').innerText; 
+                conteo[tipoEquipo] = (conteo[tipoEquipo] || 0) + 1; 
+            }); 
+            
+            const fechaHoy = new Date().toLocaleDateString('es-ES');
+            
+            let textoOutput = `SGM FIUNNE - REQUERIMIENTO HySL\n`;
+            textoOutput += `EDIFICIO: ${edif}\n`;
+            textoOutput += `FECHA DE PEDIDO: ${fechaHoy}\n`;
+            textoOutput += `\nEquipos Vencidos para Recarga:\n`;
+            textoOutput += `-----------------------------------\n`;
+            
+            for (const [equipo, cantidad] of Object.entries(conteo)) {
+                textoOutput += `${cantidad} x ${equipo}\n`; 
+            }
+            
+            textoOutput += `\n-----------------------------------\n`;
+            textoOutput += `Generado automáticamente por SGM FIUNNE`;
+            
+            // Crea un archivo de texto y lo descarga
+            const blob = new Blob([textoOutput], {type:'text/plain'}); 
+            const a = document.createElement('a'); 
+            const nombreArchivo = `OC_HySL_${edif.replace(/\s+/g, '_')}_${fechaHoy.replace(/\//g, '-')}.txt`;
+            
+            a.download = nombreArchivo; 
+            a.href = window.URL.createObjectURL(blob); 
+            a.click(); 
         }
     </script>
 </body>
