@@ -11,16 +11,19 @@
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; touch-action: manipulation; }
         .loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 3000; flex-direction: column; color: white; }
         .tab-active { border-bottom: 4px solid var(--fiunne-orange); color: var(--fiunne-orange); font-weight: 900; background: #fff7ed; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        @keyframes pulse-red { 0%, 100% { background-color: #fef2f2; } 50% { background-color: #fee2e2; } }
+        .vencido-anim { animation: pulse-red 2s infinite; border-left: 8px solid #dc2626 !important; }
         .btn-fiunne { background-color: var(--fiunne-orange); color: white; transition: all 0.2s; }
         .btn-fiunne:active { transform: scale(0.96); opacity: 0.9; }
-        input, select, textarea { font-size: 16px !important; }
+        input, select, textarea { font-size: 16px !important; } /* Evita zoom automático en iOS */
     </style>
 </head>
 <body class="p-2 md:p-4 select-none">
 
     <div id="login-screen" class="fixed inset-0 bg-slate-950 flex items-center justify-center z-[2000] p-4">
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-sm text-center border-t-8 border-[#f06423]">
-            <div class="mb-6 h-32 w-32 mx-auto flex items-center justify-center rounded-full border-4 border-[#f06423]/20 p-2 overflow-hidden bg-slate-50 shadow-inner">
+            <div class="mb-6 h-32 w-32 mx-auto flex items-center justify-center rounded-full border-4 border-[#f06423]/20 p-2 overflow-hidden shadow-inner bg-slate-50">
                 <img src="https://raw.githubusercontent.com/fiunne/mantenimiento-unne/main/logo.png" alt="Logo FIUNNE" class="max-h-[85%] max-w-[85%] object-contain">
             </div>
             <h2 class="font-black text-2xl text-slate-900 uppercase tracking-tighter leading-none">Mantenimiento</h2>
@@ -40,30 +43,30 @@
         <header class="mb-4 p-4 bg-white rounded-2xl border shadow-sm">
             <div class="flex justify-between items-start mb-5">
                 <div>
-                    <h1 class="text-xl font-black text-slate-900 uppercase tracking-tighter">Panel de Control</h1>
+                    <h1 class="text-xl font-black text-slate-900 uppercase tracking-tighter leading-none">Panel de Control</h1>
                     <p class="text-[9px] font-black text-[#f06423] uppercase tracking-widest mt-1">FIUNNE • Gestión Operativa</p>
                 </div>
                 <div class="text-right">
-                    <span id="fecha-actual" class="text-[9px] font-black bg-slate-950 text-white px-3 py-1.5 rounded-lg uppercase">-- --- 202X</span>
+                    <span id="fecha-actual" class="text-[9px] font-black bg-slate-950 text-white px-3 py-1.5 rounded-lg border shadow-sm uppercase">-- --- 202X</span>
                 </div>
             </div>
 
             <div id="dashboard" class="space-y-2">
-                <div class="bg-red-50 p-4 rounded-xl border border-red-100 flex justify-between items-center">
+                <div class="bg-red-50 p-4 rounded-xl border border-red-100 flex justify-between items-center shadow-sm">
                     <div>
                         <p class="text-[9px] font-black text-red-500 uppercase tracking-widest">Estado HySL (Vencidos)</p>
                         <p id="dash-venc" class="text-3xl font-black text-red-900 leading-none mt-1">0</p>
                     </div>
-                    <div class="h-10 w-10 bg-red-600 rounded-lg flex items-center justify-center">
+                    <div class="h-10 w-10 bg-red-600 rounded-lg flex items-center justify-center shadow-lg">
                         <span class="text-white text-lg">⚠️</span>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                    <div class="bg-blue-50 p-4 rounded-xl border border-blue-100 shadow-sm">
                         <p class="text-[8px] font-black text-blue-500 uppercase tracking-wider">OT Abiertas</p>
                         <p id="dash-ot" class="text-2xl font-black text-blue-900 mt-1">0</p>
                     </div>
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
                         <p class="text-[8px] font-black text-slate-500 uppercase tracking-wider">Edificios</p>
                         <p id="dash-sec" class="text-2xl font-black text-slate-900 mt-1">0</p>
                     </div>
@@ -71,7 +74,7 @@
             </div>
         </header>
 
-        <div class="flex border-b mb-6 overflow-x-auto text-[9px] font-black uppercase sticky top-0 bg-slate-100/90 backdrop-blur-md z-50 py-2">
+        <div class="flex border-b mb-6 overflow-x-auto no-scrollbar text-[9px] font-black uppercase whitespace-nowrap sticky top-0 bg-slate-100/90 backdrop-blur-md z-50 py-2">
             <button onclick="tab('nueva')" id="btn-nueva" class="flex-1 py-4 tab-active">Nueva OT</button>
             <button onclick="tab('pendientes')" id="btn-pendientes" class="flex-1 py-4 text-slate-400">Cerrar OT</button>
             <button onclick="tab('relev')" id="btn-relev" class="flex-1 py-4 text-slate-400">Relevamiento</button>
@@ -79,14 +82,50 @@
             <button onclick="tab('historial')" id="btn-historial" class="flex-1 py-4 text-slate-400">Historial</button>
         </div>
 
-        <div id="sec-pendientes" class="hidden space-y-4 px-1">
-            <div class="relative">
-                <select id="c-lista" class="w-full p-4 border-2 border-orange-200 rounded-xl font-black bg-white text-xs appearance-none shadow-sm outline-none focus:border-orange-500 transition-all"></select>
-                <div class="absolute right-4 top-4 pointer-events-none text-orange-400">▼</div>
+        <div id="sec-nueva" class="space-y-4 px-1">
+            <div class="grid grid-cols-2 gap-2">
+                <select id="n-tipo" class="p-4 bg-white border rounded-xl text-xs font-bold shadow-sm outline-none"><option>Correctivo</option><option>Preventivo</option><option>Mejora</option></select>
+                <select id="n-rubro" onchange="checkRefrig()" class="p-4 bg-white border rounded-xl text-xs font-black text-blue-800 shadow-sm outline-none">
+                    <option>Electricidad</option><option>General</option><option>Refrigeración</option><option>Herrería</option><option>HySL (Seguridad)</option>
+                </select>
             </div>
+            <select id="n-edif" onchange="loadCascada('n-edif','n-sec','n-ubi')" class="w-full p-4 border-2 border-slate-200 rounded-xl text-xs font-black bg-white focus:border-[#f06423] outline-none"></select>
+            <select id="n-sec" onchange="filterUbi('n-sec','n-ubi')" class="w-full p-4 border rounded-xl text-xs bg-white" disabled><option>Sector...</option></select>
+            <select id="n-ubi" onchange="autoFill()" class="w-full p-4 border rounded-xl text-xs font-bold bg-white" disabled><option>Ubicación...</option></select>
             
+            <div id="div-refrig" class="hidden grid grid-cols-2 gap-2 bg-slate-900 p-4 rounded-xl text-white shadow-inner">
+                <div class="space-y-1"><label class="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Inventario</label><input id="n-inv" class="bg-slate-800 w-full p-2 rounded-lg text-xs" readonly></div>
+                <div class="space-y-1"><label class="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Equipo</label><input id="n-eq" class="bg-slate-800 w-full p-2 rounded-lg text-xs" readonly></div>
+            </div>
+
+            <input id="n-rep" placeholder="Reportado por..." class="w-full p-4 border rounded-xl text-xs bg-white shadow-sm">
+            <select id="n-tec" class="w-full p-4 border-2 border-yellow-200 rounded-xl text-xs font-black bg-yellow-50 outline-none"><option value="">Asignar Técnico...</option><option>DSF</option><option>AGL</option><option>MAP</option><option>RRG</option></select>
+            <textarea id="n-desc" placeholder="Descripción de la falla..." class="w-full p-4 border rounded-xl bg-white text-xs shadow-sm" rows="3"></textarea>
+            <button onclick="saveOT()" class="w-full btn-fiunne p-5 rounded-xl font-black uppercase shadow-lg tracking-widest transition-all">Registrar Trabajo</button>
+        </div>
+
+        <div id="sec-extintores" class="hidden space-y-4 px-1">
+            <div class="bg-slate-950 p-5 rounded-2xl text-white mb-4 shadow-xl border border-slate-800">
+                <h3 class="font-black text-[10px] uppercase tracking-[0.2em] mb-4 text-slate-500 text-center">Protocolo de Seguridad HySL</h3>
+                <div class="grid grid-cols-2 gap-2 text-[9px] font-black uppercase tracking-wider">
+                    <div class="bg-green-600 p-4 rounded-lg flex items-center gap-2 border-b-4 border-green-800 shadow-inner">🧯 Extintores</div>
+                    <div class="bg-green-600 p-4 rounded-lg flex items-center gap-2 border-b-4 border-green-800 shadow-inner">💧 Red Incendio</div>
+                    <div class="bg-green-600 p-4 rounded-lg flex items-center gap-2 border-b-4 border-green-800 shadow-inner">🏃 Señalética</div>
+                    <div class="bg-green-600 p-4 rounded-lg flex items-center gap-2 border-b-4 border-green-800 shadow-inner">💡 Emergencias</div>
+                    <div class="bg-green-600 p-4 rounded-lg flex items-center gap-2 border-b-4 border-green-800 shadow-inner">⚡ Puesta Tierra</div>
+                    <div class="bg-green-600 p-4 rounded-lg flex items-center gap-2 border-b-4 border-green-800 shadow-inner">🔦 Iluminación</div>
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <select id="e-edif" onchange="loadExtintores()" class="flex-1 p-4 border-2 border-slate-200 rounded-xl text-xs font-black bg-white outline-none focus:border-[#f06423]"></select>
+                <button onclick="generarOrdenCompra()" class="bg-slate-900 text-white px-5 rounded-xl text-[9px] font-black uppercase shadow-md active:bg-slate-700">Generar OC</button>
+            </div>
+            <div id="ext-lista" class="grid grid-cols-1 gap-2"></div>
+        </div>
+
+        <div id="sec-pendientes" class="hidden space-y-4 px-1">
+            <select id="c-lista" class="w-full p-4 border-2 border-green-200 rounded-xl font-black bg-green-50 text-xs"></select>
             <div class="p-5 bg-white rounded-2xl border shadow-sm space-y-4">
-                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b pb-2">Materiales Utilizados</p>
                 <select id="m-rub" onchange="loadG()" class="w-full p-4 border rounded-lg text-xs font-bold bg-slate-50"></select>
                 <div class="grid grid-cols-2 gap-2">
                     <select id="m-gru" onchange="loadI()" class="p-4 border rounded-lg text-xs bg-slate-50" disabled><option>Grupo...</option></select>
@@ -98,45 +137,48 @@
                 </div>
                 <div id="cesta" class="space-y-1"></div>
             </div>
-
             <textarea id="c-obs" placeholder="Novedades del cierre..." class="w-full p-4 border rounded-xl bg-white text-xs shadow-sm" rows="3"></textarea>
             <button onclick="cerrarOT()" class="w-full bg-green-600 text-white p-5 rounded-xl font-black uppercase shadow-lg transition-all">Finalizar Tarea</button>
         </div>
 
-        <div id="sec-nueva" class="hidden space-y-4 px-1">
-            <div class="grid grid-cols-2 gap-2">
-                <select id="n-tipo" class="p-4 bg-white border rounded-xl text-xs font-bold shadow-sm outline-none"><option>Correctivo</option><option>Preventivo</option><option>Mejora</option></select>
-                <select id="n-rubro" onchange="checkRefrig()" class="p-4 bg-white border rounded-xl text-xs font-black text-blue-800 shadow-sm outline-none">
-                    <option>Electricidad</option><option>General</option><option>Refrigeración</option><option>Herrería</option><option>HySL (Seguridad)</option>
-                </select>
+        <div id="sec-relev" class="hidden space-y-3 px-1">
+            <select id="r-edif" onchange="loadCascadaRelev()" class="w-full p-4 border-2 border-slate-200 rounded-xl text-xs font-black bg-white"></select>
+            <select id="r-sec" onchange="filterUbiRelev()" class="w-full p-4 border rounded-xl text-xs bg-white" disabled><option>Sector...</option></select>
+            <select id="r-ubi" onchange="fillRelevFields()" class="w-full p-4 border rounded-xl text-xs font-bold bg-white" disabled><option>Ubicación...</option></select>
+            <div id="relev-form" class="hidden bg-white p-5 rounded-2xl shadow-lg border space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1"><label class="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Inv Aire</label><input id="r-inv-a" class="w-full p-3 border rounded-lg text-xs bg-slate-50"></div>
+                    <div class="space-y-1"><label class="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Eq Aire</label><input id="r-eq-a" class="w-full p-3 border rounded-lg text-xs bg-slate-50"></div>
+                    <div class="space-y-1"><label class="text-[8px] font-bold text-slate-400 uppercase tracking-wider">T Lum.</label><input id="r-t-lum" class="w-full p-3 border rounded-lg text-xs bg-slate-50"></div>
+                    <div class="space-y-1"><label class="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Cant Lám.</label><input id="r-c-lam" type="number" class="w-full p-3 border rounded-lg text-xs bg-slate-50"></div>
+                </div>
+                <button onclick="saveRelevamiento()" class="w-full bg-slate-800 text-white p-4 rounded-xl font-black uppercase text-xs shadow">Actualizar Datos</button>
             </div>
-            <select id="n-edif" onchange="loadCascada('n-edif','n-sec','n-ubi')" class="w-full p-4 border-2 border-slate-200 rounded-xl text-xs font-black bg-white focus:border-[#f06423] outline-none"></select>
-            <select id="n-sec" onchange="filterUbi('n-sec','n-ubi')" class="w-full p-4 border rounded-xl text-xs bg-white" disabled><option>Sector...</option></select>
-            <select id="n-ubi" onchange="autoFill()" class="w-full p-4 border rounded-xl text-xs font-bold bg-white" disabled><option>Ubicación...</option></select>
-            <input id="n-rep" placeholder="Reportado por..." class="w-full p-4 border rounded-xl text-xs bg-white shadow-sm">
-            <select id="n-tec" class="w-full p-4 border-2 border-yellow-200 rounded-xl text-xs font-black bg-yellow-50 outline-none"><option value="">Asignar Técnico...</option><option>DSF</option><option>AGL</option><option>MAP</option><option>RRG</option></select>
-            <textarea id="n-desc" placeholder="Descripción de la falla..." class="w-full p-4 border rounded-xl bg-white text-xs shadow-sm" rows="3"></textarea>
-            <button onclick="saveOT()" class="w-full btn-fiunne p-5 rounded-xl font-black uppercase shadow-lg tracking-widest transition-all">Registrar Trabajo</button>
         </div>
-        <div id="sec-relev" class="hidden"></div>
-        <div id="sec-extintores" class="hidden"></div>
-        <div id="sec-historial" class="hidden"></div>
+
+        <div id="sec-historial" class="hidden space-y-4 px-1">
+            <div class="flex justify-center p-2 mb-2 bg-white rounded-xl border shadow-sm">
+                <button id="btn-filtro-ot" onclick="toggleFiltroHistorial()" class="text-blue-600 px-6 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest">Filtrar: Solo Abiertas</button>
+            </div>
+            <div id="historial-container" class="space-y-2"></div>
+        </div>
 
     </div>
 
     <script>
         const URL = "https://script.google.com/macros/s/AKfycbyALUU--qMV981OYeLVJHRQLBhuF3rNqxjA9na1oGfDcbP4KxuUrpcWSPvEEHzq7w7a/exec"; 
         const PIN_CORRECTO = "4370";
-        let dbU = [], dbM = {}, cesta = [];
+        let dbU = [], dbM = {}, cesta = [], filtroSoloAbiertas = false, currentRelevFila = null;
 
         function showL(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
         
         window.onload = () => { 
             const hoy = new Date();
-            document.getElementById('fecha-actual').innerText = hoy.toLocaleDateString('es-ES', { day:'2-digit', month:'short', year:'numeric' }).toUpperCase();
+            const opciones = { day: '2-digit', month: 'short', year: 'numeric' };
+            document.getElementById('fecha-actual').innerText = hoy.toLocaleDateString('es-ES', opciones).toUpperCase();
             if(localStorage.getItem('sgm_session') === PIN_CORRECTO) loginExitoso(); 
         };
-
+        
         function verificarAcceso() { 
             if(document.getElementById('pin-input').value === PIN_CORRECTO) { 
                 localStorage.setItem('sgm_session', PIN_CORRECTO); 
@@ -155,7 +197,7 @@
             try {
                 const eds = await fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`).then(r=>r.json());
                 const optEdif = '<option value="">Edificio...</option>' + eds.map(e=>`<option value="${e}">${e}</option>`).join("");
-                document.getElementById('n-edif').innerHTML = optEdif;
+                ['n-edif', 'r-edif', 'e-edif'].forEach(id => document.getElementById(id).innerHTML = optEdif);
                 
                 dbM = await fetch(`${URL}?action=getMateriales&token=${PIN_CORRECTO}`).then(r=>r.json());
                 document.getElementById('m-rub').innerHTML = '<option value="">1. Rubro...</option>' + Object.keys(dbM).map(x=>`<option value="${x}">${x}</option>`).join("");
@@ -163,83 +205,144 @@
                 const abiertas = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`).then(r=>r.json());
                 document.getElementById('dash-ot').innerText = abiertas.length;
                 document.getElementById('dash-sec').innerText = eds.length;
-            } catch(e) {}
+            } catch(e) { console.error(e); }
             showL(false);
         }
 
         function tab(t) {
             ['nueva','pendientes','relev','extintores','historial'].forEach(s => {
-                const el = document.getElementById('sec-'+s);
-                if(el) el.classList.add('hidden');
+                document.getElementById('sec-'+s).classList.add('hidden');
                 document.getElementById('btn-'+s).classList.remove('tab-active');
+                if(s !== 'extintores') document.getElementById('btn-'+s).classList.add('text-slate-400');
             });
             document.getElementById('sec-'+t).classList.remove('hidden');
             document.getElementById('btn-'+t).classList.add('tab-active');
             if(t==='pendientes') loadAbiertas();
+            if(t==='historial') loadHistorial();
         }
 
-        // --- LÓGICA DE DETECCIÓN MEJORADA ---
-        async function loadAbiertas() { 
-            showL(true); 
+        async function loadExtintores() {
+            const ed = document.getElementById('e-edif').value; if(!ed) return;
+            showL(true);
             try {
-                const res = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`);
-                const data = await res.json(); 
-                const select = document.getElementById('c-lista');
-                select.innerHTML = '<option value="">Seleccione OT a Cerrar...</option>';
-                
-                data.forEach(o => {
-                    // 1. Buscamos el ID (puede ser 'id' o 'numero')
-                    const id = o.id || o.numero || "S/N";
-                    
-                    // 2. Buscamos la Ubicación (probamos todas las variantes posibles de tu Sheets)
-                    let ubi = o.ubi || o.ubicacion || o.Ubicacion || o.sector || o.edificio || "Sin Ubicación";
-                    
-                    // 3. Buscamos el Detalle
-                    let detalle = o.detalle || o.descripcion || o.Tarea || o.tarea || "Sin descripción";
-                    
-                    // 4. Procesamos la fecha para que no salga "GMT-0300" ni "(S/F)"
-                    let fCorta = "S/F";
-                    if (o.fecha) {
-                        try {
-                            const d = new Date(o.fecha);
-                            if (!isNaN(d.getTime())) {
-                                fCorta = d.toLocaleDateString('es-AR', {day:'2-digit', month:'2-digit'});
-                            } else {
-                                // Si es un string tipo "27/03/2026", sacamos el año
-                                fCorta = o.fecha.split(' ')[0].substring(0, 5);
-                            }
-                        } catch(e) {}
-                    }
-
-                    const opt = document.createElement('option');
-                    opt.value = id;
-                    // Formato limpio: #12 (27/03) - Sector - Detalle
-                    opt.textContent = `#${id} (${fCorta}) - ${ubi} - ${detalle}`;
-                    select.appendChild(opt);
-                });
-            } catch(e) { console.error(e); }
-            showL(false); 
+                const d = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json());
+                const hoy = new Date(); hoy.setHours(0,0,0,0);
+                let countVenc = 0;
+                document.getElementById('ext-lista').innerHTML = d.map(x => {
+                    const p = x.f_venc.split("/");
+                    const fV = new Date(p[2], p[1]-1, p[0]);
+                    let estilo = "border-green-500 bg-white";
+                    if (fV < hoy) { estilo = "vencido-anim"; countVenc++; }
+                    return `<div class="p-4 border-l-8 rounded-xl shadow-sm ${estilo}">
+                        <div class="flex justify-between items-center">
+                            <div><p class="text-[9px] font-black text-slate-400 uppercase">S/N: ${x.serie}</p><h4 class="font-black text-slate-800 text-xs">${x.tipo} ${x.cap}</h4><p class="text-[8px] font-bold text-slate-500">${x.sector}</p></div>
+                            <div class="text-right"><p class="text-[10px] font-black ${fV<hoy?'text-red-600':'text-slate-900'}">${x.f_venc}</p></div>
+                        </div>
+                    </div>`;
+                }).join("");
+                document.getElementById('dash-venc').innerText = countVenc;
+            } catch(e) {}
+            showL(false);
         }
 
-        // Soporte de materiales y guardado
+        async function loadHistorial() {
+            showL(true);
+            try {
+                const d = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r=>r.json());
+                let filtrada = filtroSoloAbiertas ? d.filter(h=>h.est==='Abierta') : d;
+                document.getElementById('historial-container').innerHTML = filtrada.map(h => {
+                    const edifTxt = h.edif && h.edif !== "undefined" ? h.edif : "";
+                    const ubiTxt = h.ubi && h.ubi !== "undefined" ? h.ubi : "";
+                    const separador = edifTxt && ubiTxt ? " - " : "";
+                    
+                    return `<div class="p-4 bg-white rounded-xl shadow-sm border-l-8 ${h.est==='Cerrada'?'border-green-400 opacity-60':'border-blue-500'}">
+                        <div class="flex justify-between font-black text-[9px] text-slate-400 tracking-tighter"><span>#${h.id}</span><span>${h.fecha}</span></div>
+                        <p class="font-black text-slate-800 text-[11px] uppercase mt-1">${edifTxt}${separador}${ubiTxt}</p>
+                        <p class="text-slate-600 text-[11px] mt-1.5 leading-snug">${h.tarea}</p>
+                        <div class="flex justify-between mt-3 italic text-[9px] font-bold text-slate-500 border-t pt-2">
+                            <span>👷 ${h.tec}</span><span class="uppercase ${h.est==='Abierta'?'text-blue-600':''}">${h.est}</span>
+                        </div>
+                    </div>`}).join("");
+            } catch(e) {}
+            showL(false);
+        }
+
+        function toggleFiltroHistorial() { 
+            filtroSoloAbiertas = !filtroSoloAbiertas; 
+            document.getElementById('btn-filtro-ot').innerText = filtroSoloAbiertas ? "Ver Todas" : "Ver Solo Abiertas";
+            loadHistorial(); 
+        }
+
+        async function loadAbiertas() { showL(true); const d = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`).then(r=>r.json()); document.getElementById('c-lista').innerHTML = '<option value="">Seleccione OT...</option>' + d.map(o=>`<option value="${o.id}">OT #${o.id} - ${o.detalle}</option>`).join(""); showL(false); }
         function loadG() { const r = document.getElementById('m-rub').value; document.getElementById('m-gru').innerHTML = '<option value="">2. Grupo...</option>' + Object.keys(dbM[r]).map(x=>`<option value="${x}">${x}</option>`).join(""); document.getElementById('m-gru').disabled = false; }
-        function loadI() { const r = document.getElementById('m-rub').value, g = document.getElementById('m-gru').value; document.getElementById('m-ite').innerHTML = '<option value="">3. Item...</option>' + dbM[r][g].map(x=>`<option value='${JSON.stringify(x)}'>${x.nombre}</option>`).join(""); document.getElementById('m-ite').disabled = false; }
+        function loadI() { const r = document.getElementById('m-rub').value, g = document.getElementById('m-gru').value; document.getElementById('m-ite').innerHTML = '<option value="">3. Item...</option>' + dbM[r][g].map(x=>`<option value='${JSON.stringify(x)}'>${x.nombre} (Stock: ${x.stock})</option>`).join(""); document.getElementById('m-ite').disabled = false; }
         function addItem() { const it = JSON.parse(document.getElementById('m-ite').value); cesta.push({nombre: it.nombre, cantidad: document.getElementById('m-cant').value, hoja: it.hoja}); renderCesta(); }
         function renderCesta() { document.getElementById('cesta').innerHTML = cesta.map((x,i)=>`<div class="flex justify-between bg-slate-800 text-white p-3 rounded-lg text-[10px] mb-2 font-bold"><span>${x.cantidad} x ${x.nombre}</span><button onclick="cesta.splice(${i},1);renderCesta()" class="text-red-400">X</button></div>`).join(""); }
-        
-        async function cerrarOT() { 
-            const id = document.getElementById('c-lista').value;
-            if(!id) return alert("Seleccione orden");
-            showL(true); 
-            await fetch(URL, {method:'POST', body: JSON.stringify({ action:'cerrarOT', token:PIN_CORRECTO, idOT:id, materialesUsados:cesta.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), listaParaDescontar:cesta, comentarioFinal:document.getElementById('c-obs').value })}); 
-            location.reload(); 
-        }
-
+        async function cerrarOT() { showL(true); await fetch(URL, {method:'POST', body: JSON.stringify({ action:'cerrarOT', token:PIN_CORRECTO, idOT:document.getElementById('c-lista').value, materialesUsados:cesta.map(x=>`${x.cantidad} ${x.nombre}`).join(", "), listaParaDescontar:cesta, comentarioFinal:document.getElementById('c-obs').value })}); location.reload(); }
         async function loadCascada(eI, sI, uI) { const ed = document.getElementById(eI).value; showL(true); dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json()); document.getElementById(sI).innerHTML = '<option value="">Sector...</option>' + [...new Set(dbU.map(x=>x.sector))].map(s=>`<option value="${s}">${s}</option>`).join(""); document.getElementById(sI).disabled = false; showL(false); }
         function filterUbi(sI, uI) { const s = document.getElementById(sI).value; document.getElementById(uI).innerHTML = '<option value="">Ubi...</option>' + dbU.filter(x=>x.sector===s).map(x=>`<option value='${JSON.stringify(x)}'>${x.ubi}</option>`).join(""); document.getElementById(uI).disabled = false; }
-        function autoFill() {}
-        function checkRefrig() {}
-        async function saveOT() { alert("Simulando guardado..."); location.reload(); }
+        function autoFill() { const d = JSON.parse(document.getElementById('n-ubi').value); document.getElementById('n-inv').value = d.inv_aire||"N/A"; document.getElementById('n-eq').value = d.eq_aire||"N/A"; }
+        function checkRefrig() { document.getElementById('div-refrig').classList.toggle('hidden', document.getElementById('n-rubro').value !== "Refrigeración"); }
+        async function saveOT() { 
+            const u = JSON.parse(document.getElementById('n-ubi').value); 
+            showL(true); 
+            try {
+                await fetch(URL, {method:'POST', body: JSON.stringify({ action:'nuevaOT', token:PIN_CORRECTO, tipo:document.getElementById('n-tipo').value, especialidad:document.getElementById('n-rubro').value, edificio:document.getElementById('n-edif').value, sector:u.sector, ubicacion:u.ubi, nInventario:document.getElementById('n-inv').value, equipo:document.getElementById('n-eq').value, reportadoPor:document.getElementById('n-rep').value, personal:document.getElementById('n-tec').value, descripcion:document.getElementById('n-desc').value })}); 
+                location.reload(); 
+            } catch(e) { alert("Error de conexión. Intente nuevamente."); showL(false); }
+        }
+        async function loadCascadaRelev() { const ed = document.getElementById('r-edif').value; showL(true); dbU = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`).then(r=>r.json()); document.getElementById('r-sec').innerHTML = '<option value="">Sector...</option>' + [...new Set(dbU.map(x=>x.sector))].map(s=>`<option value="${s}">${s}</option>`).join(""); document.getElementById('r-sec').disabled = false; showL(false); }
+        function filterUbiRelev() { const s = document.getElementById('r-sec').value; document.getElementById('r-ubi').innerHTML = '<option value="">Ubi...</option>' + dbU.filter(x=>x.sector===s).map(x=>`<option value='${JSON.stringify(x)}'>${x.ubi}</option>`).join(""); document.getElementById('r-ubi').disabled = false; }
+        function fillRelevFields() { const d = JSON.parse(document.getElementById('r-ubi').value); currentRelevFila = d.fila; document.getElementById('r-inv-a').value = d.inv_aire||""; document.getElementById('r-eq-a').value = d.eq_aire||""; document.getElementById('r-t-lum').value = d.t_lum||""; document.getElementById('r-c-lam').value = d.c_lam||""; document.getElementById('relev-form').classList.remove('hidden'); }
+        async function saveRelevamiento() { 
+            showL(true); 
+            try {
+                await fetch(URL, {method:'POST', body: JSON.stringify({ action:'updateRelevamiento', token:PIN_CORRECTO, edificio:document.getElementById('r-edif').value, fila:currentRelevFila, inv_aire:document.getElementById('r-inv-a').value, eq_aire:document.getElementById('r-eq-a').value, t_lum:document.getElementById('r-t-lum').value, c_lam:document.getElementById('r-c-lam').value })}); 
+                alert("Datos sincronizados.");
+                location.reload();
+            } catch(e) { alert("Error al guardar."); showL(false); }
+        }function generarOrdenCompra() { 
+            const edif = document.getElementById('e-edif').value;
+            if(!edif) return alert("Seleccione un edificio primero.");
+            
+            // Buscamos los elementos que tienen la animación de vencido (clase vencido-anim)
+            const vencidos = document.querySelectorAll('.vencido-anim'); 
+            
+            if(vencidos.length === 0) {
+                return alert("No hay equipos vencidos en este edificio para generar un requerimiento."); 
+            }
+            
+            let conteo = {}; 
+            vencidos.forEach(el => { 
+                // Extrae el tipo de extintor del título h4
+                const tipoEquipo = el.querySelector('h4').innerText; 
+                conteo[tipoEquipo] = (conteo[tipoEquipo] || 0) + 1; 
+            }); 
+            
+            const fechaHoy = new Date().toLocaleDateString('es-ES');
+            
+            let textoOutput = `SGM FIUNNE - REQUERIMIENTO HySL\n`;
+            textoOutput += `EDIFICIO: ${edif}\n`;
+            textoOutput += `FECHA DE PEDIDO: ${fechaHoy}\n`;
+            textoOutput += `\nEquipos Vencidos para Recarga:\n`;
+            textoOutput += `-----------------------------------\n`;
+            
+            for (const [equipo, cantidad] of Object.entries(conteo)) {
+                textoOutput += `${cantidad} x ${equipo}\n`; 
+            }
+            
+            textoOutput += `\n-----------------------------------\n`;
+            textoOutput += `Generado automáticamente por SGM FIUNNE`;
+            
+            // Crea un archivo de texto y lo descarga
+            const blob = new Blob([textoOutput], {type:'text/plain'}); 
+            const a = document.createElement('a'); 
+            const nombreArchivo = `OC_HySL_${edif.replace(/\s+/g, '_')}_${fechaHoy.replace(/\//g, '-')}.txt`;
+            
+            a.download = nombreArchivo; 
+            a.href = window.URL.createObjectURL(blob); 
+            a.click(); 
+        }
     </script>
 </body>
 </html>
