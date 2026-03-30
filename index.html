@@ -8,185 +8,200 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         :root { --fiunne-orange: #f06423; }
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; touch-action: manipulation; }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
         .tab-active { border-bottom: 4px solid var(--fiunne-orange); color: var(--fiunne-orange); font-weight: 900; background: #fff7ed; }
-        .loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); display: none; justify-content: center; align-items: center; z-index: 3000; flex-direction: column; color: white; }
+        @media print { .no-print { display: none; } .print-only { display: block !important; } }
+        .print-only { display: none; }
     </style>
 </head>
-<body class="p-2 select-none">
+<body class="p-2">
 
-    <div id="loader" class="loading-overlay">
-        <div class="w-12 h-12 border-4 border-[#f06423] border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="font-black text-[10px] uppercase tracking-widest">Sincronizando...</p>
+    <div id="loader" class="fixed inset-0 bg-black/80 hidden z-[5000] flex-col items-center justify-center text-white">
+        <div class="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+        <p class="text-[10px] font-black uppercase">Procesando...</p>
     </div>
 
-    <div class="max-w-4xl mx-auto pb-20">
+    <div id="ticket-pdf" class="print-only p-10 bg-white text-black">
+        <h1 class="text-2xl font-bold border-b-2 pb-2">ORDEN DE TRABAJO - FIUNNE</h1>
+        <div id="ticket-content" class="mt-4 space-y-2"></div>
+    </div>
+
+    <div class="max-w-4xl mx-auto pb-20 no-print">
         <header class="mb-4 p-4 bg-white rounded-2xl border shadow-sm">
             <div class="flex justify-between items-center mb-4">
-                <h1 class="text-xl font-black text-slate-900 uppercase tracking-tighter">Panel FIUNNE</h1>
-                <span id="fecha-actual" class="text-[10px] font-black bg-slate-900 text-white px-3 py-1 rounded-lg">27 MAR 2026</span>
+                <h1 class="text-xl font-black text-slate-900 uppercase">Panel FIUNNE</h1>
+                <span id="fecha-actual" class="text-[10px] font-black bg-slate-900 text-white px-3 py-1 rounded-lg uppercase"></span>
             </div>
             <div class="grid grid-cols-3 gap-2">
-                <div class="bg-blue-50 p-3 rounded-xl border border-blue-100 text-center">
-                    <p class="text-[8px] font-black text-blue-500 uppercase">Abiertas</p>
-                    <p id="dash-ot" class="text-xl font-black text-blue-900">0</p>
-                </div>
-                <div class="bg-red-50 p-3 rounded-xl border border-red-100 text-center">
-                    <p class="text-[8px] font-black text-red-500 uppercase">Vencidos</p>
-                    <p id="dash-venc" class="text-xl font-black text-red-900">0</p>
-                </div>
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-center">
-                    <p class="text-[8px] font-black text-slate-500 uppercase">Edificios</p>
-                    <p id="dash-sec" class="text-xl font-black text-slate-900">0</p>
-                </div>
+                <div class="bg-blue-50 p-3 rounded-xl border text-center"><p class="text-[8px] font-black text-blue-500">OT ABIERTAS</p><p id="dash-ot" class="text-xl font-black">0</p></div>
+                <div class="bg-slate-50 p-3 rounded-xl border text-center"><p class="text-[8px] font-black text-slate-500">EDIFICIOS</p><p id="dash-sec" class="text-xl font-black">0</p></div>
+                <div class="bg-green-50 p-3 rounded-xl border text-center"><p class="text-[8px] font-black text-green-500">ESTADO HySL</p><p class="text-xl font-black">OK</p></div>
             </div>
         </header>
 
-        <nav class="flex border-b mb-6 overflow-x-auto bg-white rounded-t-xl sticky top-0 z-50 shadow-sm">
-            <button onclick="tab('nueva')" id="btn-nueva" class="flex-1 py-4 text-[10px] font-black uppercase text-slate-400">Nueva OT</button>
-            <button onclick="tab('pendientes')" id="btn-pendientes" class="flex-1 py-4 text-[10px] font-black uppercase text-slate-400">Cerrar OT</button>
-            <button onclick="tab('relev')" id="btn-relev" class="flex-1 py-4 text-[10px] font-black uppercase text-slate-400">Relevamiento</button>
-            <button onclick="tab('extintores')" id="btn-extintores" class="flex-1 py-4 text-[10px] font-black uppercase text-green-600">HySL</button>
-            <button onclick="tab('historial')" id="btn-historial" class="flex-1 py-4 text-[10px] font-black uppercase text-slate-400">Historial</button>
+        <nav class="flex border-b mb-6 bg-white rounded-t-xl sticky top-0 z-50 shadow-sm overflow-x-auto">
+            <button onclick="tab('nueva')" id="btn-nueva" class="flex-1 py-4 text-[10px] font-black uppercase">Nueva OT</button>
+            <button onclick="tab('pendientes')" id="btn-pendientes" class="flex-1 py-4 text-[10px] font-black uppercase">Cerrar OT</button>
+            <button onclick="tab('extintores')" id="btn-extintores" class="flex-1 py-4 text-[10px] font-black uppercase">Extintores</button>
+            <button onclick="tab('historial')" id="btn-historial" class="flex-1 py-4 text-[10px] font-black uppercase">Historial</button>
         </nav>
 
         <div id="sec-nueva" class="hidden space-y-4">
             <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
-                <select id="n-edif" onchange="loadCascada('n-edif','n-sec','n-ubi')" class="w-full p-4 border rounded-xl font-bold bg-slate-50"></select>
-                <select id="n-sec" class="w-full p-4 border rounded-xl text-sm" disabled><option>Sector...</option></select>
-                <textarea id="n-desc" placeholder="Descripción del problema..." class="w-full p-4 border rounded-xl text-sm h-24"></textarea>
-                <button class="w-full bg-[#f06423] text-white p-4 rounded-xl font-black uppercase shadow-lg">Registrar</button>
-            </div>
-        </div>
-
-        <div id="sec-pendientes" class="hidden space-y-4">
-            <select id="c-lista" class="w-full p-4 border-2 border-orange-200 rounded-xl font-black bg-white text-xs"></select>
-            <div class="bg-white p-4 rounded-2xl border shadow-sm">
-                <textarea id="c-obs" placeholder="Novedades del cierre..." class="w-full p-4 border rounded-xl text-sm mb-4"></textarea>
-                <button onclick="cerrarOT()" class="w-full bg-green-600 text-white p-4 rounded-xl font-black uppercase shadow-lg">Finalizar Tarea</button>
-            </div>
-        </div>
-
-        <div id="sec-relev" class="hidden space-y-4">
-            <div class="bg-white p-4 rounded-2xl border shadow-sm">
-                <h3 class="font-black text-xs uppercase mb-3 text-slate-400">Actualizar Equipos</h3>
-                <select id="r-edif" onchange="loadRelevData()" class="w-full p-4 border rounded-xl font-bold mb-3"></select>
-                <div id="relev-list" class="space-y-2">
-                    <p class="text-center text-slate-400 text-xs py-10 italic">Seleccione un edificio para ver equipos...</p>
+                <select id="n-edif" class="w-full p-4 border rounded-xl font-bold bg-slate-50"></select>
+                <input type="text" id="n-ubi" placeholder="Ubicación específica..." class="w-full p-4 border rounded-xl text-sm">
+                <textarea id="n-desc" placeholder="Descripción de la tarea..." class="w-full p-4 border rounded-xl text-sm h-24"></textarea>
+                <div class="flex gap-2">
+                    <button onclick="enviarOT()" class="flex-1 bg-[#f06423] text-white p-4 rounded-xl font-black uppercase shadow-lg">Registrar</button>
+                    <button onclick="imprimirPDF()" class="bg-slate-800 text-white p-4 rounded-xl shadow-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    </button>
                 </div>
             </div>
         </div>
 
         <div id="sec-extintores" class="hidden space-y-4">
-            <div class="bg-green-900 text-white p-5 rounded-2xl shadow-xl border-b-4 border-green-700">
-                <p class="text-[10px] font-black opacity-60 uppercase tracking-widest">Seguridad e Higiene</p>
-                <h2 class="text-xl font-black italic">Control de Extintores</h2>
+            <div class="flex justify-between items-center bg-white p-4 rounded-xl border">
+                <select id="e-edif" onchange="loadExtintores()" class="p-2 border rounded-lg text-xs font-bold"></select>
+                <button onclick="generarTXT()" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-black text-[10px] uppercase shadow-md">Descargar OC (TXT)</button>
             </div>
-            <div id="ext-container" class="grid grid-cols-1 gap-2">
-                </div>
+            <div id="ext-container" class="space-y-2"></div>
         </div>
 
-        <div id="sec-historial" class="hidden space-y-3">
-            <div class="flex justify-between items-center px-2">
-                <h3 class="font-black text-xs uppercase text-slate-500">Últimos Movimientos</h3>
-                <button onclick="loadHistorial()" class="text-[10px] font-black text-blue-600 uppercase">Refrescar</button>
-            </div>
-            <div id="hist-container" class="space-y-2">
-                </div>
+        <div id="sec-historial" class="hidden space-y-2">
+            <div id="hist-container"></div>
         </div>
+
+        <div id="sec-pendientes" class="hidden space-y-4">
+            <select id="c-lista" class="w-full p-4 border-2 border-orange-200 rounded-xl font-black bg-white text-xs"></select>
+            <button class="w-full bg-green-600 text-white p-4 rounded-xl font-black uppercase shadow-lg">Finalizar Tarea</button>
+        </div>
+
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbywvToXSQw1WwAvws_STdilHSPffURqF8b3Ybi6x2DHrEhytIhnZUC3tSJEzYHMt3oW/exec";
-        const PIN_CORRECTO = "4370";
+        const URL = "https://script.google.com/macros/s/AKfycbzQrm_X9lHdVdhKkUUOIf1QLcI-2vG6ePO8DovoF1uzJPsEUGdBU3NCkXw-kno5iBT0/exec";
+        const PIN = "4370";
 
         function showL(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
 
-        // Sistema de navegación corregido
+        // 1. ACTUALIZAR FECHA EN PORTADA
+        function actualizarFecha() {
+            const opciones = { day: '2-digit', month: 'short', year: 'numeric' };
+            document.getElementById('fecha-actual').innerText = new Date().toLocaleDateString('es-AR', opciones);
+        }
+
         function tab(name) {
-            const sections = ['nueva', 'pendientes', 'relev', 'extintores', 'historial'];
-            sections.forEach(s => {
-                const sec = document.getElementById('sec-' + s);
-                const btn = document.getElementById('btn-' + s);
-                if (sec) sec.classList.add('hidden');
-                if (btn) btn.classList.remove('tab-active');
+            ['nueva', 'pendientes', 'extintores', 'historial'].forEach(s => {
+                document.getElementById('sec-' + s).classList.add('hidden');
+                document.getElementById('btn-' + s)?.classList.remove('tab-active');
             });
-
             document.getElementById('sec-' + name).classList.remove('hidden');
-            document.getElementById('btn-' + name).classList.add('tab-active');
-
-            // Cargas automáticas según tab
+            document.getElementById('btn-' + name)?.classList.add('tab-active');
             if (name === 'pendientes') loadAbiertas();
             if (name === 'historial') loadHistorial();
             if (name === 'extintores') loadExtintores();
-            if (name === 'relev') initRelev();
         }
 
-        async function init() {
+        // 2. BOTÓN IMPRIMIR PDF
+        function imprimirPDF() {
+            const edif = document.getElementById('n-edif').value;
+            const ubi = document.getElementById('n-ubi').value;
+            const desc = document.getElementById('n-desc').value;
+            
+            if(!desc) return alert("Complete la descripción antes de imprimir.");
+
+            document.getElementById('ticket-content').innerHTML = `
+                <p><strong>Fecha:</strong> ${new Date().toLocaleString()}</p>
+                <p><strong>Edificio:</strong> ${edif}</p>
+                <p><strong>Ubicación:</strong> ${ubi}</p>
+                <hr>
+                <p><strong>Descripción:</strong><br>${desc}</p>
+                <br><br><br>
+                <div style="border-top: 1px solid black; width: 200px; text-align: center;">Firma Responsable</div>
+            `;
+            window.print();
+        }
+
+        // 3. BOTÓN GENERAR TXT (EXTINTORES)
+        function generarTXT() {
+            const container = document.getElementById('ext-container');
+            const items = container.querySelectorAll('.ext-item');
+            if(items.length === 0) return alert("No hay datos para exportar.");
+
+            let contenido = "ORDEN DE CARGA/MANTENIMIENTO - HySL FIUNNE\n";
+            contenido += "==========================================\n\n";
+            
+            items.forEach(div => {
+                contenido += div.innerText.replace(/\n/g, " | ") + "\n";
+            });
+
+            const blob = new Blob([contenido], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `OC_Extintores_${new Date().getTime()}.txt`;
+            link.click();
+        }
+
+        async function loadExtintores() {
             showL(true);
+            const edif = document.getElementById('e-edif').value || "Edificio Principal";
+            const cont = document.getElementById('ext-container');
             try {
-                const eds = await fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`).then(r => r.json());
-                const opt = '<option value="">Seleccionar Edificio...</option>' + eds.map(e => `<option value="${e}">${e}</option>`).join("");
-                ['n-edif', 'r-edif'].forEach(id => { if(document.getElementById(id)) document.getElementById(id).innerHTML = opt; });
-                document.getElementById('dash-sec').innerText = eds.length;
-                tab('nueva'); // Tab por defecto
+                const res = await fetch(`${URL}?action=getExtintores&token=${PIN}&edificio=${encodeURIComponent(edif)}`);
+                const data = await res.json();
+                cont.innerHTML = data.map(e => `
+                    <div class="ext-item bg-white p-3 rounded-lg border shadow-sm flex justify-between text-xs">
+                        <div>
+                            <p class="font-black text-orange-600">${e.tipo} ${e.cap}</p>
+                            <p>S/N: ${e.serie} - ${e.sector}</p>
+                        </div>
+                        <div class="text-right font-bold text-red-600">Vence: ${e.f_venc}</div>
+                    </div>
+                `).join("");
             } catch (e) { console.log(e); }
             showL(false);
         }
 
-        // --- HISTORIAL ---
-        async function loadHistorial() {
-            showL(true);
-            const cont = document.getElementById('hist-container');
-            cont.innerHTML = '<p class="text-center py-10 animate-pulse">Buscando registros...</p>';
-            try {
-                const data = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`).then(r => r.json());
-                cont.innerHTML = data.map(h => `
-                    <div class="bg-white p-4 rounded-xl border-l-4 ${h.est === 'Cerrada' ? 'border-green-500' : 'border-blue-500'} shadow-sm">
-                        <div class="flex justify-between text-[9px] font-black text-slate-400"><span>#${h.id}</span><span>${h.fecha}</span></div>
-                        <p class="text-xs font-bold mt-1 uppercase">${h.edif} - ${h.ubi}</p>
-                        <p class="text-[11px] text-slate-600 mt-1">${h.tarea}</p>
-                    </div>
-                `).join("");
-            } catch (e) { cont.innerHTML = "Error al cargar historial."; }
-            showL(false);
-        }
-
-        // --- EXTINTORES ---
-        async function loadExtintores() {
-            showL(true);
-            const cont = document.getElementById('ext-container');
-            try {
-                const data = await fetch(`${URL}?action=getExtintores&token=${PIN_CORRECTO}`).then(r => r.json());
-                cont.innerHTML = data.map(e => `
-                    <div class="bg-white p-4 rounded-xl border flex justify-between items-center">
-                        <div>
-                            <p class="text-[10px] font-black text-slate-400 uppercase">S/N: ${e.serie}</p>
-                            <p class="text-sm font-black">${e.tipo} ${e.cap}</p>
-                            <p class="text-[10px] font-bold text-orange-600 uppercase">${e.edificio} - ${e.sector}</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-[9px] font-black uppercase text-slate-400">Vencimiento</p>
-                            <p class="text-xs font-black ${e.estado === 'VENCIDO' ? 'text-red-600' : 'text-slate-900'}">${e.f_venc}</p>
-                        </div>
-                    </div>
-                `).join("");
-            } catch (e) { }
-            showL(false);
-        }
-
-        // Carga inicial de datos de OT abiertas para el dashboard
         async function loadAbiertas() {
             showL(true);
             try {
-                const data = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`).then(r => r.json());
+                const res = await fetch(`${URL}?action=getAbiertas&token=${PIN}`);
+                const data = await res.json();
                 document.getElementById('dash-ot').innerText = data.length;
-                const select = document.getElementById('c-lista');
-                if(select) {
-                    select.innerHTML = '<option value="">Seleccione OT a Cerrar...</option>' + 
-                    data.map(o => `<option value="${o.id}">#${o.id} - ${o.ubi} - ${o.detalle.substring(0,20)}...</option>`).join("");
-                }
+                document.getElementById('c-lista').innerHTML = data.map(o => `<option value="${o.id}">#${o.id} - ${o.ubi} - ${o.detalle}</option>`).join("");
             } catch (e) { }
+            showL(false);
+        }
+
+        async function loadHistorial() {
+            showL(true);
+            try {
+                const res = await fetch(`${URL}?action=getHistorial&token=${PIN}`);
+                const data = await res.json();
+                document.getElementById('hist-container').innerHTML = data.map(h => `
+                    <div class="bg-white p-3 rounded-lg border-l-4 ${h.est === 'Cerrada' ? 'border-green-500' : 'border-blue-500'} mb-2 text-[10px]">
+                        <div class="flex justify-between font-black"><span>#${h.id}</span><span>${h.fecha}</span></div>
+                        <p class="uppercase font-bold">${h.edif} - ${h.tarea}</p>
+                    </div>
+                `).join("");
+            } catch (e) { }
+            showL(false);
+        }
+
+        async function init() {
+            actualizarFecha();
+            showL(true);
+            try {
+                const res = await fetch(`${URL}?action=getEdificios&token=${PIN}`);
+                const eds = await res.json();
+                const opt = eds.map(e => `<option value="${e}">${e}</option>`).join("");
+                document.getElementById('n-edif').innerHTML = opt;
+                document.getElementById('e-edif').innerHTML = opt;
+                document.getElementById('dash-sec').innerText = eds.length;
+                loadAbiertas();
+                tab('nueva');
+            } catch (e) { console.error(e); }
             showL(false);
         }
 
