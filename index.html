@@ -7,138 +7,143 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
-        .tab-active { border-bottom: 4px solid #f06423; color: #f06423; font-weight: 900; }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        .tab-active { border-bottom: 4px solid #f06423; color: #f06423; font-weight: 900; background: #fff7ed; }
     </style>
 </head>
 <body class="p-2">
 
-    <div id="loader" class="fixed inset-0 bg-black/60 hidden z-[5000] flex flex-col items-center justify-center text-white">
+    <div id="loader" class="fixed inset-0 bg-black/80 hidden z-[5000] flex flex-col items-center justify-center text-white">
         <div class="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-2"></div>
-        <p class="text-[10px] font-bold">CARGANDO...</p>
+        <p class="text-[10px] font-black uppercase">Sincronizando...</p>
     </div>
 
-    <div class="max-w-2xl mx-auto">
-        <header class="p-4 bg-white rounded-xl shadow-sm mb-4 flex justify-between items-center">
-            <h1 class="font-black text-slate-800">SGM FIUNNE</h1>
-            <span id="fecha" class="text-xs font-bold bg-slate-100 px-2 py-1 rounded"></span>
+    <div class="max-w-4xl mx-auto pb-20">
+        <header class="mb-4 p-4 bg-white rounded-2xl border shadow-sm flex justify-between items-center">
+            <h1 class="text-xl font-black text-slate-900 uppercase">Panel FIUNNE</h1>
+            <span id="fecha-actual" class="text-[10px] font-black bg-slate-900 text-white px-3 py-1 rounded-lg"></span>
         </header>
 
-        <nav class="flex bg-white rounded-t-xl border-b mb-4 overflow-x-auto">
+        <nav class="flex border-b mb-6 bg-white rounded-t-xl sticky top-0 z-50 shadow-sm overflow-x-auto">
             <button onclick="tab('nueva')" id="btn-nueva" class="flex-1 py-4 text-[10px] font-black uppercase">Nueva OT</button>
-            <button onclick="tab('cerrar')" id="btn-cerrar" class="flex-1 py-4 text-[10px] font-black uppercase">Cerrar OT</button>
+            <button onclick="tab('pendientes')" id="btn-pendientes" class="flex-1 py-4 text-[10px] font-black uppercase">Cerrar OT</button>
             <button onclick="tab('historial')" id="btn-historial" class="flex-1 py-4 text-[10px] font-black uppercase">Historial</button>
         </nav>
 
         <div id="sec-nueva" class="hidden space-y-3">
-            <div class="bg-white p-4 rounded-xl shadow-sm space-y-3">
-                <select id="n-edif" onchange="loadSectores(this.value)" class="w-full p-3 border rounded-lg font-bold"></select>
-                <select id="n-sec" class="w-full p-3 border rounded-lg text-sm"></select>
-                <input type="text" id="n-pers" placeholder="Personal Responsable" class="w-full p-3 border rounded-lg text-sm">
-                <textarea id="n-desc" placeholder="Descripción de la tarea" class="w-full p-3 border rounded-lg text-sm h-24"></textarea>
-                <button onclick="registrarOT()" class="w-full bg-[#f06423] text-white p-4 rounded-lg font-black shadow-lg">REGISTRAR ORDEN</button>
+            <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
+                <select id="n-edif" onchange="actualizarSectores(this.value)" class="w-full p-4 border rounded-xl font-bold bg-slate-50"></select>
+                <select id="n-sec" class="w-full p-4 border rounded-xl text-sm"><option>Sector...</option></select>
+                <select id="n-esp" class="w-full p-4 border rounded-xl text-sm">
+                    <option value="Electricidad">Electricidad</option>
+                    <option value="Refrigeración">Refrigeración</option>
+                    <option value="Albañilería">Albañilería</option>
+                    <option value="Limpieza">Limpieza</option>
+                </select>
+                <input type="text" id="n-pers" placeholder="Técnico asignado..." class="w-full p-4 border rounded-xl text-sm">
+                <textarea id="n-desc" placeholder="Detalle del problema..." class="w-full p-4 border rounded-xl text-sm h-24"></textarea>
+                <button onclick="enviarNuevaOT()" class="w-full bg-[#f06423] text-white p-4 rounded-xl font-black uppercase shadow-lg">Registrar OT</button>
             </div>
         </div>
 
-        <div id="sec-cerrar" class="hidden space-y-3">
-            <div class="bg-white p-4 rounded-xl shadow-sm space-y-3">
-                <select id="c-lista" class="w-full p-3 border-2 border-orange-200 rounded-lg text-xs font-bold"></select>
-                <textarea id="c-obs" placeholder="Novedades del cierre..." class="w-full p-3 border rounded-lg text-sm h-24"></textarea>
-                <button onclick="finalizarOT()" class="w-full bg-green-600 text-white p-4 rounded-lg font-black shadow-lg">CERRAR TRABAJO</button>
+        <div id="sec-pendientes" class="hidden space-y-4">
+            <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
+                <select id="c-lista" class="w-full p-4 border-2 border-orange-200 rounded-xl font-black text-xs bg-white"></select>
+                <textarea id="c-obs" placeholder="Observaciones del cierre..." class="w-full p-4 border rounded-xl text-sm h-24"></textarea>
+                <button onclick="confirmarCierre()" class="w-full bg-green-600 text-white p-4 rounded-xl font-black uppercase shadow-lg">Finalizar Tarea</button>
             </div>
         </div>
 
-        <div id="sec-historial" class="hidden space-y-2" id="hist-cont"></div>
+        <div id="sec-historial" class="hidden space-y-2">
+            <div id="hist-container"></div>
+        </div>
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbyviyiaJCs1VjElfeB3e_5D_GIxKVoHNJUwubZbttJqgLDZAyWdITHdk1e9xA63cmAK/exec"; // REEMPLAZA ESTO
+        const URL = "https://script.google.com/macros/s/AKfycbzGbo7IEN4adNNSLH3qYuu9jMwhuox6fsk_XWZ6AwRuVr8omdbdqcfvTryqDfNRXsK1/exec"; 
         const PIN = "4370";
 
         function showL(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
 
-        async function loadSectores(edif) {
-            if(!edif) return;
-            const res = await fetch(`${URL}?action=getSectores&token=${PIN}&edificio=${encodeURIComponent(edif)}`);
-            const data = await res.json();
-            document.getElementById('n-sec').innerHTML = data.map(s => `<option value="${s.sector}">${s.sector} - ${s.ubi}</option>`).join("");
+        async function actualizarSectores(edif) {
+            showL(true);
+            try {
+                const res = await fetch(`${URL}?action=getSectores&token=${PIN}&edificio=${encodeURIComponent(edif)}`);
+                const data = await res.json();
+                document.getElementById('n-sec').innerHTML = data.map(s => `<option value="${s}">${s}</option>`).join("");
+            } finally { showL(false); }
         }
 
-        async function registrarOT() {
+        async function enviarNuevaOT() {
             showL(true);
             const d = {
+                action: 'nuevaOT',
                 edificio: document.getElementById('n-edif').value,
                 sector: document.getElementById('n-sec').value,
+                especialidad: document.getElementById('n-esp').value,
                 personal: document.getElementById('n-pers').value,
                 descripcion: document.getElementById('n-desc').value,
-                tipo: "Correctivo",
-                especialidad: "General",
                 token: PIN
             };
             await fetch(URL, { method: 'POST', body: JSON.stringify(d) });
-            alert("Registrado");
+            alert("OT Registrada");
             location.reload();
         }
 
-        async function finalizarOT() {
-            const id = document.getElementById('c-lista').value;
-            if(!id) return alert("Seleccione OT");
+        async function confirmarCierre() {
             showL(true);
             const d = {
                 action: 'cerrarOT',
-                idOT: id,
-                comentario: document.getElementById('c-obs').value,
+                idOT: document.getElementById('c-lista').value,
+                obs: document.getElementById('c-obs').value,
                 token: PIN
             };
             await fetch(URL, { method: 'POST', body: JSON.stringify(d) });
-            alert("Cerrada");
+            alert("OT Cerrada");
             location.reload();
         }
 
         async function loadAbiertas() {
             const res = await fetch(`${URL}?action=getAbiertas&token=${PIN}`);
             const data = await res.json();
-            if(Array.isArray(data)) {
-                document.getElementById('c-lista').innerHTML = data.length > 0 
-                    ? '<option value="">Seleccione OT...</option>' + data.map(o => `<option value="${o.id}">${o.detalle}</option>`).join("")
-                    : '<option>No hay pendientes</option>';
-            }
+            document.getElementById('c-lista').innerHTML = data.map(o => `<option value="${o.id}">#${o.id} - ${o.edif} - ${o.detalle}</option>`).join("");
         }
 
         async function loadHistorial() {
             showL(true);
-            const res = await fetch(`${URL}?action=getHistorial&token=${PIN}`);
-            const data = await res.json();
-            document.getElementById('sec-historial').innerHTML = data.map(h => `
-                <div class="bg-white p-3 rounded-lg border-l-4 ${h.est === 'Cerrada' ? 'border-green-500' : 'border-blue-400'} mb-2 shadow-sm text-xs">
-                    <p class="font-black">#${h.id} - ${h.fecha}</p>
-                    <p class="uppercase">${h.edif} | ${h.tarea}</p>
-                </div>
-            `).join("");
-            showL(false);
+            try {
+                const res = await fetch(`${URL}?action=getHistorial&token=${PIN}`);
+                const data = await res.json();
+                document.getElementById('hist-container').innerHTML = data.map(h => `
+                    <div class="bg-white p-3 rounded-xl border-l-4 ${h.est === 'Cerrada' ? 'border-green-500' : 'border-blue-500'} mb-2 shadow-sm">
+                        <p class="text-[10px] font-black">#${h.id} | ${h.fecha}</p>
+                        <p class="text-xs uppercase font-bold text-slate-700">${h.edif} - ${h.tarea}</p>
+                    </div>
+                `).join("");
+            } finally { showL(false); }
         }
 
         function tab(name) {
-            ['nueva', 'cerrar', 'historial'].forEach(s => {
+            ['nueva', 'pendientes', 'historial'].forEach(s => {
                 document.getElementById('sec-' + s).classList.add('hidden');
-                document.getElementById('btn-' + s).classList.remove('tab-active');
+                document.getElementById('btn-' + s)?.classList.remove('tab-active');
             });
             document.getElementById('sec-' + name).classList.remove('hidden');
-            document.getElementById('btn-' + name).classList.add('tab-active');
-            if(name === 'cerrar') loadAbiertas();
+            document.getElementById('btn-' + name)?.classList.add('tab-active');
+            if(name === 'pendientes') loadAbiertas();
             if(name === 'historial') loadHistorial();
         }
 
         async function init() {
-            document.getElementById('fecha').innerText = new Date().toLocaleDateString();
+            document.getElementById('fecha-actual').innerText = new Date().toLocaleDateString();
             showL(true);
             try {
                 const res = await fetch(`${URL}?action=getEdificios&token=${PIN}`);
                 const eds = await res.json();
-                document.getElementById('n-edif').innerHTML = '<option value="">Seleccione Edificio...</option>' + eds.map(e => `<option value="${e}">${e}</option>`).join("");
+                const opt = eds.map(e => `<option value="${e}">${e}</option>`).join("");
+                document.getElementById('n-edif').innerHTML = '<option value="">Edificio...</option>' + opt;
                 tab('nueva');
-            } catch(e) { alert("Error de conexión"); }
-            finally { showL(false); }
+            } finally { showL(false); }
         }
 
         window.onload = init;
