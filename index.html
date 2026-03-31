@@ -3,35 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mantenimiento FIUNNE 2026</title>
+    <title>SGM FIUNNE 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        :root { --fiunne-orange: #f06423; --fiunne-gray: #374151; --safe-green: #16a34a; }
+        :root { --fiunne-orange: #f06423; }
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #1e293b; touch-action: manipulation; }
-        .loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 3000; flex-direction: column; color: white; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 5000; flex-direction: column; color: white; }
         .tab-active { border-bottom: 4px solid var(--fiunne-orange); color: var(--fiunne-orange); font-weight: 900; background: #fff7ed; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .card-ot { transition: all 0.2s; border-left-width: 6px; }
+        .card-ot { border-left-width: 8px; transition: all 0.2s; }
         .vencido-anim { animation: pulse-red 2s infinite; border-left-color: #dc2626 !important; background-color: #fef2f2; }
         @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="p-2">
 
     <div id="loader" class="loading-overlay">
         <div class="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="font-black text-xs tracking-widest uppercase">Sincronizando FIUNNE...</p>
+        <p class="font-black text-[10px] tracking-widest uppercase italic">Sincronizando FIUNNE...</p>
     </div>
 
     <div class="max-w-4xl mx-auto pb-24">
         <header class="p-4 bg-white rounded-2xl shadow-sm mb-4 border flex justify-between items-center">
             <div>
                 <h1 class="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">Panel de Control</h1>
-                <p class="text-[9px] font-black text-orange-600 uppercase tracking-widest mt-1">FIUNNE • Gestión Operativa</p>
+                <p class="text-[9px] font-black text-orange-600 uppercase tracking-widest mt-1">FIUNNE • Gestión de Mantenimiento</p>
             </div>
-            <div id="dash-venc-box" class="bg-red-50 px-3 py-2 rounded-xl border border-red-100 text-center">
-                <p class="text-[8px] font-black text-red-500 uppercase">HySL Vencidos</p>
+            <div class="bg-red-50 px-3 py-2 rounded-xl border border-red-100 text-center">
+                <p class="text-[8px] font-black text-red-500 uppercase leading-none">Vencidos</p>
                 <p id="dash-venc" class="text-xl font-black text-red-700">0</p>
             </div>
         </header>
@@ -46,40 +46,64 @@
 
         <div id="sec-nueva" class="hidden space-y-3">
             <div class="bg-white p-5 rounded-2xl shadow-sm border space-y-4">
-                <select id="n-edif" onchange="loadSectores(this.value)" class="w-full p-4 bg-slate-50 border rounded-xl font-bold"></select>
+                <label class="text-[10px] font-black uppercase text-slate-400">Ubicación y Sector</label>
+                <select id="n-edif" onchange="loadSectores(this.value, 'n-sec')" class="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold"></select>
                 <select id="n-sec" class="w-full p-4 border rounded-xl text-sm"></select>
+                
+                <label class="text-[10px] font-black uppercase text-slate-400">Detalles de la Tarea</label>
                 <div class="grid grid-cols-2 gap-2">
-                    <select id="n-esp" onchange="checkRefri(this.value)" class="p-4 border rounded-xl text-sm font-bold">
-                        <option>Mantenimiento General</option>
+                    <select id="n-esp" onchange="checkRefri(this.value)" class="p-4 border rounded-xl text-sm font-bold bg-white">
+                        <option>General</option>
                         <option value="Refrigeración">Refrigeración</option>
                         <option>Electricidad</option>
+                        <option>Herrería / Carpintería</option>
                     </select>
-                    <input type="text" id="n-pers" placeholder="Responsable" class="p-4 border rounded-xl text-sm">
+                    <select id="n-prio" class="p-4 border rounded-xl text-sm font-bold text-orange-600">
+                        <option>Baja</option>
+                        <option selected>Media</option>
+                        <option>Alta</option>
+                        <option>URGENTE</option>
+                    </select>
                 </div>
-                <div id="extra-refri" class="hidden grid grid-cols-2 gap-2">
-                    <input type="text" id="n-inv" placeholder="N° Inventario" class="p-4 border border-orange-200 rounded-xl text-sm bg-orange-50">
-                    <input type="text" id="n-eq" placeholder="Equipo/Modelo" class="p-4 border border-orange-200 rounded-xl text-sm bg-orange-50">
+
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="n-repor" placeholder="Reportado por..." class="p-4 border rounded-xl text-sm">
+                    <select id="n-medio" class="p-4 border rounded-xl text-sm">
+                        <option>WhatsApp</option>
+                        <option>Llamada</option>
+                        <option>Personalmente</option>
+                        <option>Nota/Expediente</option>
+                    </select>
                 </div>
-                <textarea id="n-desc" placeholder="Descripción de la tarea..." class="w-full p-4 border rounded-xl h-24 text-sm"></textarea>
-                <button onclick="guardarNuevaOT()" class="w-full bg-[#f06423] text-white p-5 rounded-2xl font-black uppercase shadow-lg">Registrar Orden</button>
+
+                <input type="text" id="n-pers" placeholder="Personal Asignado (Siglas)" class="w-full p-4 border rounded-xl text-sm font-bold uppercase">
+
+                <div id="extra-refri" class="hidden grid grid-cols-2 gap-2 p-3 bg-orange-50 rounded-xl border border-orange-100">
+                    <input type="text" id="n-eq" placeholder="Equipo / Activo" class="p-3 border rounded-lg text-xs">
+                    <input type="text" id="n-inv" placeholder="N° Inventario" class="p-3 border rounded-lg text-xs">
+                </div>
+
+                <textarea id="n-desc" placeholder="Descripción del trabajo a realizar..." class="w-full p-4 border rounded-xl h-24 text-sm"></textarea>
+                <button onclick="guardarNuevaOT()" class="w-full bg-[#f06423] text-white p-5 rounded-2xl font-black uppercase shadow-lg active:scale-95 transition-transform">Registrar en Registro OT</button>
             </div>
         </div>
 
         <div id="sec-cerrar" class="hidden space-y-4">
             <div class="bg-white p-5 rounded-2xl shadow-sm border space-y-4">
-                <label class="text-[10px] font-black uppercase text-slate-400">Seleccionar Orden Abierta</label>
+                <label class="text-[10px] font-black uppercase text-slate-400 italic">Seleccionar Orden del Registro (Abiertas)</label>
                 <select id="c-lista" class="w-full p-4 border-2 border-orange-200 rounded-xl font-bold text-xs"></select>
+                
                 <div class="bg-slate-50 p-4 rounded-xl space-y-2 border">
-                    <p class="text-[10px] font-black uppercase text-slate-500">Materiales Utilizados</p>
+                    <p class="text-[10px] font-black uppercase text-slate-500">Insumos y Materiales</p>
                     <div class="flex gap-2">
-                        <select id="ins-sel" class="flex-1 p-3 border rounded-lg text-xs"></select>
+                        <select id="ins-sel" class="flex-1 p-3 border rounded-lg text-xs bg-white"></select>
                         <input type="number" id="ins-cant" value="1" class="w-16 p-3 border rounded-lg text-center font-black">
                         <button onclick="addCesta()" class="bg-slate-900 text-white px-4 rounded-lg font-black text-xl">+</button>
                     </div>
-                    <ul id="ins-lista" class="text-[10px] font-bold text-blue-600 space-y-1"></ul>
+                    <ul id="ins-lista" class="text-[10px] font-bold text-blue-600 space-y-1 py-1"></ul>
                 </div>
-                <textarea id="c-obs" placeholder="Novedades del trabajo..." class="w-full p-4 border rounded-xl h-24 text-sm"></textarea>
-                <button onclick="finalizarCierre()" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black uppercase shadow-lg">Finalizar y Archivar</button>
+                <textarea id="c-obs" placeholder="Observaciones del cierre o materiales extras..." class="w-full p-4 border rounded-xl h-24 text-sm"></textarea>
+                <button onclick="finalizarCierre()" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black uppercase shadow-lg">Cerrar Orden y Actualizar Stock</button>
             </div>
         </div>
 
@@ -88,15 +112,10 @@
                 <select id="r-edif" onchange="loadCascadaRel(this.value)" class="w-full p-4 bg-slate-50 border rounded-xl font-bold"></select>
                 <select id="r-sec" onchange="filterUbiRel()" class="w-full p-4 border rounded-xl text-sm"></select>
                 <select id="r-ubi" onchange="fillRelFields()" class="w-full p-4 border rounded-xl text-sm"></select>
-                <div id="rel-form" class="hidden grid grid-cols-2 gap-3 pt-4 border-t">
-                    <div class="space-y-1">
-                        <label class="text-[9px] font-bold uppercase text-slate-400">Inv. Aire</label>
-                        <input type="text" id="ri-aire" class="w-full p-3 border rounded-lg text-xs">
-                    </div>
-                    <div class="space-y-1">
-                        <label class="text-[9px] font-bold uppercase text-slate-400">Equipo Aire</label>
-                        <input type="text" id="re-aire" class="w-full p-3 border rounded-lg text-xs">
-                    </div>
+                
+                <div id="rel-form" class="hidden grid grid-cols-2 gap-3 pt-4 border-t border-dashed">
+                    <input type="text" id="ri-aire" placeholder="Inv. Aire" class="p-3 border rounded-lg text-xs">
+                    <input type="text" id="re-aire" placeholder="Equipo Aire" class="p-3 border rounded-lg text-xs">
                     <button onclick="guardarRel()" class="col-span-2 bg-blue-600 text-white p-4 rounded-xl font-black uppercase">Actualizar Datos</button>
                 </div>
             </div>
@@ -105,7 +124,7 @@
         <div id="sec-hysl" class="hidden space-y-4">
             <div class="flex gap-2">
                 <select id="e-edif" onchange="loadExtintores(this.value)" class="flex-1 p-4 border-2 border-slate-200 rounded-xl text-xs font-black bg-white"></select>
-                <button onclick="descargarOC()" class="bg-slate-900 text-white px-5 rounded-xl text-[9px] font-black uppercase shadow-md">Generar OC (.txt)</button>
+                <button onclick="descargarOC()" class="bg-slate-900 text-white px-5 rounded-xl text-[9px] font-black uppercase shadow-md">Descargar .txt</button>
             </div>
             <div id="ext-lista" class="grid grid-cols-1 gap-2"></div>
         </div>
@@ -114,162 +133,103 @@
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbwikpv6rof2CRHdxPeSWb_0LUcKvhaO-xT4jMhuYTZZkqvbf6UOCUeQMNYTMXxoBryf/exec"; 
-        const PIN_CORRECTO = "4370";
+        const URL = "https://script.google.com/macros/s/AKfycbxPDb4AkG6HYwSBdUFu_JWKSWbcRDknT6rPEHlkvb4uMH4yl91kGPE9NDHUEPApQF7e/exec"; 
+        const PIN = "4370";
         let cesta = [];
         let dbRel = [];
-        let currentFila = null;
 
         function showL(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
 
-        function tab(name) {
+        async function tab(t) {
             ['nueva','cerrar','rel','hysl','hist'].forEach(s => {
                 document.getElementById('sec-'+s).classList.add('hidden');
                 document.getElementById('btn-'+s).classList.remove('tab-active');
             });
-            document.getElementById('sec-'+name).classList.remove('hidden');
-            document.getElementById('btn-'+name).classList.add('tab-active');
-            if(name === 'cerrar') loadAbiertas();
-            if(name === 'hist') loadHistorial();
+            document.getElementById('sec-'+t).classList.remove('hidden');
+            document.getElementById('btn-'+t).classList.add('tab-active');
+            if(t === 'cerrar') loadAbiertas();
+            if(t === 'hist') loadHistorial();
         }
 
         // --- NUEVA OT ---
         function checkRefri(v) { document.getElementById('extra-refri').classList.toggle('hidden', v !== 'Refrigeración'); }
-        async function loadSectores(edif) {
-            const res = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(edif)}&token=${PIN_CORRECTO}`);
+        
+        async function loadSectores(edif, targetId) {
+            showL(true);
+            const res = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(edif)}&token=${PIN}`);
             const data = await res.json();
-            document.getElementById('n-sec').innerHTML = data.map(s => `<option value="${s.sector}">${s.sector} - ${s.ubi}</option>`).join("");
+            document.getElementById(targetId).innerHTML = data.map(s => `<option value="${s.sector}|${s.ubi}">${s.sector} - ${s.ubi}</option>`).join("");
+            showL(false);
         }
+
         async function guardarNuevaOT() {
             showL(true);
+            const secUbi = document.getElementById('n-sec').value.split('|');
             const d = {
                 action: 'nuevaOT',
                 edificio: document.getElementById('n-edif').value,
-                sector: document.getElementById('n-sec').value.split(" - ")[0],
-                ubicacion: document.getElementById('n-sec').value.split(" - ")[1] || "",
+                sector: secUbi[0],
+                ubicacion: secUbi[1],
                 especialidad: document.getElementById('n-esp').value,
+                prioridad: document.getElementById('n-prio').value,
+                reportado: document.getElementById('n-repor').value,
+                medio: document.getElementById('n-medio').value,
                 personal: document.getElementById('n-pers').value,
-                nInventario: document.getElementById('n-inv').value,
-                equipo: document.getElementById('n-eq').value,
+                nInventario: document.getElementById('n-inv').value || "n/c",
+                equipo: document.getElementById('n-eq').value || "n/c",
                 descripcion: document.getElementById('n-desc').value,
-                tipo: "Correctivo", token: PIN_CORRECTO
+                token: PIN
             };
             await fetch(URL, { method: 'POST', body: JSON.stringify(d) });
-            alert("Orden Registrada!"); location.reload();
+            alert("¡OT registrada exitosamente en Gestion_OT_2026!");
+            location.reload();
         }
 
         // --- CERRAR OT ---
         async function loadAbiertas() {
             showL(true);
-            const res = await fetch(`${URL}?action=getAbiertas&token=${PIN_CORRECTO}`);
-            const data = await res.json();
-            document.getElementById('c-lista').innerHTML = data.map(o => `<option value="${o.id}">${o.detalle}</option>`).join("");
-            
-            const resM = await fetch(`${URL}?action=getMateriales&token=${PIN_CORRECTO}`);
-            const mats = await resM.json();
-            document.getElementById('ins-sel').innerHTML = mats.map(m => `<option value='${JSON.stringify({m: m.nombre, hoja: m.hoja})}'>${m.nombre} (${m.stock})</option>`).join("");
+            const [resA, resM] = await Promise.all([
+                fetch(`${URL}?action=getAbiertas&token=${PIN}`).then(r => r.json()),
+                fetch(`${URL}?action=getMateriales&token=${PIN}`).then(r => r.json())
+            ]);
+            document.getElementById('c-lista').innerHTML = resA.map(o => `<option value="${o.id}">${o.detalle}</option>`).join("");
+            document.getElementById('ins-sel').innerHTML = resM.map(m => `<option value='${JSON.stringify(m)}'>${m.m} (${m.s})</option>`).join("");
             showL(false);
         }
+
         function addCesta() {
-            const obj = JSON.parse(document.getElementById('ins-sel').value);
+            const item = JSON.parse(document.getElementById('ins-sel').value);
             const cant = document.getElementById('ins-cant').value;
-            cesta.push({ ...obj, c: cant });
+            cesta.push({ ...item, c: cant });
             document.getElementById('ins-lista').innerHTML = cesta.map(i => `<li>• ${i.c} x ${i.m}</li>`).join("");
         }
+
         async function finalizarCierre() {
             showL(true);
             const d = {
                 action: 'cerrarOT',
                 idOT: document.getElementById('c-lista').value,
                 comentario: document.getElementById('c-obs').value,
-                materiales: cesta, token: PIN_CORRECTO
+                materiales: cesta, token: PIN
             };
             await fetch(URL, { method: 'POST', body: JSON.stringify(d) });
-            alert("OT Finalizada"); location.reload();
-        }
-
-        // --- RELEVAMIENTO ---
-        async function loadCascadaRel(ed) {
-            showL(true);
-            const res = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`);
-            dbRel = await res.json();
-            const sectoresUnicos = [...new Set(dbRel.map(x => x.sector))];
-            document.getElementById('r-sec').innerHTML = '<option>Seleccionar Sector...</option>' + sectoresUnicos.map(s => `<option value="${s}">${s}</option>`).join("");
-            showL(false);
-        }
-        function filterUbiRel() {
-            const s = document.getElementById('r-sec').value;
-            document.getElementById('r-ubi').innerHTML = '<option>Seleccionar Ubi...</option>' + 
-                dbRel.filter(x => x.sector === s).map(x => `<option value='${JSON.stringify(x)}'>${x.ubi}</option>`).join("");
-        }
-        function fillRelFields() {
-            const d = JSON.parse(document.getElementById('r-ubi').value);
-            currentFila = d.fila;
-            document.getElementById('ri-aire').value = d.inv_aire || "";
-            document.getElementById('re-aire').value = d.eq_aire || "";
-            document.getElementById('rel-form').classList.remove('hidden');
-        }
-        async function guardarRel() {
-            showL(true);
-            const d = {
-                action: 'updateRelevamiento',
-                edificio: document.getElementById('r-edif').value,
-                fila: currentFila,
-                inv_aire: document.getElementById('ri-aire').value,
-                eq_aire: document.getElementById('re-aire').value,
-                token: PIN_CORRECTO
-            };
-            await fetch(URL, { method: 'POST', body: JSON.stringify(d) });
-            alert("Relevamiento guardado"); showL(false);
-        }
-
-        // --- HySL ---
-        async function loadExtintores(ed) {
-            showL(true);
-            const res = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN_CORRECTO}`);
-            const data = await res.json();
-            let vencidos = 0;
-            document.getElementById('ext-lista').innerHTML = data.map(e => {
-                const esVencido = e.venc.includes('2023') || e.venc.includes('2024'); // Ejemplo lógica vencimiento
-                if(esVencido) vencidos++;
-                return `
-                <div class="p-4 bg-white rounded-xl shadow-sm border-l-8 flex justify-between items-center ${esVencido?'vencido-anim border-red-500':'border-green-500'}">
-                    <div>
-                        <h4 class="font-black text-[11px] text-slate-800">${e.tipo} ${e.cap}</h4>
-                        <p class="text-[9px] font-bold text-slate-500 uppercase">${e.sector} | #${e.unne}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[8px] font-black text-slate-400 uppercase">Vence</p>
-                        <p class="text-[10px] font-black ${esVencido?'text-red-600':'text-green-600'}">${e.venc}</p>
-                    </div>
-                </div>`;
-            }).join("");
-            document.getElementById('dash-venc').innerText = vencidos;
-            showL(false);
-        }
-        function descargarOC() {
-            const edif = document.getElementById('e-edif').value;
-            const equipos = document.querySelectorAll('.vencido-anim h4');
-            if(equipos.length === 0) return alert("No hay equipos vencidos.");
-            let txt = `REQUERIMIENTO HySL - ${edif}\nFECHA: ${new Date().toLocaleDateString()}\n\nEquipos Vencidos:\n`;
-            equipos.forEach(el => txt += `- ${el.innerText}\n`);
-            const blob = new Blob([txt], {type:'text/plain'});
-            const a = document.createElement('a');
-            a.download = `OC_HySL_${edif}.txt`; a.href = window.URL.createObjectURL(blob); a.click();
+            alert("Orden Cerrada");
+            location.reload();
         }
 
         // --- HISTORIAL ---
         async function loadHistorial() {
             showL(true);
-            const res = await fetch(`${URL}?action=getHistorial&token=${PIN_CORRECTO}`);
+            const res = await fetch(`${URL}?action=getHistorial&token=${PIN}`);
             const data = await res.json();
             document.getElementById('sec-hist').innerHTML = data.map(h => `
                 <div class="card-ot p-4 bg-white rounded-xl shadow-sm border-l-8 mb-2 ${h.est==='Cerrada'?'border-green-500 opacity-75':'border-blue-500'}">
                     <div class="flex justify-between text-[9px] font-black text-slate-400">
-                        <span>#${h.id}</span><span>${h.fecha}</span>
+                        <span>#${h.id}</span><span>${h.fecha} ${h.hora}</span>
                     </div>
-                    <p class="font-black text-slate-800 text-[11px] uppercase mt-1">${h.edif} / ${h.sector} / ${h.ubi}</p>
-                    <p class="text-slate-600 text-[11px] mt-1 italic">${h.tarea}</p>
+                    <p class="font-black text-slate-800 text-[11px] uppercase mt-1">${h.edif} / ${h.sec}</p>
+                    <p class="text-[9px] font-bold text-orange-600 mb-1 uppercase">${h.obs}</p>
+                    <p class="text-slate-600 text-[10px] italic leading-tight">${h.desc}</p>
                     <div class="flex justify-between mt-3 border-t pt-2 text-[9px] font-bold uppercase">
                         <span>👷 ${h.tec}</span>
                         <span class="${h.est==='Abierta'?'text-blue-600':'text-green-600'}">${h.est}</span>
@@ -279,18 +239,78 @@
             showL(false);
         }
 
-        async function init() {
+        // --- HySL ---
+        async function loadExtintores(ed) {
             showL(true);
-            const res = await fetch(`${URL}?action=getEdificios&token=${PIN_CORRECTO}`);
-            const edifs = await res.json();
-            const html = edifs.map(e => `<option value="${e}">${e}</option>`).join("");
-            document.getElementById('n-edif').innerHTML = html;
-            document.getElementById('r-edif').innerHTML = '<option>Edificio...</option>' + html;
-            document.getElementById('e-edif').innerHTML = '<option>Seleccionar Edificio...</option>' + html;
-            tab('nueva');
+            const res = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN}`);
+            const data = await res.json();
+            let v = 0;
+            document.getElementById('ext-lista').innerHTML = data.map(e => {
+                const isV = e.venc.includes('2023') || e.venc.includes('2024') || e.venc.includes('2025'); 
+                if(isV) v++;
+                return `
+                <div class="p-4 bg-white rounded-xl shadow-sm border-l-8 flex justify-between items-center ${isV?'vencido-anim border-red-500':'border-green-500'}">
+                    <div>
+                        <h4 class="font-black text-[11px] text-slate-800">${e.tipo} ${e.cap}</h4>
+                        <p class="text-[9px] font-bold text-slate-500 uppercase">${e.sector} | #${e.unne}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[8px] font-black text-slate-400 uppercase">Vence</p>
+                        <p class="text-[10px] font-black ${isV?'text-red-600':'text-green-600'}">${e.venc}</p>
+                    </div>
+                </div>`;
+            }).join("");
+            document.getElementById('dash-venc').innerText = v;
             showL(false);
         }
 
+        function descargarOC() {
+            const ed = document.getElementById('e-edif').value;
+            const items = document.querySelectorAll('.vencido-anim');
+            let txt = `REQUERIMIENTO HySL - ${ed}\nFecha: ${new Date().toLocaleDateString()}\n\nEquipos Vencidos:\n`;
+            items.forEach(i => txt += `- ${i.querySelector('h4').innerText} (UNNE: ${i.querySelector('p').innerText})\n`);
+            const blob = new Blob([txt], {type:'text/plain'});
+            const a = document.createElement('a');
+            a.download = `OC_EXTINTORES_${ed}.txt`;
+            a.href = window.URL.createObjectURL(blob);
+            a.click();
+        }
+
+        // --- RELEVAMIENTO ---
+        async function loadCascadaRel(ed) {
+            showL(true);
+            const res = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN}`);
+            dbRel = await res.json();
+            const uniqueSec = [...new Set(dbRel.map(x => x.sector))];
+            document.getElementById('r-sec').innerHTML = '<option>Sector...</option>' + uniqueSec.map(s => `<option value="${s}">${s}</option>`).join("");
+            showL(false);
+        }
+        function filterUbiRel() {
+            const s = document.getElementById('r-sec').value;
+            document.getElementById('r-ubi').innerHTML = '<option>Ubicación...</option>' + 
+                dbRel.filter(x => x.sector === s).map(x => `<option value='${JSON.stringify(x)}'>${x.ubi}</option>`).join("");
+        }
+        function fillRelFields() {
+            const d = JSON.parse(document.getElementById('r-ubi').value);
+            document.getElementById('ri-aire').value = d.inv_aire || "";
+            document.getElementById('re-aire').value = d.eq_aire || "";
+            document.getElementById('rel-form').classList.remove('hidden');
+        }
+
+        // --- INICIO ---
+        async function init() {
+            showL(true);
+            try {
+                const res = await fetch(`${URL}?action=getEdificios&token=${PIN}`);
+                const edifs = await res.json();
+                const opt = edifs.map(e => `<option value="${e}">${e}</option>`).join("");
+                document.getElementById('n-edif').innerHTML = '<option>Edificio...</option>' + opt;
+                document.getElementById('r-edif').innerHTML = '<option>Edificio...</option>' + opt;
+                document.getElementById('e-edif').innerHTML = '<option>Edificio...</option>' + opt;
+                tab('nueva');
+            } catch(e) { alert("Error de conexión. Verifica la URL de la App Script."); }
+            showL(false);
+        }
         window.onload = init;
     </script>
 </body>
