@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGM FIUNNE 2026</title>
+    <title>SGM PRO 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
@@ -12,10 +12,9 @@
     </style>
 </head>
 <body class="p-2">
-
-    <div id="loader" class="fixed inset-0 bg-black/80 hidden z-[5000] flex flex-col items-center justify-center text-white">
+    <div id="loader" class="fixed inset-0 bg-black/60 hidden z-[5000] flex flex-col items-center justify-center text-white text-xs font-black">
         <div class="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-2"></div>
-        <p class="text-[10px] font-black uppercase">Sincronizando...</p>
+        SINCRONIZANDO...
     </div>
 
     <div class="max-w-4xl mx-auto pb-20">
@@ -24,128 +23,118 @@
             <span id="fecha-actual" class="text-[10px] font-black bg-slate-900 text-white px-3 py-1 rounded-lg"></span>
         </header>
 
-        <nav class="flex border-b mb-6 bg-white rounded-t-xl sticky top-0 z-50 shadow-sm overflow-x-auto">
+        <div class="grid grid-cols-2 gap-2 mb-6">
+            <div class="bg-white p-4 rounded-2xl border shadow-sm text-center">
+                <p class="text-[8px] font-black text-blue-500 uppercase">OT Abiertas</p>
+                <p id="count-abiertas" class="text-2xl font-black">0</p>
+            </div>
+            <div class="bg-white p-4 rounded-2xl border shadow-sm text-center">
+                <p class="text-[8px] font-black text-orange-500 uppercase">Edificios</p>
+                <p id="count-edif" class="text-2xl font-black">0</p>
+            </div>
+        </div>
+
+        <nav class="flex border-b mb-6 bg-white rounded-t-xl sticky top-0 z-50 overflow-x-auto shadow-sm">
             <button onclick="tab('nueva')" id="btn-nueva" class="flex-1 py-4 text-[10px] font-black uppercase">Nueva OT</button>
-            <button onclick="tab('pendientes')" id="btn-pendientes" class="flex-1 py-4 text-[10px] font-black uppercase">Cerrar OT</button>
+            <button onclick="tab('cerrar')" id="btn-cerrar" class="flex-1 py-4 text-[10px] font-black uppercase">Cerrar OT</button>
             <button onclick="tab('historial')" id="btn-historial" class="flex-1 py-4 text-[10px] font-black uppercase">Historial</button>
         </nav>
 
         <div id="sec-nueva" class="hidden space-y-3">
             <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
-                <select id="n-edif" onchange="actualizarSectores(this.value)" class="w-full p-4 border rounded-xl font-bold bg-slate-50"></select>
-                <select id="n-sec" class="w-full p-4 border rounded-xl text-sm"><option>Sector...</option></select>
-                <select id="n-esp" class="w-full p-4 border rounded-xl text-sm">
-                    <option value="Electricidad">Electricidad</option>
-                    <option value="Refrigeración">Refrigeración</option>
-                    <option value="Albañilería">Albañilería</option>
-                    <option value="Limpieza">Limpieza</option>
-                </select>
-                <input type="text" id="n-pers" placeholder="Técnico asignado..." class="w-full p-4 border rounded-xl text-sm">
-                <textarea id="n-desc" placeholder="Detalle del problema..." class="w-full p-4 border rounded-xl text-sm h-24"></textarea>
-                <button onclick="enviarNuevaOT()" class="w-full bg-[#f06423] text-white p-4 rounded-xl font-black uppercase shadow-lg">Registrar OT</button>
+                <select id="n-edif" onchange="loadSectores(this.value)" class="w-full p-4 border rounded-xl font-bold bg-slate-50"></select>
+                <select id="n-sec" class="w-full p-4 border rounded-xl text-sm"></select>
+                <input type="text" id="n-pers" placeholder="Personal Asignado" class="w-full p-4 border rounded-xl text-sm">
+                <textarea id="n-desc" placeholder="Descripción de la tarea" class="w-full p-4 border rounded-xl text-sm h-24"></textarea>
+                <button onclick="registrarOT()" class="w-full bg-[#f06423] text-white p-4 rounded-xl font-black shadow-lg">REGISTRAR</button>
             </div>
         </div>
 
-        <div id="sec-pendientes" class="hidden space-y-4">
+        <div id="sec-cerrar" class="hidden space-y-4">
             <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
-                <select id="c-lista" class="w-full p-4 border-2 border-orange-200 rounded-xl font-black text-xs bg-white"></select>
-                <textarea id="c-obs" placeholder="Observaciones del cierre..." class="w-full p-4 border rounded-xl text-sm h-24"></textarea>
-                <button onclick="confirmarCierre()" class="w-full bg-green-600 text-white p-4 rounded-xl font-black uppercase shadow-lg">Finalizar Tarea</button>
+                <select id="c-lista" class="w-full p-4 border-2 border-orange-200 rounded-xl font-black text-xs"></select>
+                <div id="materiales-cont" class="space-y-2 border-t pt-2">
+                    <p class="text-[10px] font-black uppercase text-slate-400">Insumos Utilizados</p>
+                    <div class="flex gap-2">
+                        <select id="insumo-sel" class="flex-1 p-2 border rounded-lg text-xs"></select>
+                        <input type="number" id="insumo-cant" value="1" class="w-16 p-2 border rounded-lg text-center font-bold">
+                        <button onclick="addInsumo()" class="bg-slate-900 text-white px-4 rounded-lg font-black">+</button>
+                    </div>
+                    <ul id="lista-insumos" class="text-xs space-y-1 font-bold text-slate-600"></ul>
+                </div>
+                <textarea id="c-obs" placeholder="Novedades del cierre..." class="w-full p-4 border rounded-xl text-sm h-24"></textarea>
+                <button onclick="finalizarOT()" class="w-full bg-green-600 text-white p-4 rounded-xl font-black shadow-lg">FINALIZAR TAREA</button>
             </div>
         </div>
 
-        <div id="sec-historial" class="hidden space-y-2">
-            <div id="hist-container"></div>
-        </div>
+        <div id="sec-historial" class="hidden space-y-2"></div>
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbzGbo7IEN4adNNSLH3qYuu9jMwhuox6fsk_XWZ6AwRuVr8omdbdqcfvTryqDfNRXsK1/exec"; 
+        const URL = "TU_URL_DE_APPS_SCRIPT"; 
         const PIN = "4370";
+        let insumosCargados = [];
 
         function showL(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
 
-        async function actualizarSectores(edif) {
-            showL(true);
-            try {
-                const res = await fetch(`${URL}?action=getSectores&token=${PIN}&edificio=${encodeURIComponent(edif)}`);
-                const data = await res.json();
-                document.getElementById('n-sec').innerHTML = data.map(s => `<option value="${s}">${s}</option>`).join("");
-            } finally { showL(false); }
-        }
-
-        async function enviarNuevaOT() {
-            showL(true);
-            const d = {
-                action: 'nuevaOT',
-                edificio: document.getElementById('n-edif').value,
-                sector: document.getElementById('n-sec').value,
-                especialidad: document.getElementById('n-esp').value,
-                personal: document.getElementById('n-pers').value,
-                descripcion: document.getElementById('n-desc').value,
-                token: PIN
-            };
-            await fetch(URL, { method: 'POST', body: JSON.stringify(d) });
-            alert("OT Registrada");
-            location.reload();
-        }
-
-        async function confirmarCierre() {
-            showL(true);
-            const d = {
-                action: 'cerrarOT',
-                idOT: document.getElementById('c-lista').value,
-                obs: document.getElementById('c-obs').value,
-                token: PIN
-            };
-            await fetch(URL, { method: 'POST', body: JSON.stringify(d) });
-            alert("OT Cerrada");
-            location.reload();
+        async function loadSectores(edif) {
+            if(!edif) return;
+            const res = await fetch(`${URL}?action=getSectores&token=${PIN}&edificio=${encodeURIComponent(edif)}`);
+            const data = await res.json();
+            document.getElementById('n-sec').innerHTML = data.map(s => `<option value="${s.sector}">${s.sector} - ${s.ubi}</option>`).join("");
         }
 
         async function loadAbiertas() {
             const res = await fetch(`${URL}?action=getAbiertas&token=${PIN}`);
             const data = await res.json();
-            document.getElementById('c-lista').innerHTML = data.map(o => `<option value="${o.id}">#${o.id} - ${o.edif} - ${o.detalle}</option>`).join("");
+            document.getElementById('count-abiertas').innerText = data.length;
+            document.getElementById('c-lista').innerHTML = data.map(o => `<option value="${o.id}">${o.detalle}</option>`).join("");
         }
 
-        async function loadHistorial() {
+        async function loadMateriales() {
+            const res = await fetch(`${URL}?action=getMateriales&token=${PIN}`);
+            const data = await res.json();
+            document.getElementById('insumo-sel').innerHTML = data.map(m => `<option value="${m.nombre}">${m.nombre} (S: ${m.stock})</option>`).join("");
+        }
+
+        function addInsumo() {
+            const m = document.getElementById('insumo-sel').value;
+            const c = document.getElementById('insumo-cant').value;
+            insumosCargados.push({ material: m, cantidad: c });
+            renderInsumos();
+        }
+
+        function renderInsumos() {
+            document.getElementById('lista-insumos').innerHTML = insumosCargados.map(i => `<li>• ${i.cantidad}x ${i.material}</li>`).join("");
+        }
+
+        async function finalizarOT() {
             showL(true);
-            try {
-                const res = await fetch(`${URL}?action=getHistorial&token=${PIN}`);
-                const data = await res.json();
-                document.getElementById('hist-container').innerHTML = data.map(h => `
-                    <div class="bg-white p-3 rounded-xl border-l-4 ${h.est === 'Cerrada' ? 'border-green-500' : 'border-blue-500'} mb-2 shadow-sm">
-                        <p class="text-[10px] font-black">#${h.id} | ${h.fecha}</p>
-                        <p class="text-xs uppercase font-bold text-slate-700">${h.edif} - ${h.tarea}</p>
-                    </div>
-                `).join("");
-            } finally { showL(false); }
+            const d = { action: 'cerrarOT', idOT: document.getElementById('c-lista').value, materiales: insumosCargados, comentario: document.getElementById('c-obs').value, token: PIN };
+            await fetch(URL, { method: 'POST', body: JSON.stringify(d) });
+            location.reload();
         }
 
         function tab(name) {
-            ['nueva', 'pendientes', 'historial'].forEach(s => {
+            ['nueva', 'cerrar', 'historial'].forEach(s => {
                 document.getElementById('sec-' + s).classList.add('hidden');
-                document.getElementById('btn-' + s)?.classList.remove('tab-active');
+                document.getElementById('btn-' + s).classList.remove('tab-active');
             });
             document.getElementById('sec-' + name).classList.remove('hidden');
-            document.getElementById('btn-' + name)?.classList.add('tab-active');
-            if(name === 'pendientes') loadAbiertas();
-            if(name === 'historial') loadHistorial();
+            document.getElementById('btn-' + name).classList.add('tab-active');
+            if(name === 'cerrar') { loadAbiertas(); loadMateriales(); }
         }
 
         async function init() {
-            document.getElementById('fecha-actual').innerText = new Date().toLocaleDateString();
+            document.getElementById('fecha-actual').innerText = new Date().toLocaleDateString('es-AR', {day:'2-digit', month:'short'});
             showL(true);
-            try {
-                const res = await fetch(`${URL}?action=getEdificios&token=${PIN}`);
-                const eds = await res.json();
-                const opt = eds.map(e => `<option value="${e}">${e}</option>`).join("");
-                document.getElementById('n-edif').innerHTML = '<option value="">Edificio...</option>' + opt;
-                tab('nueva');
-            } finally { showL(false); }
+            const res = await fetch(`${URL}?action=getEdificios&token=${PIN}`);
+            const eds = await res.json();
+            document.getElementById('count-edif').innerText = eds.length;
+            document.getElementById('n-edif').innerHTML = eds.map(e => `<option value="${e}">${e}</option>`).join("");
+            tab('nueva');
+            showL(false);
         }
-
         window.onload = init;
     </script>
 </body>
