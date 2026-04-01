@@ -12,16 +12,17 @@
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
         .loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); display: none; justify-content: center; align-items: center; z-index: 5000; flex-direction: column; color: white; }
         .tab-active { border-bottom: 4px solid var(--fiunne-orange); color: var(--fiunne-orange); font-weight: 900; background: #fff7ed; }
-        .card-ot { border-left-width: 8px; border-radius: 12px; }
-        .vencido-anim { border-left-color: #ef4444 !important; background-color: #fee2e2; color: #b91c1c; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .card-ot { border-left-width: 8px; border-radius: 12px; transition: 0.2s; }
+        .vencido { border-left-color: #ef4444 !important; background-color: #fee2e2; }
+        .por-vencer { border-left-color: #f97316 !important; background-color: #ffedd5; }
+        .en-fecha { border-left-color: #22c55e !important; background-color: #f0fdf4; }
     </style>
 </head>
 <body class="p-2">
 
     <div id="loader" class="loading-overlay">
         <div class="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="font-black text-[9px] uppercase tracking-widest">Sincronizando...</p>
+        <p class="font-black text-[9px] uppercase tracking-widest italic">Sincronizando FIUNNE...</p>
     </div>
 
     <div class="max-w-4xl mx-auto pb-24">
@@ -31,27 +32,27 @@
                 <p class="text-[9px] font-black text-orange-600 uppercase tracking-widest mt-1">FIUNNE 2026</p>
             </div>
             <div class="bg-red-50 px-3 py-2 rounded-xl border border-red-100 text-center">
-                <p class="text-[8px] font-black text-red-500 uppercase leading-none">Vencidos</p>
+                <p class="text-[8px] font-black text-red-500 uppercase leading-none italic">Alertas</p>
                 <p id="dash-venc" class="text-xl font-black text-red-700">0</p>
             </div>
         </header>
 
-        <nav class="flex bg-white rounded-xl shadow-sm border mb-4 sticky top-2 z-40 overflow-x-auto no-scrollbar">
-            <button onclick="tab('nueva')" id="btn-nueva" class="flex-1 py-4 px-2 text-[10px] font-black uppercase whitespace-nowrap">Nueva OT</button>
-            <button onclick="tab('cerrar')" id="btn-cerrar" class="flex-1 py-4 px-2 text-[10px] font-black uppercase whitespace-nowrap">Cerrar OT</button>
-            <button onclick="tab('rel')" id="btn-rel" class="flex-1 py-4 px-2 text-[10px] font-black uppercase whitespace-nowrap">Relevamiento</button>
-            <button onclick="tab('hysl')" id="btn-hysl" class="flex-1 py-4 px-2 text-[10px] font-black uppercase whitespace-nowrap text-green-600">HySL</button>
-            <button onclick="tab('hist')" id="btn-hist" class="flex-1 py-4 px-2 text-[10px] font-black uppercase whitespace-nowrap">Historial</button>
+        <nav class="flex bg-white rounded-xl shadow-sm border mb-4 sticky top-2 z-40 overflow-x-auto">
+            <button onclick="tab('nueva')" id="btn-nueva" class="flex-1 py-4 px-2 text-[10px] font-black uppercase">Nueva OT</button>
+            <button onclick="tab('cerrar')" id="btn-cerrar" class="flex-1 py-4 px-2 text-[10px] font-black uppercase">Cerrar</button>
+            <button onclick="tab('rel')" id="btn-rel" class="flex-1 py-4 px-2 text-[10px] font-black uppercase">Relevamiento</button>
+            <button onclick="tab('hysl')" id="btn-hysl" class="flex-1 py-4 px-2 text-[10px] font-black uppercase text-green-600">HySL</button>
+            <button onclick="tab('hist')" id="btn-hist" class="flex-1 py-4 px-2 text-[10px] font-black uppercase">Historial</button>
         </nav>
 
         <div id="sec-nueva" class="hidden space-y-3">
-            <div id="modo-edicion" class="hidden bg-blue-600 text-white p-2 rounded-lg text-center text-[10px] font-black uppercase animate-pulse">MODO EDICIÓN: Actualizando Orden</div>
+            <div id="modo-edicion" class="hidden bg-blue-600 text-white p-2 rounded-lg text-center text-[10px] font-black uppercase">MODO EDICIÓN ACTIVO</div>
             <div class="bg-white p-5 rounded-2xl shadow-sm border space-y-3">
                 <input type="hidden" id="n-id-edit">
                 <select id="n-edif" onchange="loadTriple(this.value, 'n-sec', 'n-ubi')" class="w-full p-4 bg-slate-50 border rounded-xl font-bold"></select>
                 <div class="grid grid-cols-2 gap-2">
                     <select id="n-sec" onchange="filterUbi('n-sec','n-ubi')" class="p-4 border rounded-xl text-xs"></select>
-                    <select id="n-ubi" class="p-4 border rounded-xl text-xs"></select>
+                    <select id="n-ubi" onchange="autoFillRefri()" class="p-4 border rounded-xl text-xs"></select>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-2">
@@ -80,7 +81,7 @@
                     <input type="text" id="n-inv" placeholder="Inv." class="p-4 border border-orange-200 rounded-xl text-xs bg-orange-50">
                 </div>
 
-                <textarea id="n-desc" placeholder="Descripción..." class="w-full p-4 border rounded-xl h-20 text-xs"></textarea>
+                <textarea id="n-desc" placeholder="Descripción del problema..." class="w-full p-4 border rounded-xl h-20 text-xs"></textarea>
                 
                 <div class="flex gap-2">
                     <button onclick="guardarOT(false)" class="flex-1 bg-slate-800 text-white p-4 rounded-xl font-black uppercase text-[10px]">Guardar</button>
@@ -104,7 +105,7 @@
                     </div>
                     <div id="ins-lista" class="text-[10px] font-bold text-blue-600 p-1"></div>
                 </div>
-                <textarea id="c-obs" placeholder="Novedades de cierre..." class="w-full p-4 border rounded-xl h-16 text-xs"></textarea>
+                <textarea id="c-obs" placeholder="Observaciones finales..." class="w-full p-4 border rounded-xl h-16 text-xs"></textarea>
                 <button onclick="finalizarCierre()" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black uppercase">Finalizar Orden</button>
             </div>
         </div>
@@ -122,7 +123,7 @@
                     <label>Emergencia</label><input type="text" id="ri-em" class="p-2 border rounded">
                     <label>Ventiladores</label><input type="text" id="ri-vent" class="p-2 border rounded">
                     <label>Inv. Ventilador</label><input type="text" id="ri-inv-v" class="p-2 border rounded">
-                    <button onclick="guardarRel()" class="col-span-2 bg-blue-600 text-white p-4 rounded-xl font-black uppercase">Actualizar</button>
+                    <button onclick="guardarRel()" class="col-span-2 bg-blue-600 text-white p-4 rounded-xl font-black uppercase">Actualizar Datos</button>
                 </div>
             </div>
         </div>
@@ -130,7 +131,7 @@
         <div id="sec-hysl" class="hidden space-y-4">
             <div class="flex gap-2">
                 <select id="e-edif" onchange="loadExt(this.value)" class="flex-1 p-4 border rounded-xl text-xs font-black"></select>
-                <button onclick="genOC()" class="bg-slate-900 text-white px-5 rounded-xl text-[9px] font-black uppercase">Descargar OC</button>
+                <button onclick="genOC()" class="bg-slate-900 text-white px-5 rounded-xl text-[9px] font-black uppercase">Generar OC</button>
             </div>
             <div id="ext-lista" class="grid grid-cols-1 gap-2"></div>
         </div>
@@ -145,7 +146,7 @@
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbzX6jAhLTnwa58qc2xQXLWrlzx5Yq3LsG8v4FrGCb6IBjAJTgLJ-8YkieB117vjej98/exec"; 
+        const URL = "https://script.google.com/macros/s/AKfycbwxhIlSyIcr219Ib6DsOXZcH0m-_4Mu-v-oGmEC0B3zG_pMlCcNNvZC_v58jD9uGr_K/exec"; 
         const PIN = "4370";
         let dbS = [], dbM = {}, cesta = [], hLocal = [];
 
@@ -170,21 +171,34 @@
             filterUbi(idS, idU);
             showL(false);
         }
+
         function filterUbi(idS, idU) {
             const s = document.getElementById(idS).value;
             document.getElementById(idU).innerHTML = dbS.filter(x=>x.sector===s).map(x=>`<option value='${JSON.stringify(x)}'>${x.ubi}</option>`).join("");
         }
-        function checkRefri(v) { document.getElementById('extra-refri').classList.toggle('hidden', v !== 'Refrigeración'); }
+
+        function autoFillRefri() {
+            if(document.getElementById('n-esp').value === 'Refrigeración') {
+                const u = JSON.parse(document.getElementById('n-ubi').value);
+                document.getElementById('n-eq').value = u.eq_a || "N/A";
+                document.getElementById('n-inv').value = u.inv_a || "N/A";
+            }
+        }
+
+        function checkRefri(v) { 
+            document.getElementById('extra-refri').classList.toggle('hidden', v !== 'Refrigeración'); 
+            if(v === 'Refrigeración') autoFillRefri();
+        }
 
         async function guardarOT(pdf) {
             showL(true);
-            const ubi = JSON.parse(document.getElementById('n-ubi').value);
+            const ubiSel = JSON.parse(document.getElementById('n-ubi').value);
             const d = {
                 action: 'nuevaOT', token: PIN,
                 idExistente: document.getElementById('n-id-edit').value || null,
                 edificio: document.getElementById('n-edif').value,
                 sector: document.getElementById('n-sec').value,
-                ubicacion: ubi.ubi,
+                ubicacion: ubiSel.ubi,
                 especialidad: document.getElementById('n-esp').value,
                 prioridad: document.getElementById('n-prio').value,
                 reportado: document.getElementById('n-repor').value,
@@ -195,8 +209,8 @@
                 descripcion: document.getElementById('n-desc').value
             };
             await fetch(URL, {method:'POST', body: JSON.stringify(d)});
-            if(pdf) genPDF(d);
-            alert("Operación Exitosa");
+            if(pdf) genPDF_Full(d);
+            alert("Operación completada con éxito");
             location.reload();
         }
 
@@ -207,11 +221,12 @@
                 fetch(`${URL}?action=getMaterialesFull&token=${PIN}`).then(r=>r.json())
             ]);
             dbM = rm;
-            document.getElementById('c-lista').innerHTML = ra.map(o=>`<option value="${o.id}">${o.detalle}</option>`).join("");
+            document.getElementById('c-lista').innerHTML = (ra || []).map(o=>`<option value="${o.id}">${o.detalle}</option>`).join("");
             showL(false);
         }
+
         function loadMG(r) { document.getElementById('m-grupo').innerHTML = [...new Set(dbM[r].map(x=>x.grupo))].map(g=>`<option value="${g}">${g}</option>`).join(""); loadMD(document.getElementById('m-grupo').value); }
-        function loadMD(g) { const r = document.getElementById('m-rubro').value; document.getElementById('m-desc').innerHTML = dbM[r].filter(x=>x.grupo===g).map(i=>`<option value="${i.desc}">${i.desc} (${i.stock})</option>`).join(""); }
+        function loadMD(g) { const r = document.getElementById('m-rubro').value; document.getElementById('m-desc').innerHTML = dbM[r].filter(x=>x.grupo===g).map(i=>`<option value="${i.desc}">${i.desc} (Stock: ${i.stock})</option>`).join(""); }
         function addM() { cesta.push(`${document.getElementById('m-cant').value} x ${document.getElementById('m-desc').value}`); document.getElementById('ins-lista').innerText = cesta.join(" | "); }
 
         async function finalizarCierre() {
@@ -220,7 +235,7 @@
                 action: 'cerrarOT', token: PIN, idOT: document.getElementById('c-lista').value,
                 comentario: document.getElementById('c-obs').value, resumenMat: cesta.join(" | ")
             })});
-            alert("Orden Cerrada");
+            alert("Orden cerrada exitosamente");
             location.reload();
         }
 
@@ -228,23 +243,31 @@
             showL(true);
             const r = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN}`);
             const data = await r.json();
-            let v = 0;
+            const hoy = new Date();
+            let vCount = 0;
+
             document.getElementById('ext-lista').innerHTML = data.map(e => {
-                const isV = e.venc.includes('2023') || e.venc.includes('2024') || e.venc.includes('2025');
-                if(isV) v++;
-                return `<div class="p-3 bg-white card-ot border-l-8 flex justify-between items-center ${isV?'vencido-anim':''} shadow-sm">
+                const parts = e.venc.split('/');
+                const fV = new Date(parts[2], parts[1]-1, parts[0]);
+                const diffDays = (fV - hoy) / (1000 * 60 * 60 * 24);
+                
+                let clase = "en-fecha";
+                if (fV < hoy) { clase = "vencido"; vCount++; }
+                else if (diffDays < 60) { clase = "por-vencer"; vCount++; }
+
+                return `<div class="p-3 bg-white card-ot border-l-8 flex justify-between items-center ${clase} shadow-sm">
                     <div><b class="text-xs uppercase">${e.tipo} ${e.cap}</b><p class="text-[9px] font-bold opacity-70">${e.sector} | #${e.unne}</p></div>
                     <div class="text-right text-[10px] font-black">${e.venc}</div>
                 </div>`;
             }).join("");
-            document.getElementById('dash-venc').innerText = v;
+            document.getElementById('dash-venc').innerText = vCount;
             showL(false);
         }
 
         function genOC() {
             const ed = document.getElementById('e-edif').value;
-            const items = document.querySelectorAll('.vencido-anim');
-            let t = `REQUERIMIENTO HySL - ${ed}\nFECHA: ${new Date().toLocaleDateString()}\n\nEQUIPOS VENCIDOS:\n`;
+            const items = document.querySelectorAll('.vencido, .por-vencer');
+            let t = `SGM FIUNNE - REQUERIMIENTO HySL\nEDIFICIO: ${ed}\nFECHA: ${new Date().toLocaleDateString()}\n\nEQUIPOS PARA REVISIÓN:\n`;
             items.forEach(i => t += `- ${i.querySelector('b').innerText} (Sector: ${i.querySelector('p').innerText})\n`);
             const blob = new Blob([t], {type:'text/plain'});
             const a = document.createElement('a'); a.download = `OC_${ed}.txt`; a.href = window.URL.createObjectURL(blob); a.click();
@@ -256,15 +279,19 @@
             fH('todas');
             showL(false);
         }
+
         function fH(v) {
             const f = v === 'todas' ? hLocal : hLocal.filter(x=>x.est===v);
             document.getElementById('hist-cont').innerHTML = f.map(h => `
                 <div class="p-4 bg-white card-ot border-l-8 shadow-sm ${h.est==='Abierta'?'border-blue-500':'border-green-500'}">
-                    <div class="flex justify-between text-[9px] font-black text-slate-400"><span>#${h.id}</span><span>${h.fecha}</span></div>
-                    <p class="font-black text-slate-800 text-[11px] uppercase">${h.edif} / ${h.sec}</p>
+                    <div class="flex justify-between items-start mb-1">
+                        <div><span class="text-[9px] font-black text-slate-400">#${h.id} | ${h.fecha}</span>
+                        <p class="font-black text-slate-800 text-[11px] uppercase">${h.edif} / ${h.sec}</p></div>
+                        <button onclick='genPDF_Full(${JSON.stringify(h)})' class="bg-slate-100 text-slate-700 p-1 px-2 rounded text-[8px] font-black">PDF</button>
+                    </div>
                     <p class="text-slate-500 text-[10px] italic leading-tight my-1">${h.desc}</p>
                     <div class="flex justify-between mt-2"><span class="text-[9px] font-black text-orange-600">${h.tec}</span>
-                    <button onclick='editarOT(${JSON.stringify(h)})' class="bg-slate-900 text-white px-3 py-1 rounded text-[8px] font-black uppercase">Ver / Editar</button></div>
+                    <button onclick='editarOT(${JSON.stringify(h)})' class="bg-slate-900 text-white px-3 py-1 rounded text-[8px] font-black">EDITAR</button></div>
                 </div>
             `).join("");
         }
@@ -289,18 +316,33 @@
             });
         }
 
-        function genPDF(d) {
-            const { jsPDF } = window.jspdf; const doc = new jsPDF();
-            doc.text("ORDEN DE TRABAJO - FIUNNE", 20, 20);
-            doc.text(`ID: ${d.idExistente || 'Nueva'}`, 20, 30);
-            doc.text(`Edificio: ${d.edificio}`, 20, 40);
-            doc.text(`Sector: ${d.sector}`, 20, 50);
-            doc.text(`Descripcion: ${d.descripcion}`, 20, 60);
-            doc.save("OT.pdf");
+        function genPDF_Full(d) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(20); doc.text("SGM FIUNNE - ORDEN DE TRABAJO", 20, 20);
+            doc.setFontSize(10); doc.text("ID OT: " + (d.id || "Nueva"), 20, 30);
+            doc.line(20, 32, 190, 32);
+            doc.text(`Fecha: ${new Date().toLocaleString()}`, 20, 40);
+            doc.text(`Edificio: ${d.edificio}`, 20, 50);
+            doc.text(`Ubicación: ${d.sector} / ${d.ubicacion || d.sec}`, 20, 60);
+            doc.text(`Especialidad: ${d.especialidad}`, 20, 70);
+            doc.text(`Prioridad: ${d.prioridad}`, 20, 80);
+            doc.text(`Reportado por: ${d.reportado} (${d.medio})`, 20, 90);
+            doc.text(`Personal Asignado: ${d.personal || d.tec}`, 20, 100);
+            if(d.especialidad === 'Refrigeración') doc.text(`Equipo: ${d.equipo} | Inv: ${d.nInventario || d.inv}`, 20, 110);
+            doc.text("DESCRIPCIÓN:", 20, 120);
+            doc.setFontSize(9);
+            const splitText = doc.splitTextToSize(d.descripcion || d.desc, 160);
+            doc.text(splitText, 20, 125);
+            if(d.mat) {
+                doc.setFontSize(10); doc.text("MATERIALES UTILIZADOS:", 20, 150);
+                doc.text(d.mat, 20, 155);
+            }
+            doc.save(`OT_${d.id || 'NUEVA'}.pdf`);
         }
 
         function fillRel() { const d = JSON.parse(document.getElementById('r-ubi').value); document.getElementById('ri-inv-a').value = d.inv_a; document.getElementById('ri-eq-a').value = d.eq_a; document.getElementById('ri-tlum').value = d.t_lum; document.getElementById('ri-cart').value = d.c_art; document.getElementById('ri-clam').value = d.c_lam; document.getElementById('ri-em').value = d.em; document.getElementById('ri-vent').value = d.vent; document.getElementById('ri-inv-v').value = d.inv_v; document.getElementById('rel-form').classList.remove('hidden'); }
-        async function guardarRel() { showL(true); const u = JSON.parse(document.getElementById('r-ubi').value); await fetch(URL, {method:'POST', body: JSON.stringify({ action: 'updateRelevamiento', token: PIN, edificio: document.getElementById('r-edif').value, fila: u.fila, inv_a: document.getElementById('ri-inv-a').value, eq_a: document.getElementById('ri-eq-a').value, t_lum: document.getElementById('ri-tlum').value, c_art: document.getElementById('ri-cart').value, c_lam: document.getElementById('ri-clam').value, em: document.getElementById('ri-em').value, vent: document.getElementById('ri-vent').value, inv_v: document.getElementById('ri-inv-v').value })}); alert("Actualizado"); showL(false); }
+        async function guardarRel() { showL(true); const u = JSON.parse(document.getElementById('r-ubi').value); await fetch(URL, {method:'POST', body: JSON.stringify({ action: 'updateRelevamiento', token: PIN, edificio: document.getElementById('r-edif').value, fila: u.fila, inv_a: document.getElementById('ri-inv-a').value, eq_a: document.getElementById('ri-eq-a').value, t_lum: document.getElementById('ri-tlum').value, c_art: document.getElementById('ri-cart').value, c_lam: document.getElementById('ri-clam').value, em: document.getElementById('ri-em').value, vent: document.getElementById('ri-vent').value, inv_v: document.getElementById('ri-inv-v').value })}); alert("Datos de relevamiento actualizados"); showL(false); }
 
         async function init() {
             showL(true);
