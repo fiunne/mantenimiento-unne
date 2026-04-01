@@ -10,33 +10,33 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         :root { --fiunne-orange: #f06423; }
         body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
-        .loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.95); display: none; justify-content: center; align-items: center; z-index: 5000; flex-direction: column; color: white; }
+        .loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); display: none; justify-content: center; align-items: center; z-index: 5000; flex-direction: column; color: white; }
         .tab-active { border-bottom: 4px solid var(--fiunne-orange); color: var(--fiunne-orange); font-weight: 900; background: #fff7ed; }
-        .card-ot { border-left-width: 8px; }
-        .vencido-anim { animation: pulse-red 2s infinite; border-left-color: #dc2626 !important; background-color: #fef2f2; }
-        @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        .card-ot { border-left-width: 8px; border-radius: 12px; }
+        .vencido-anim { border-left-color: #ef4444 !important; background-color: #fee2e2; color: #b91c1c; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="p-2">
 
     <div id="loader" class="loading-overlay">
         <div class="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="font-black text-[9px] uppercase tracking-widest">Procesando...</p>
+        <p class="font-black text-[9px] uppercase tracking-widest">Sincronizando...</p>
     </div>
 
     <div class="max-w-4xl mx-auto pb-24">
         <header class="p-4 bg-white rounded-2xl shadow-sm mb-4 border flex justify-between items-center">
             <div>
-                <h1 class="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">SGM FIUNNE</h1>
-                <p class="text-[9px] font-black text-orange-600 uppercase tracking-widest mt-1">Gestión 2026</p>
+                <h1 class="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">Panel SGM</h1>
+                <p class="text-[9px] font-black text-orange-600 uppercase tracking-widest mt-1">FIUNNE 2026</p>
             </div>
             <div class="bg-red-50 px-3 py-2 rounded-xl border border-red-100 text-center">
-                <p class="text-[8px] font-black text-red-500 uppercase leading-none italic">Vencidos</p>
+                <p class="text-[8px] font-black text-red-500 uppercase leading-none">Vencidos</p>
                 <p id="dash-venc" class="text-xl font-black text-red-700">0</p>
             </div>
         </header>
 
-        <nav class="flex bg-white rounded-xl shadow-sm border mb-4 sticky top-2 z-40 overflow-x-auto">
+        <nav class="flex bg-white rounded-xl shadow-sm border mb-4 sticky top-2 z-40 overflow-x-auto no-scrollbar">
             <button onclick="tab('nueva')" id="btn-nueva" class="flex-1 py-4 px-2 text-[10px] font-black uppercase whitespace-nowrap">Nueva OT</button>
             <button onclick="tab('cerrar')" id="btn-cerrar" class="flex-1 py-4 px-2 text-[10px] font-black uppercase whitespace-nowrap">Cerrar OT</button>
             <button onclick="tab('rel')" id="btn-rel" class="flex-1 py-4 px-2 text-[10px] font-black uppercase whitespace-nowrap">Relevamiento</button>
@@ -45,8 +45,10 @@
         </nav>
 
         <div id="sec-nueva" class="hidden space-y-3">
+            <div id="modo-edicion" class="hidden bg-blue-600 text-white p-2 rounded-lg text-center text-[10px] font-black uppercase animate-pulse">MODO EDICIÓN: Actualizando Orden</div>
             <div class="bg-white p-5 rounded-2xl shadow-sm border space-y-3">
-                <select id="n-edif" onchange="loadTripleCascada(this.value, 'n-sec', 'n-ubi')" class="w-full p-4 bg-slate-50 border rounded-xl font-bold"></select>
+                <input type="hidden" id="n-id-edit">
+                <select id="n-edif" onchange="loadTriple(this.value, 'n-sec', 'n-ubi')" class="w-full p-4 bg-slate-50 border rounded-xl font-bold"></select>
                 <div class="grid grid-cols-2 gap-2">
                     <select id="n-sec" onchange="filterUbi('n-sec','n-ubi')" class="p-4 border rounded-xl text-xs"></select>
                     <select id="n-ubi" class="p-4 border rounded-xl text-xs"></select>
@@ -69,7 +71,7 @@
                 </div>
 
                 <select id="n-pers" class="w-full p-4 border rounded-xl text-xs font-black uppercase">
-                    <option value="">Seleccionar Personal...</option>
+                    <option value="">Personal Asignado...</option>
                     <option>AGL</option><option>DSF</option><option>RRG</option><option>MAP</option>
                 </select>
 
@@ -79,9 +81,10 @@
                 </div>
 
                 <textarea id="n-desc" placeholder="Descripción..." class="w-full p-4 border rounded-xl h-20 text-xs"></textarea>
+                
                 <div class="flex gap-2">
-                    <button onclick="guardarNuevaOT(false)" class="flex-1 bg-slate-800 text-white p-4 rounded-xl font-black uppercase text-[10px]">Solo Guardar</button>
-                    <button onclick="guardarNuevaOT(true)" class="flex-1 bg-orange-600 text-white p-4 rounded-xl font-black uppercase text-[10px]">Guardar y PDF</button>
+                    <button onclick="guardarOT(false)" class="flex-1 bg-slate-800 text-white p-4 rounded-xl font-black uppercase text-[10px]">Guardar</button>
+                    <button onclick="guardarOT(true)" class="flex-1 bg-orange-600 text-white p-4 rounded-xl font-black uppercase text-[10px]">Guardar y PDF</button>
                 </div>
             </div>
         </div>
@@ -89,40 +92,28 @@
         <div id="sec-cerrar" class="hidden space-y-4">
             <div class="bg-white p-5 rounded-2xl shadow-sm border space-y-4">
                 <select id="c-lista" class="w-full p-4 border-2 border-orange-200 rounded-xl font-black text-xs"></select>
-                
                 <div class="bg-slate-50 p-4 rounded-xl space-y-2 border">
-                    <p class="text-[9px] font-black uppercase text-slate-500">Triple Selección de Materiales</p>
-                    <div class="grid grid-cols-1 gap-2">
-                        <select id="m-rubro" onchange="loadMGrupos(this.value)" class="p-3 border rounded-lg text-[10px] font-bold">
-                            <option value="">1. Seleccionar Rubro (Hoja)</option>
-                            <option value="Electrico">Electrico</option>
-                            <option value="Refrigeracion">Refrigeracion</option>
-                            <option value="Herreria Ferreteria">Herreria Ferreteria</option>
-                        </select>
-                        <select id="m-grupo" onchange="loadMDesc(this.value)" class="p-3 border rounded-lg text-[10px] bg-white"></select>
-                        <select id="m-desc" class="p-3 border rounded-lg text-[10px] bg-white"></select>
-                        <div class="flex gap-2">
-                            <input type="number" id="m-cant" value="1" class="w-20 p-3 border rounded-lg text-center font-black">
-                            <button onclick="addCesta()" class="flex-1 bg-slate-900 text-white rounded-lg font-black">+</button>
-                        </div>
+                    <select id="m-rubro" onchange="loadMG(this.value)" class="w-full p-3 border rounded-lg text-[10px] font-bold">
+                        <option value="">Rubro...</option><option value="Electrico">Electrico</option><option value="Refrigeracion">Refrigeracion</option><option value="Herreria Ferreteria">Herreria Ferreteria</option>
+                    </select>
+                    <select id="m-grupo" onchange="loadMD(this.value)" class="w-full p-3 border rounded-lg text-[10px] bg-white"></select>
+                    <select id="m-desc" class="w-full p-3 border rounded-lg text-[10px] bg-white"></select>
+                    <div class="flex gap-2">
+                        <input type="number" id="m-cant" value="1" class="w-20 p-3 border rounded-lg text-center font-black">
+                        <button onclick="addM()" class="flex-1 bg-slate-900 text-white rounded-lg font-black">+</button>
                     </div>
-                    <ul id="ins-lista" class="text-[10px] font-bold text-blue-600 p-2 italic"></ul>
+                    <div id="ins-lista" class="text-[10px] font-bold text-blue-600 p-1"></div>
                 </div>
-                <textarea id="c-obs" placeholder="Novedades del cierre..." class="w-full p-4 border rounded-xl h-20 text-xs"></textarea>
-                <button onclick="finalizarCierre()" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black uppercase shadow-lg">Finalizar Orden</button>
+                <textarea id="c-obs" placeholder="Novedades de cierre..." class="w-full p-4 border rounded-xl h-16 text-xs"></textarea>
+                <button onclick="finalizarCierre()" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black uppercase">Finalizar Orden</button>
             </div>
         </div>
 
         <div id="sec-rel" class="hidden space-y-4">
             <div class="bg-white p-5 rounded-2xl shadow-sm border space-y-4">
-                <select id="r-edif" onchange="loadTripleCascada(this.value, 'r-sec', 'r-ubi')" class="w-full p-4 bg-slate-50 border rounded-xl font-bold"></select>
-                <div class="grid grid-cols-2 gap-2">
-                    <select id="r-sec" onchange="filterUbi('r-sec','r-ubi')" class="p-4 border rounded-xl text-[10px]"></select>
-                    <select id="r-ubi" onchange="fillRelFields()" class="p-4 border rounded-xl text-[10px]"></select>
-                </div>
-                
-                <div id="rel-form" class="hidden grid grid-cols-2 gap-2 pt-4 border-t border-dashed text-[10px]">
-                    <div class="col-span-2 font-black text-slate-400 uppercase italic">Formulario de Relevamiento</div>
+                <select id="r-edif" onchange="loadTriple(this.value, 'r-sec', 'r-ubi')" class="w-full p-4 bg-slate-50 border rounded-xl font-bold"></select>
+                <div class="grid grid-cols-2 gap-2"><select id="r-sec" onchange="filterUbi('r-sec','r-ubi')" class="p-4 border rounded-xl text-[10px]"></select><select id="r-ubi" onchange="fillRel()" class="p-4 border rounded-xl text-[10px]"></select></div>
+                <div id="rel-form" class="hidden grid grid-cols-2 gap-2 pt-4 border-t text-[10px]">
                     <label>Inv. Aire</label><input type="text" id="ri-inv-a" class="p-2 border rounded">
                     <label>Equipo Aire</label><input type="text" id="ri-eq-a" class="p-2 border rounded">
                     <label>Tipo Lum.</label><input type="text" id="ri-tlum" class="p-2 border rounded">
@@ -131,35 +122,32 @@
                     <label>Emergencia</label><input type="text" id="ri-em" class="p-2 border rounded">
                     <label>Ventiladores</label><input type="text" id="ri-vent" class="p-2 border rounded">
                     <label>Inv. Ventilador</label><input type="text" id="ri-inv-v" class="p-2 border rounded">
-                    <button onclick="guardarRel()" class="col-span-2 bg-blue-600 text-white p-4 rounded-xl font-black uppercase mt-2">Guardar Cambios</button>
+                    <button onclick="guardarRel()" class="col-span-2 bg-blue-600 text-white p-4 rounded-xl font-black uppercase">Actualizar</button>
                 </div>
             </div>
         </div>
 
         <div id="sec-hysl" class="hidden space-y-4">
             <div class="flex gap-2">
-                <select id="e-edif" onchange="loadExtintores(this.value)" class="flex-1 p-4 border-2 border-slate-200 rounded-xl text-xs font-black bg-white"></select>
-                <button onclick="descargarOC()" class="bg-slate-900 text-white px-5 rounded-xl text-[9px] font-black uppercase">Generar OC</button>
+                <select id="e-edif" onchange="loadExt(this.value)" class="flex-1 p-4 border rounded-xl text-xs font-black"></select>
+                <button onclick="genOC()" class="bg-slate-900 text-white px-5 rounded-xl text-[9px] font-black uppercase">Descargar OC</button>
             </div>
             <div id="ext-lista" class="grid grid-cols-1 gap-2"></div>
         </div>
 
         <div id="sec-hist" class="hidden space-y-2">
             <div class="flex gap-2 mb-2">
-                <button onclick="filterHist('todas')" class="flex-1 p-2 bg-slate-200 rounded-lg text-[9px] font-black uppercase">Todas</button>
-                <button onclick="filterHist('Abierta')" class="flex-1 p-2 bg-blue-100 text-blue-700 rounded-lg text-[9px] font-black uppercase">Solo Abiertas</button>
+                <button onclick="fH('todas')" class="flex-1 p-2 bg-slate-200 rounded-lg text-[9px] font-black">TODAS</button>
+                <button onclick="fH('Abierta')" class="flex-1 p-2 bg-blue-100 text-blue-700 rounded-lg text-[9px] font-black">ABIERTAS</button>
             </div>
-            <div id="hist-cont"></div>
+            <div id="hist-cont" class="space-y-2"></div>
         </div>
     </div>
 
     <script>
-        const URL = "https://script.google.com/macros/s/AKfycbxz-k9KF_-htl5byjivR-u568NsuiGgW52Q8pFUaEoXsThW6vGN2pPJCL-mdW5WpxPt/exec"; 
+        const URL = "https://script.google.com/macros/s/AKfycbzX6jAhLTnwa58qc2xQXLWrlzx5Yq3LsG8v4FrGCb6IBjAJTgLJ-8YkieB117vjej98/exec"; 
         const PIN = "4370";
-        let dbSectores = [];
-        let dbMat = {};
-        let cesta = [];
-        let histLocal = [];
+        let dbS = [], dbM = {}, cesta = [], hLocal = [];
 
         function showL(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
 
@@ -171,162 +159,155 @@
             document.getElementById('sec-'+t).classList.remove('hidden');
             document.getElementById('btn-'+t).classList.add('tab-active');
             if(t === 'cerrar') loadAbiertas();
-            if(t === 'hist') loadHistorial();
+            if(t === 'hist') loadH();
         }
 
-        // --- CASCADAS ---
-        async function loadTripleCascada(edif, idSec, idUbi) {
+        async function loadTriple(ed, idS, idU) {
             showL(true);
-            const res = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(edif)}&token=${PIN}`);
-            dbSectores = await res.json();
-            const uniqueSec = [...new Set(dbSectores.map(x => x.sector))];
-            document.getElementById(idSec).innerHTML = uniqueSec.map(s => `<option value="${s}">${s}</option>`).join("");
-            filterUbi(idSec, idUbi);
+            const r = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN}`);
+            dbS = await r.json();
+            document.getElementById(idS).innerHTML = [...new Set(dbS.map(x=>x.sector))].map(s=>`<option value="${s}">${s}</option>`).join("");
+            filterUbi(idS, idU);
             showL(false);
         }
-        function filterUbi(idSec, idUbi) {
-            const s = document.getElementById(idSec).value;
-            document.getElementById(idUbi).innerHTML = dbSectores.filter(x => x.sector === s)
-                .map(x => `<option value='${JSON.stringify(x)}'>${x.ubi}</option>`).join("");
+        function filterUbi(idS, idU) {
+            const s = document.getElementById(idS).value;
+            document.getElementById(idU).innerHTML = dbS.filter(x=>x.sector===s).map(x=>`<option value='${JSON.stringify(x)}'>${x.ubi}</option>`).join("");
+        }
+        function checkRefri(v) { document.getElementById('extra-refri').classList.toggle('hidden', v !== 'Refrigeración'); }
+
+        async function guardarOT(pdf) {
+            showL(true);
+            const ubi = JSON.parse(document.getElementById('n-ubi').value);
+            const d = {
+                action: 'nuevaOT', token: PIN,
+                idExistente: document.getElementById('n-id-edit').value || null,
+                edificio: document.getElementById('n-edif').value,
+                sector: document.getElementById('n-sec').value,
+                ubicacion: ubi.ubi,
+                especialidad: document.getElementById('n-esp').value,
+                prioridad: document.getElementById('n-prio').value,
+                reportado: document.getElementById('n-repor').value,
+                medio: document.getElementById('n-medio').value,
+                personal: document.getElementById('n-pers').value,
+                equipo: document.getElementById('n-eq').value,
+                nInventario: document.getElementById('n-inv').value,
+                descripcion: document.getElementById('n-desc').value
+            };
+            await fetch(URL, {method:'POST', body: JSON.stringify(d)});
+            if(pdf) genPDF(d);
+            alert("Operación Exitosa");
+            location.reload();
         }
 
-        // --- MATERIALES CASCADA ---
         async function loadAbiertas() {
             showL(true);
-            const [resA, resM] = await Promise.all([
-                fetch(`${URL}?action=getAbiertas&token=${PIN}`).then(r => r.json()),
-                fetch(`${URL}?action=getMaterialesFull&token=${PIN}`).then(r => r.json())
+            const [ra, rm] = await Promise.all([
+                fetch(`${URL}?action=getAbiertas&token=${PIN}`).then(r=>r.json()),
+                fetch(`${URL}?action=getMaterialesFull&token=${PIN}`).then(r=>r.json())
             ]);
-            dbMat = resM;
-            document.getElementById('c-lista').innerHTML = resA.map(o => `<option value="${o.id}">${o.id} | ${o.edif} - ${o.sec} (${o.obs})</option>`).join("");
+            dbM = rm;
+            document.getElementById('c-lista').innerHTML = ra.map(o=>`<option value="${o.id}">${o.detalle}</option>`).join("");
             showL(false);
         }
-        function loadMGrupos(rubro) {
-            if(!rubro) return;
-            const grupos = [...new Set(dbMat[rubro].map(x => x.grupo))];
-            document.getElementById('m-grupo').innerHTML = grupos.map(g => `<option value="${g}">${g}</option>`).join("");
-            loadMDesc(grupos[0]);
-        }
-        function loadMDesc(grupo) {
-            const rubro = document.getElementById('m-rubro').value;
-            const items = dbMat[rubro].filter(x => x.grupo === grupo);
-            document.getElementById('m-desc').innerHTML = items.map(i => `<option value="${i.desc}">${i.desc} (Stock: ${i.stock})</option>`).join("");
-        }
-        function addCesta() {
-            const m = document.getElementById('m-desc').value;
-            const c = document.getElementById('m-cant').value;
-            cesta.push(`${c} x ${m}`);
-            document.getElementById('ins-lista').innerText = cesta.join(" | ");
+        function loadMG(r) { document.getElementById('m-grupo').innerHTML = [...new Set(dbM[r].map(x=>x.grupo))].map(g=>`<option value="${g}">${g}</option>`).join(""); loadMD(document.getElementById('m-grupo').value); }
+        function loadMD(g) { const r = document.getElementById('m-rubro').value; document.getElementById('m-desc').innerHTML = dbM[r].filter(x=>x.grupo===g).map(i=>`<option value="${i.desc}">${i.desc} (${i.stock})</option>`).join(""); }
+        function addM() { cesta.push(`${document.getElementById('m-cant').value} x ${document.getElementById('m-desc').value}`); document.getElementById('ins-lista').innerText = cesta.join(" | "); }
+
+        async function finalizarCierre() {
+            showL(true);
+            await fetch(URL, {method:'POST', body: JSON.stringify({
+                action: 'cerrarOT', token: PIN, idOT: document.getElementById('c-lista').value,
+                comentario: document.getElementById('c-obs').value, resumenMat: cesta.join(" | ")
+            })});
+            alert("Orden Cerrada");
+            location.reload();
         }
 
-        // --- HYSL ---
-        async function loadExtintores(ed) {
+        async function loadExt(ed) {
             showL(true);
-            const res = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN}`);
-            const data = await res.json();
+            const r = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN}`);
+            const data = await r.json();
             let v = 0;
             document.getElementById('ext-lista').innerHTML = data.map(e => {
-                const vencido = e.venc.includes('2023') || e.venc.includes('2024') || e.venc.includes('2025');
-                if(vencido) v++;
-                return `<div class="p-4 bg-white rounded-xl shadow-sm border-l-8 flex justify-between items-center ${vencido?'vencido-anim border-red-500':'border-green-500'}">
-                    <div><h4 class="font-black text-xs">${e.tipo} ${e.cap}</h4><p class="text-[9px] uppercase font-bold text-slate-400">${e.sector} | #${e.unne}</p></div>
-                    <div class="text-right"><p class="text-[8px] font-black uppercase text-slate-400">Vence</p><p class="text-[10px] font-black ${vencido?'text-red-600':'text-green-600'}">${e.venc}</p></div>
+                const isV = e.venc.includes('2023') || e.venc.includes('2024') || e.venc.includes('2025');
+                if(isV) v++;
+                return `<div class="p-3 bg-white card-ot border-l-8 flex justify-between items-center ${isV?'vencido-anim':''} shadow-sm">
+                    <div><b class="text-xs uppercase">${e.tipo} ${e.cap}</b><p class="text-[9px] font-bold opacity-70">${e.sector} | #${e.unne}</p></div>
+                    <div class="text-right text-[10px] font-black">${e.venc}</div>
                 </div>`;
             }).join("");
             document.getElementById('dash-venc').innerText = v;
             showL(false);
         }
 
-        function descargarOC() {
+        function genOC() {
             const ed = document.getElementById('e-edif').value;
             const items = document.querySelectorAll('.vencido-anim');
-            let txt = `SGM FIUNNE - REQUERIMIENTO HySL\nEDIFICIO: ${ed}\nFECHA: ${new Date().toLocaleDateString()}\n\nEquipos Vencidos:\n`;
-            items.forEach(i => {
-                const t = i.querySelector('h4').innerText;
-                const p = i.querySelector('p').innerText;
-                txt += `- ${t} (Sector: ${p})\n`;
-            });
-            const blob = new Blob([txt], {type:'text/plain'});
-            const a = document.createElement('a');
-            a.download = `OC_HySL_${ed}.txt`;
-            a.href = window.URL.createObjectURL(blob);
-            a.click();
+            let t = `REQUERIMIENTO HySL - ${ed}\nFECHA: ${new Date().toLocaleDateString()}\n\nEQUIPOS VENCIDOS:\n`;
+            items.forEach(i => t += `- ${i.querySelector('b').innerText} (Sector: ${i.querySelector('p').innerText})\n`);
+            const blob = new Blob([t], {type:'text/plain'});
+            const a = document.createElement('a'); a.download = `OC_${ed}.txt`; a.href = window.URL.createObjectURL(blob); a.click();
         }
 
-        // --- RELEVAMIENTO ---
-        function fillRelFields() {
-            const d = JSON.parse(document.getElementById('r-ubi').value);
-            document.getElementById('ri-inv-a').value = d.inv_a;
-            document.getElementById('ri-eq-a').value = d.eq_a;
-            document.getElementById('ri-tlum').value = d.t_lum;
-            document.getElementById('ri-cart').value = d.c_art;
-            document.getElementById('ri-clam').value = d.c_lam;
-            document.getElementById('ri-em').value = d.em;
-            document.getElementById('ri-vent').value = d.vent;
-            document.getElementById('ri-inv-v').value = d.inv_v;
-            document.getElementById('rel-form').classList.remove('hidden');
-        }
-
-        async function guardarRel() {
+        async function loadH() {
             showL(true);
-            const ubiData = JSON.parse(document.getElementById('r-ubi').value);
-            const d = {
-                action: 'updateRelevamiento',
-                token: PIN,
-                edificio: document.getElementById('r-edif').value,
-                fila: ubiData.fila,
-                inv_a: document.getElementById('ri-inv-a').value,
-                eq_a: document.getElementById('ri-eq-a').value,
-                t_lum: document.getElementById('ri-tlum').value,
-                c_art: document.getElementById('ri-cart').value,
-                c_lam: document.getElementById('ri-clam').value,
-                em: document.getElementById('ri-em').value,
-                vent: document.getElementById('ri-vent').value,
-                inv_v: document.getElementById('ri-inv-v').value
-            };
-            await fetch(URL, {method:'POST', body: JSON.stringify(d)});
-            alert("Relevamiento Actualizado");
+            hLocal = await fetch(`${URL}?action=getHistorial&token=${PIN}`).then(r=>r.json());
+            fH('todas');
             showL(false);
         }
-
-        // --- HISTORIAL ---
-        async function loadHistorial() {
-            showL(true);
-            const res = await fetch(`${URL}?action=getHistorial&token=${PIN}`);
-            histLocal = await res.json();
-            filterHist('todas');
-            showL(false);
-        }
-        function filterHist(v) {
-            const filtrado = v === 'todas' ? histLocal : histLocal.filter(x => x.est === v);
-            document.getElementById('hist-cont').innerHTML = filtrado.map(h => `
-                <div class="card-ot p-4 bg-white rounded-xl shadow-sm border-l-8 mb-2 ${h.est==='Abierta'?'border-blue-500':'border-green-500'}">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-[9px] font-black text-slate-400">#${h.id} | ${h.fecha}</span>
-                        <button onclick="genPDF('${h.id}')" class="bg-slate-100 p-1 px-2 rounded text-[8px] font-bold">PDF</button>
-                    </div>
-                    <p class="font-black text-slate-800 text-[10px] uppercase">${h.edif} - ${h.sec}</p>
-                    <p class="text-slate-500 text-[10px] italic">${h.desc}</p>
+        function fH(v) {
+            const f = v === 'todas' ? hLocal : hLocal.filter(x=>x.est===v);
+            document.getElementById('hist-cont').innerHTML = f.map(h => `
+                <div class="p-4 bg-white card-ot border-l-8 shadow-sm ${h.est==='Abierta'?'border-blue-500':'border-green-500'}">
+                    <div class="flex justify-between text-[9px] font-black text-slate-400"><span>#${h.id}</span><span>${h.fecha}</span></div>
+                    <p class="font-black text-slate-800 text-[11px] uppercase">${h.edif} / ${h.sec}</p>
+                    <p class="text-slate-500 text-[10px] italic leading-tight my-1">${h.desc}</p>
+                    <div class="flex justify-between mt-2"><span class="text-[9px] font-black text-orange-600">${h.tec}</span>
+                    <button onclick='editarOT(${JSON.stringify(h)})' class="bg-slate-900 text-white px-3 py-1 rounded text-[8px] font-black uppercase">Ver / Editar</button></div>
                 </div>
             `).join("");
         }
 
-        // --- PDF ---
-        function genPDF(id) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(18); doc.text("ORDEN DE TRABAJO - SGM FIUNNE", 20, 20);
-            doc.setFontSize(12); doc.text("ID OT: " + id, 20, 35);
-            doc.text("Generado: " + new Date().toLocaleString(), 20, 45);
-            doc.save(`OT_${id}.pdf`);
+        function editarOT(h) {
+            tab('nueva');
+            document.getElementById('modo-edicion').classList.remove('hidden');
+            document.getElementById('n-id-edit').value = h.id;
+            document.getElementById('n-edif').value = h.edif;
+            loadTriple(h.edif, 'n-sec', 'n-ubi').then(() => {
+                document.getElementById('n-sec').value = h.sec;
+                filterUbi('n-sec', 'n-ubi');
+                document.getElementById('n-esp').value = h.esp;
+                checkRefri(h.esp);
+                document.getElementById('n-prio').value = h.prio;
+                document.getElementById('n-repor').value = h.repor;
+                document.getElementById('n-medio').value = h.medio;
+                document.getElementById('n-pers').value = h.tec;
+                document.getElementById('n-eq').value = h.eq;
+                document.getElementById('n-inv').value = h.inv;
+                document.getElementById('n-desc').value = h.desc;
+            });
         }
+
+        function genPDF(d) {
+            const { jsPDF } = window.jspdf; const doc = new jsPDF();
+            doc.text("ORDEN DE TRABAJO - FIUNNE", 20, 20);
+            doc.text(`ID: ${d.idExistente || 'Nueva'}`, 20, 30);
+            doc.text(`Edificio: ${d.edificio}`, 20, 40);
+            doc.text(`Sector: ${d.sector}`, 20, 50);
+            doc.text(`Descripcion: ${d.descripcion}`, 20, 60);
+            doc.save("OT.pdf");
+        }
+
+        function fillRel() { const d = JSON.parse(document.getElementById('r-ubi').value); document.getElementById('ri-inv-a').value = d.inv_a; document.getElementById('ri-eq-a').value = d.eq_a; document.getElementById('ri-tlum').value = d.t_lum; document.getElementById('ri-cart').value = d.c_art; document.getElementById('ri-clam').value = d.c_lam; document.getElementById('ri-em').value = d.em; document.getElementById('ri-vent').value = d.vent; document.getElementById('ri-inv-v').value = d.inv_v; document.getElementById('rel-form').classList.remove('hidden'); }
+        async function guardarRel() { showL(true); const u = JSON.parse(document.getElementById('r-ubi').value); await fetch(URL, {method:'POST', body: JSON.stringify({ action: 'updateRelevamiento', token: PIN, edificio: document.getElementById('r-edif').value, fila: u.fila, inv_a: document.getElementById('ri-inv-a').value, eq_a: document.getElementById('ri-eq-a').value, t_lum: document.getElementById('ri-tlum').value, c_art: document.getElementById('ri-cart').value, c_lam: document.getElementById('ri-clam').value, em: document.getElementById('ri-em').value, vent: document.getElementById('ri-vent').value, inv_v: document.getElementById('ri-inv-v').value })}); alert("Actualizado"); showL(false); }
 
         async function init() {
             showL(true);
-            const res = await fetch(`${URL}?action=getEdificios&token=${PIN}`);
-            const edifs = await res.json();
-            const opt = edifs.map(e => `<option value="${e}">${e}</option>`).join("");
-            ['n-edif','r-edif','e-edif'].forEach(id => document.getElementById(id).innerHTML = '<option>Seleccionar...</option>' + opt);
+            const r = await fetch(`${URL}?action=getEdificios&token=${PIN}`);
+            const eds = await r.json();
+            const o = '<option value="">Seleccionar...</option>' + eds.map(e=>`<option value="${e}">${e}</option>`).join("");
+            ['n-edif','r-edif','e-edif'].forEach(id => document.getElementById(id).innerHTML = o);
             tab('nueva');
             showL(false);
         }
