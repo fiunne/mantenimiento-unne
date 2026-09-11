@@ -1,359 +1,311 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SGM FIUNNE 2026</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        :root { --fiunne-orange: #f06423; }
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
-        .loading-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.9); display: none; justify-content: center; align-items: center; z-index: 5000; flex-direction: column; color: white; }
-        .tab-active { border-bottom: 4px solid var(--fiunne-orange); color: var(--fiunne-orange); font-weight: 900; background: #fff7ed; }
-        .card-ot { border-left-width: 8px; border-radius: 12px; transition: 0.2s; }
-        .vencido { border-left-color: #ef4444 !important; background-color: #fee2e2; }
-        .por-vencer { border-left-color: #f97316 !important; background-color: #ffedd5; }
-        .en-fecha { border-left-color: #22c55e !important; background-color: #f0fdf4; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGM FIUNNE 2026</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .header-panel { background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
+    .nav-tabs .nav-link { color: #555; font-weight: 600; border: none; border-bottom: 3px solid transparent; }
+    .nav-tabs .nav-link.active { color: #d9534f; border-bottom: 3px solid #d9534f; background: transparent; }
+    .card-custom { background: #fff; border-radius: 12px; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.04); padding: 20px; margin-bottom: 20px; }
+    .btn-primary-custom { background-color: #1a252f; color: #fff; border: none; font-weight: 600; }
+    .btn-primary-custom:hover { background-color: #2c3e50; color: #fff; }
+    .btn-orange { background-color: #e67e22; color: #fff; font-weight: 600; }
+    .btn-orange:hover { background-color: #d35400; color: #fff; }
+    .badge-vencido { background-color: #e74c3c; }
+    .badge-vigente { background-color: #2ecc71; }
+    .badge-proximo { background-color: #f39c12; }
+  </style>
 </head>
-<body class="p-2">
+<body>
 
-    <div id="loader" class="loading-overlay">
-        <div class="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="font-black text-[9px] uppercase tracking-widest italic">Sincronizando FIUNNE...</p>
+<div class="container py-3">
+  <!-- ENCABEZADO -->
+  <div class="header-panel d-flex justify-content-between align-items-center">
+    <div>
+      <h3 class="m-0 fw-bold">PANEL SGM</h3>
+      <small class="text-danger fw-bold">FIUNNE 2026</small>
+    </div>
+    <div class="text-end">
+      <span class="badge bg-light text-danger p-2 border border-danger">ALERTAS: <strong id="cant-alertas">0</strong></span>
+    </div>
+  </div>
+
+  <!-- NAVEGACIÓN -->
+  <ul class="nav nav-tabs justify-content-between mb-3" id="sgmTabs" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#nueva-ot">NUEVA OT</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#cerrar-ot">CERRAR</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#relevamiento">RELEVAMIENTO</button></li>
+    <li class="nav-item"><button class="nav-link text-success" data-bs-toggle="tab" data-bs-target="#hysl">HYSL</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#historial">HISTORIAL</button></li>
+  </ul>
+
+  <!-- CONTENIDO DE LAS PESTAÑAS -->
+  <div class="tab-content" id="sgmTabsContent">
+
+    <!-- 1. NUEVA OT -->
+    <div class="tab-pane fade show active" id="nueva-ot">
+      <div class="card-custom">
+        <form id="formNuevaOT">
+          <div class="row g-2 mb-2">
+            <div class="col-md-4"><select class="form-select" id="otEdificio" onchange="cargarSectores()"><option value="">Edificio...</option></select></div>
+            <div class="col-md-4"><select class="form-select" id="otSector" onchange="cargarUbicaciones()"><option value="">Sector...</option></select></div>
+            <div class="col-md-4"><select class="form-select" id="otUbicacion"><option value="">Ubicación...</option></select></div>
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-md-6">
+              <select class="form-select" id="otTipoTarea" onchange="toggleCamposAA()">
+                <option value="General">General</option>
+                <option value="Electricidad">Electricidad</option>
+                <option value="Refrigeracion">Refrigeración</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <select class="form-select text-danger fw-bold" id="otPrioridad">
+                <option value="Media">Prioridad: Media</option>
+                <option value="Alta">Prioridad: Alta</option>
+                <option value="Baja">Prioridad: Baja</option>
+              </select>
+            </div>
+          </div>
+          <!-- Campos dinámicos para Refrigeración -->
+          <div class="row g-2 mb-2 d-none" id="rowCamposAA">
+            <div class="col-md-6"><input type="text" class="form-control" id="otEquipoAA" placeholder="Equipo de Aire"></div>
+            <div class="col-md-6"><input type="text" class="form-control" id="otInventarioAA" placeholder="N° Inventario AA"></div>
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-md-6"><input type="text" class="form-control" id="otReporto" placeholder="Reportado por"></div>
+            <div class="col-md-6">
+              <select class="form-select" id="otVia">
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="Personal">Personal</option>
+                <option value="Telefonica">Telefónica</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-2"><input type="text" class="form-control" id="otPersonal" placeholder="PERSONAL ASIGNADO..."></div>
+          <div class="mb-3"><textarea class="form-control" id="otDescripcion" rows="3" placeholder="Descripción del problema..."></textarea></div>
+          
+          <div class="d-flex gap-2">
+            <button type="button" class="btn btn-primary-custom w-50 py-2" onclick="guardarOT(false)">GUARDAR</button>
+            <button type="button" class="btn btn-orange w-50 py-2" onclick="guardarOT(true)">GUARDAR Y PDF</button>
+          </div>
+        </form>
+      </div>
     </div>
 
-    <div class="max-w-4xl mx-auto pb-24">
-        <header class="p-4 bg-white rounded-2xl shadow-sm mb-4 border flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none">Panel SGM</h1>
-                <p class="text-[9px] font-black text-orange-600 uppercase tracking-widest mt-1">FIUNNE 2026</p>
-            </div>
-            <div class="bg-red-50 px-3 py-2 rounded-xl border border-red-100 text-center">
-                <p class="text-[8px] font-black text-red-500 uppercase leading-none italic">Alertas</p>
-                <p id="dash-venc" class="text-xl font-black text-red-700">0</p>
-            </div>
-        </header>
-
-        <nav class="flex bg-white rounded-xl shadow-sm border mb-4 sticky top-2 z-40 overflow-x-auto">
-            <button onclick="tab('nueva')" id="btn-nueva" class="flex-1 py-4 px-2 text-[10px] font-black uppercase">Nueva OT</button>
-            <button onclick="tab('cerrar')" id="btn-cerrar" class="flex-1 py-4 px-2 text-[10px] font-black uppercase">Cerrar</button>
-            <button onclick="tab('rel')" id="btn-rel" class="flex-1 py-4 px-2 text-[10px] font-black uppercase">Relevamiento</button>
-            <button onclick="tab('hysl')" id="btn-hysl" class="flex-1 py-4 px-2 text-[10px] font-black uppercase text-green-600">HySL</button>
-            <button onclick="tab('hist')" id="btn-hist" class="flex-1 py-4 px-2 text-[10px] font-black uppercase">Historial</button>
-        </nav>
-
-        <div id="sec-nueva" class="hidden space-y-3">
-            <div id="modo-edicion" class="hidden bg-blue-600 text-white p-2 rounded-lg text-center text-[10px] font-black uppercase">MODO EDICIÓN ACTIVO</div>
-            <div class="bg-white p-5 rounded-2xl shadow-sm border space-y-3">
-                <input type="hidden" id="n-id-edit">
-                <select id="n-edif" onchange="loadTriple(this.value, 'n-sec', 'n-ubi')" class="w-full p-4 bg-slate-50 border rounded-xl font-bold"></select>
-                <div class="grid grid-cols-2 gap-2">
-                    <select id="n-sec" onchange="filterUbi('n-sec','n-ubi')" class="p-4 border rounded-xl text-xs"></select>
-                    <select id="n-ubi" onchange="autoFillRefri()" class="p-4 border rounded-xl text-xs"></select>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-2">
-                    <select id="n-esp" onchange="checkRefri(this.value)" class="p-4 border rounded-xl text-xs font-bold">
-                        <option>General</option><option value="Refrigeración">Refrigeración</option><option>Electricidad</option>
-                    </select>
-                    <select id="n-prio" class="p-4 border rounded-xl text-xs font-bold text-red-600">
-                        <option>Baja</option><option selected>Media</option><option>Alta</option><option>URGENTE</option>
-                    </select>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="text" id="n-repor" placeholder="Reportado por" class="p-4 border rounded-xl text-xs">
-                    <select id="n-medio" class="p-4 border rounded-xl text-xs">
-                        <option>WhatsApp</option><option>Llamada</option><option>Personal</option>
-                    </select>
-                </div>
-
-                <select id="n-pers" class="w-full p-4 border rounded-xl text-xs font-black uppercase">
-                    <option value="">Personal Asignado...</option>
-                    <option>AGL</option><option>DSF</option><option>RRG</option><option>MAP</option>
-                </select>
-
-                <div id="extra-refri" class="hidden grid grid-cols-2 gap-2">
-                    <input type="text" id="n-eq" placeholder="Equipo" class="p-4 border border-orange-200 rounded-xl text-xs bg-orange-50">
-                    <input type="text" id="n-inv" placeholder="Inv." class="p-4 border border-orange-200 rounded-xl text-xs bg-orange-50">
-                </div>
-
-                <textarea id="n-desc" placeholder="Descripción del problema..." class="w-full p-4 border rounded-xl h-20 text-xs"></textarea>
-                
-                <div class="flex gap-2">
-                    <button onclick="guardarOT(false)" class="flex-1 bg-slate-800 text-white p-4 rounded-xl font-black uppercase text-[10px]">Guardar</button>
-                    <button onclick="guardarOT(true)" class="flex-1 bg-orange-600 text-white p-4 rounded-xl font-black uppercase text-[10px]">Guardar y PDF</button>
-                </div>
-            </div>
+    <!-- 2. CERRAR OT -->
+    <div class="tab-pane fade" id="cerrar-ot">
+      <div class="card-custom">
+        <select class="form-select mb-3" id="selectOTAbiertas"><option value="">Cargando OTs abiertas...</option></select>
+        
+        <h6 class="fw-bold mb-2">Materiales Consumidos</h6>
+        <div id="listaMaterialesConsumidos" class="mb-2"></div>
+        
+        <div class="row g-2 mb-3">
+          <div class="col-md-4"><select class="form-select" id="matRubro" onchange="filtrarMateriales()"><option value="">Rubro...</option></select></div>
+          <div class="col-md-5"><select class="form-select" id="matDescripcion"><option value="">Material...</option></select></div>
+          <div class="col-md-2"><input type="number" class="form-control" id="matCant" value="1" min="1"></div>
+          <div class="col-md-1"><button class="btn btn-dark w-100" onclick="agregarMaterial()">+</button></div>
         </div>
 
-        <div id="sec-cerrar" class="hidden space-y-4">
-            <div class="bg-white p-5 rounded-2xl shadow-sm border space-y-4">
-                <select id="c-lista" class="w-full p-4 border-2 border-orange-200 rounded-xl font-black text-xs"></select>
-                <div class="bg-slate-50 p-4 rounded-xl space-y-2 border">
-                    <select id="m-rubro" onchange="loadMG(this.value)" class="w-full p-3 border rounded-lg text-[10px] font-bold">
-                        <option value="">Rubro...</option><option value="Electrico">Electrico</option><option value="Refrigeracion">Refrigeracion</option><option value="Herreria Ferreteria">Herreria Ferreteria</option>
-                    </select>
-                    <select id="m-grupo" onchange="loadMD(this.value)" class="w-full p-3 border rounded-lg text-[10px] bg-white"></select>
-                    <select id="m-desc" class="w-full p-3 border rounded-lg text-[10px] bg-white"></select>
-                    <div class="flex gap-2">
-                        <input type="number" id="m-cant" value="1" class="w-20 p-3 border rounded-lg text-center font-black">
-                        <button onclick="addM()" class="flex-1 bg-slate-900 text-white rounded-lg font-black">+</button>
-                    </div>
-                    <div id="ins-lista" class="text-[10px] font-bold text-blue-600 p-1"></div>
-                </div>
-                <textarea id="c-obs" placeholder="Observaciones finales..." class="w-full p-4 border rounded-xl h-16 text-xs"></textarea>
-                <button onclick="finalizarCierre()" class="w-full bg-green-600 text-white p-5 rounded-2xl font-black uppercase">Finalizar Orden</button>
-            </div>
-        </div>
-
-        <div id="sec-rel" class="hidden space-y-4">
-            <div class="bg-white p-5 rounded-2xl shadow-sm border space-y-4">
-                <select id="r-edif" onchange="loadTriple(this.value, 'r-sec', 'r-ubi')" class="w-full p-4 bg-slate-50 border rounded-xl font-bold"></select>
-                <div class="grid grid-cols-2 gap-2"><select id="r-sec" onchange="filterUbi('r-sec','r-ubi')" class="p-4 border rounded-xl text-[10px]"></select><select id="r-ubi" onchange="fillRel()" class="p-4 border rounded-xl text-[10px]"></select></div>
-                <div id="rel-form" class="hidden grid grid-cols-2 gap-2 pt-4 border-t text-[10px]">
-                    <label>Inv. Aire</label><input type="text" id="ri-inv-a" class="p-2 border rounded">
-                    <label>Equipo Aire</label><input type="text" id="ri-eq-a" class="p-2 border rounded">
-                    <label>Tipo Lum.</label><input type="text" id="ri-tlum" class="p-2 border rounded">
-                    <label>Cant. Artef.</label><input type="text" id="ri-cart" class="p-2 border rounded">
-                    <label>Cant. Lámpara</label><input type="text" id="ri-clam" class="p-2 border rounded">
-                    <label>Emergencia</label><input type="text" id="ri-em" class="p-2 border rounded">
-                    <label>Ventiladores</label><input type="text" id="ri-vent" class="p-2 border rounded">
-                    <label>Inv. Ventilador</label><input type="text" id="ri-inv-v" class="p-2 border rounded">
-                    <button onclick="guardarRel()" class="col-span-2 bg-blue-600 text-white p-4 rounded-xl font-black uppercase">Actualizar Datos</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="sec-hysl" class="hidden space-y-4">
-            <div class="flex gap-2">
-                <select id="e-edif" onchange="loadExt(this.value)" class="flex-1 p-4 border rounded-xl text-xs font-black"></select>
-                <button onclick="genOC()" class="bg-slate-900 text-white px-5 rounded-xl text-[9px] font-black uppercase">Generar OC</button>
-            </div>
-            <div id="ext-lista" class="grid grid-cols-1 gap-2"></div>
-        </div>
-
-        <div id="sec-hist" class="hidden space-y-2">
-            <div class="flex gap-2 mb-2">
-                <button onclick="fH('todas')" class="flex-1 p-2 bg-slate-200 rounded-lg text-[9px] font-black">TODAS</button>
-                <button onclick="fH('Abierta')" class="flex-1 p-2 bg-blue-100 text-blue-700 rounded-lg text-[9px] font-black">ABIERTAS</button>
-            </div>
-            <div id="hist-cont" class="space-y-2"></div>
-        </div>
+        <textarea class="form-control mb-3" id="cerrarObs" rows="2" placeholder="Observaciones finales..."></textarea>
+        <button class="btn btn-success w-100 py-2 fw-bold" onclick="ejecutarCierreOT()">FINALIZAR ORDEN</button>
+      </div>
     </div>
 
-    <script>
-        const URL = "https://script.google.com/macros/s/AKfycbwxhIlSyIcr219Ib6DsOXZcH0m-_4Mu-v-oGmEC0B3zG_pMlCcNNvZC_v58jD9uGr_K/exec"; 
-        const PIN = "4370";
-        let dbS = [], dbM = {}, cesta = [], hLocal = [];
+    <!-- 3. RELEVAMIENTO -->
+    <div class="tab-pane fade" id="relevamiento">
+      <div class="card-custom">
+        <div class="row g-2 mb-3">
+          <div class="col-md-4"><select class="form-select" id="relEdificio" onchange="cargarSectoresRel()"><option value="">Edificio...</option></select></div>
+          <div class="col-md-4"><select class="form-select" id="relSector" onchange="cargarUbicacionesRel()"><option value="">Sector...</option></select></div>
+          <div class="col-md-4"><select class="form-select" id="relUbicacion"><option value="">Ubicación...</option></select></div>
+        </div>
+        <hr>
+        <div class="row g-2 mb-2">
+          <div class="col-md-6"><input type="text" class="form-control" id="relEquipoAA" placeholder="Equipo AA"></div>
+          <div class="col-md-6"><input type="text" class="form-control" id="relInvAA" placeholder="Inventario AA"></div>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-md-4"><input type="text" class="form-control" id="relTipoIlum" placeholder="Tipo Lum."></div>
+          <div class="col-md-4"><input type="number" class="form-control" id="relCantArtef" placeholder="Cant. Artefactos"></div>
+          <div class="col-md-4"><input type="number" class="form-control" id="relCantLamp" placeholder="Cant. Lámparas"></div>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-md-4"><input type="text" class="form-control" id="relEmergencia" placeholder="Luces Emergencia"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="relVentiladores" placeholder="Ventiladores"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="relInvVent" placeholder="Inv. Ventiladores"></div>
+        </div>
+        <div class="row g-2 mb-3">
+          <div class="col-md-6"><input type="text" class="form-control" id="relOtros" placeholder="Otros Equipos"></div>
+          <div class="col-md-6"><input type="text" class="form-control" id="relInvOtros" placeholder="Inv. Otros"></div>
+        </div>
+        <button class="btn btn-primary w-100 py-2 fw-bold" onclick="guardarRelevamiento()">ACTUALIZAR DATOS</button>
+      </div>
+    </div>
 
-        function showL(v) { document.getElementById('loader').style.display = v ? 'flex' : 'none'; }
+    <!-- 4. HYSL (EXTINTORES Y BOTIQUINES) -->
+    <div class="tab-pane fade" id="hysl">
+      <ul class="nav nav-pills mb-3" id="hyslSubTabs">
+        <li class="nav-item"><button class="nav-link active py-1 px-3" data-bs-toggle="pill" data-bs-target="#tab-extintores">Extintores</button></li>
+        <li class="nav-item"><button class="nav-link py-1 px-3" data-bs-toggle="pill" data-bs-target="#tab-botiquines">Botiquines</button></li>
+      </ul>
 
-        async function tab(t) {
-            ['nueva','cerrar','rel','hysl','hist'].forEach(s => {
-                document.getElementById('sec-'+s).classList.add('hidden');
-                document.getElementById('btn-'+s).classList.remove('tab-active');
-            });
-            document.getElementById('sec-'+t).classList.remove('hidden');
-            document.getElementById('btn-'+t).classList.add('tab-active');
-            if(t === 'cerrar') loadAbiertas();
-            if(t === 'hist') loadH();
-        }
+      <div class="tab-content">
+        <!-- SUBTAB EXTINTORES -->
+        <div class="tab-pane fade show active" id="tab-extintores">
+          <div class="card-custom">
+            <div class="d-flex justify-content-between mb-3">
+              <select class="form-select w-50" id="filtroEdifExt" onchange="renderizarExtintores()"><option value="">Todos los Edificios</option></select>
+              <button class="btn btn-dark btn-sm" onclick="imprimirReporteExtintores()">GENERAR OC / REPORTE</button>
+            </div>
+            <div id="listaExtintores"></div>
+          </div>
+        </div>
 
-        async function loadTriple(ed, idS, idU) {
-            showL(true);
-            const r = await fetch(`${URL}?action=getSectores&edificio=${encodeURIComponent(ed)}&token=${PIN}`);
-            dbS = await r.json();
-            document.getElementById(idS).innerHTML = [...new Set(dbS.map(x=>x.sector))].map(s=>`<option value="${s}">${s}</option>`).join("");
-            filterUbi(idS, idU);
-            showL(false);
-        }
+        <!-- SUBTAB BOTIQUINES -->
+        <div class="tab-pane fade" id="tab-botiquines">
+          <div class="card-custom">
+            <h6 class="fw-bold mb-3">Estado de Botiquines de Primeros Auxilios</h6>
+            <div id="listaBotiquines"></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        function filterUbi(idS, idU) {
-            const s = document.getElementById(idS).value;
-            document.getElementById(idU).innerHTML = dbS.filter(x=>x.sector===s).map(x=>`<option value='${JSON.stringify(x)}'>${x.ubi}</option>`).join("");
-        }
+    <!-- 5. HISTORIAL -->
+    <div class="tab-pane fade" id="historial">
+      <div class="d-flex gap-2 mb-3">
+        <button class="btn btn-outline-secondary w-50 active" id="btnFiltroTodas" onclick="filtrarHistorial('TODAS')">TODAS</button>
+        <button class="btn btn-outline-primary w-50" id="btnFiltroAbiertas" onclick="filtrarHistorial('ABIERTAS')">ABIERTAS</button>
+      </div>
+      <div id="contenedorHistorial"></div>
+    </div>
 
-        function autoFillRefri() {
-            if(document.getElementById('n-esp').value === 'Refrigeración') {
-                const u = JSON.parse(document.getElementById('n-ubi').value);
-                document.getElementById('n-eq').value = u.eq_a || "N/A";
-                document.getElementById('n-inv').value = u.inv_a || "N/A";
-            }
-        }
+  </div>
+</div>
 
-        function checkRefri(v) { 
-            document.getElementById('extra-refri').classList.toggle('hidden', v !== 'Refrigeración'); 
-            if(v === 'Refrigeración') autoFillRefri();
-        }
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Cambiar esta URL por la de tu despliegue de Apps Script cuando corresponda
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwXaQPlVVu8SDtEY_SrtAdtX3iOoNH9TwlqQDs9iIun23rsReBPRdwmGS4zVQK5-kqa/exec"; 
 
-        async function guardarOT(pdf) {
-            showL(true);
-            const ubiSel = JSON.parse(document.getElementById('n-ubi').value);
-            const d = {
-                action: 'nuevaOT', token: PIN,
-                idExistente: document.getElementById('n-id-edit').value || null,
-                edificio: document.getElementById('n-edif').value,
-                sector: document.getElementById('n-sec').value,
-                ubicacion: ubiSel.ubi,
-                especialidad: document.getElementById('n-esp').value,
-                prioridad: document.getElementById('n-prio').value,
-                reportado: document.getElementById('n-repor').value,
-                medio: document.getElementById('n-medio').value,
-                personal: document.getElementById('n-pers').value,
-                equipo: document.getElementById('n-eq').value,
-                nInventario: document.getElementById('n-inv').value,
-                descripcion: document.getElementById('n-desc').value
-            };
-            await fetch(URL, {method:'POST', body: JSON.stringify(d)});
-            if(pdf) genPDF_Full(d);
-            alert("Operación completada con éxito");
-            location.reload();
-        }
+  let mapaUbicaciones = {};
+  let listaStock = [];
+  let materialesAgregar = [];
+  let listaExtintoresData = [];
 
-        async function loadAbiertas() {
-            showL(true);
-            const [ra, rm] = await Promise.all([
-                fetch(`${URL}?action=getAbiertas&token=${PIN}`).then(r=>r.json()),
-                fetch(`${URL}?action=getMaterialesFull&token=${PIN}`).then(r=>r.json())
-            ]);
-            dbM = rm;
-            document.getElementById('c-lista').innerHTML = (ra || []).map(o=>`<option value="${o.id}">${o.detalle}</option>`).join("");
-            showL(false);
-        }
+  window.onload = function() {
+    cargarDatosIniciales();
+  };
 
-        function loadMG(r) { document.getElementById('m-grupo').innerHTML = [...new Set(dbM[r].map(x=>x.grupo))].map(g=>`<option value="${g}">${g}</option>`).join(""); loadMD(document.getElementById('m-grupo').value); }
-        function loadMD(g) { const r = document.getElementById('m-rubro').value; document.getElementById('m-desc').innerHTML = dbM[r].filter(x=>x.grupo===g).map(i=>`<option value="${i.desc}">${i.desc} (Stock: ${i.stock})</option>`).join(""); }
-        function addM() { cesta.push(`${document.getElementById('m-cant').value} x ${document.getElementById('m-desc').value}`); document.getElementById('ins-lista').innerText = cesta.join(" | "); }
+  function cargarDatosIniciales() {
+    // Aquí se realizan los llamados al backend de Apps Script
+    google.script.run.withSuccessHandler(res => {
+      mapaUbicaciones = res;
+      poblarDesplegableEdificios();
+    }).getUbicaciones();
 
-        async function finalizarCierre() {
-            showL(true);
-            await fetch(URL, {method:'POST', body: JSON.stringify({
-                action: 'cerrarOT', token: PIN, idOT: document.getElementById('c-lista').value,
-                comentario: document.getElementById('c-obs').value, resumenMat: cesta.join(" | ")
-            })});
-            alert("Orden cerrada exitosamente");
-            location.reload();
-        }
+    google.script.run.withSuccessHandler(res => {
+      listaStock = res;
+      poblarRubros();
+    }).getStockMateriales();
 
-        async function loadExt(ed) {
-            showL(true);
-            const r = await fetch(`${URL}?action=getExtintores&edificio=${encodeURIComponent(ed)}&token=${PIN}`);
-            const data = await r.json();
-            const hoy = new Date();
-            let vCount = 0;
+    google.script.run.withSuccessHandler(res => {
+      poblarOTsAbiertas(res);
+    }).getOTsAbiertas();
 
-            document.getElementById('ext-lista').innerHTML = data.map(e => {
-                const parts = e.venc.split('/');
-                const fV = new Date(parts[2], parts[1]-1, parts[0]);
-                const diffDays = (fV - hoy) / (1000 * 60 * 60 * 24);
-                
-                let clase = "en-fecha";
-                if (fV < hoy) { clase = "vencido"; vCount++; }
-                else if (diffDays < 60) { clase = "por-vencer"; vCount++; }
+    google.script.run.withSuccessHandler(res => {
+      listaExtintoresData = res;
+      renderizarExtintores();
+    }).getExtintores();
+  }
 
-                return `<div class="p-3 bg-white card-ot border-l-8 flex justify-between items-center ${clase} shadow-sm">
-                    <div><b class="text-xs uppercase">${e.tipo} ${e.cap}</b><p class="text-[9px] font-bold opacity-70">${e.sector} | #${e.unne}</p></div>
-                    <div class="text-right text-[10px] font-black">${e.venc}</div>
-                </div>`;
-            }).join("");
-            document.getElementById('dash-venc').innerText = vCount;
-            showL(false);
-        }
+  function poblarDesplegableEdificios() {
+    let select = document.getElementById("otEdificio");
+    let selectRel = document.getElementById("relEdificio");
+    select.innerHTML = '<option value="">Edificio...</option>';
+    selectRel.innerHTML = '<option value="">Edificio...</option>';
+    
+    Object.keys(mapaUbicaciones).forEach(edif => {
+      select.innerHTML += `<option value="${edif}">${edif}</option>`;
+      selectRel.innerHTML += `<option value="${edif}">${edif}</option>`;
+    });
+  }
 
-        function genOC() {
-            const ed = document.getElementById('e-edif').value;
-            const items = document.querySelectorAll('.vencido, .por-vencer');
-            let t = `SGM FIUNNE - REQUERIMIENTO HySL\nEDIFICIO: ${ed}\nFECHA: ${new Date().toLocaleDateString()}\n\nEQUIPOS PARA REVISIÓN:\n`;
-            items.forEach(i => t += `- ${i.querySelector('b').innerText} (Sector: ${i.querySelector('p').innerText})\n`);
-            const blob = new Blob([t], {type:'text/plain'});
-            const a = document.createElement('a'); a.download = `OC_${ed}.txt`; a.href = window.URL.createObjectURL(blob); a.click();
-        }
+  function cargarSectores() {
+    let edif = document.getElementById("otEdificio").value;
+    let selectSec = document.getElementById("otSector");
+    selectSec.innerHTML = '<option value="">Sector...</option>';
+    if (!edif || !mapaUbicaciones[edif]) return;
 
-        async function loadH() {
-            showL(true);
-            hLocal = await fetch(`${URL}?action=getHistorial&token=${PIN}`).then(r=>r.json());
-            fH('todas');
-            showL(false);
-        }
+    Object.keys(mapaUbicaciones[edif]).forEach(sec => {
+      selectSec.innerHTML += `<option value="${sec}">${sec}</option>`;
+    });
+  }
 
-        function fH(v) {
-            const f = v === 'todas' ? hLocal : hLocal.filter(x=>x.est===v);
-            document.getElementById('hist-cont').innerHTML = f.map(h => `
-                <div class="p-4 bg-white card-ot border-l-8 shadow-sm ${h.est==='Abierta'?'border-blue-500':'border-green-500'}">
-                    <div class="flex justify-between items-start mb-1">
-                        <div><span class="text-[9px] font-black text-slate-400">#${h.id} | ${h.fecha}</span>
-                        <p class="font-black text-slate-800 text-[11px] uppercase">${h.edif} / ${h.sec}</p></div>
-                        <button onclick='genPDF_Full(${JSON.stringify(h)})' class="bg-slate-100 text-slate-700 p-1 px-2 rounded text-[8px] font-black">PDF</button>
-                    </div>
-                    <p class="text-slate-500 text-[10px] italic leading-tight my-1">${h.desc}</p>
-                    <div class="flex justify-between mt-2"><span class="text-[9px] font-black text-orange-600">${h.tec}</span>
-                    <button onclick='editarOT(${JSON.stringify(h)})' class="bg-slate-900 text-white px-3 py-1 rounded text-[8px] font-black">EDITAR</button></div>
-                </div>
-            `).join("");
-        }
+  function cargarUbicaciones() {
+    let edif = document.getElementById("otEdificio").value;
+    let sec = document.getElementById("otSector").value;
+    let selectUbic = document.getElementById("otUbicacion");
+    selectUbic.innerHTML = '<option value="">Ubicación...</option>';
+    if (!edif || !sec || !mapaUbicaciones[edif][sec]) return;
 
-        function editarOT(h) {
-            tab('nueva');
-            document.getElementById('modo-edicion').classList.remove('hidden');
-            document.getElementById('n-id-edit').value = h.id;
-            document.getElementById('n-edif').value = h.edif;
-            loadTriple(h.edif, 'n-sec', 'n-ubi').then(() => {
-                document.getElementById('n-sec').value = h.sec;
-                filterUbi('n-sec', 'n-ubi');
-                document.getElementById('n-esp').value = h.esp;
-                checkRefri(h.esp);
-                document.getElementById('n-prio').value = h.prio;
-                document.getElementById('n-repor').value = h.repor;
-                document.getElementById('n-medio').value = h.medio;
-                document.getElementById('n-pers').value = h.tec;
-                document.getElementById('n-eq').value = h.eq;
-                document.getElementById('n-inv').value = h.inv;
-                document.getElementById('n-desc').value = h.desc;
-            });
-        }
+    mapaUbicaciones[edif][sec].forEach(u => {
+      selectUbic.innerHTML += `<option value="${u}">${u}</option>`;
+    });
+  }
 
-        function genPDF_Full(d) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(20); doc.text("SGM FIUNNE - ORDEN DE TRABAJO", 20, 20);
-            doc.setFontSize(10); doc.text("ID OT: " + (d.id || "Nueva"), 20, 30);
-            doc.line(20, 32, 190, 32);
-            doc.text(`Fecha: ${new Date().toLocaleString()}`, 20, 40);
-            doc.text(`Edificio: ${d.edificio}`, 20, 50);
-            doc.text(`Ubicación: ${d.sector} / ${d.ubicacion || d.sec}`, 20, 60);
-            doc.text(`Especialidad: ${d.especialidad}`, 20, 70);
-            doc.text(`Prioridad: ${d.prioridad}`, 20, 80);
-            doc.text(`Reportado por: ${d.reportado} (${d.medio})`, 20, 90);
-            doc.text(`Personal Asignado: ${d.personal || d.tec}`, 20, 100);
-            if(d.especialidad === 'Refrigeración') doc.text(`Equipo: ${d.equipo} | Inv: ${d.nInventario || d.inv}`, 20, 110);
-            doc.text("DESCRIPCIÓN:", 20, 120);
-            doc.setFontSize(9);
-            const splitText = doc.splitTextToSize(d.descripcion || d.desc, 160);
-            doc.text(splitText, 20, 125);
-            if(d.mat) {
-                doc.setFontSize(10); doc.text("MATERIALES UTILIZADOS:", 20, 150);
-                doc.text(d.mat, 20, 155);
-            }
-            doc.save(`OT_${d.id || 'NUEVA'}.pdf`);
-        }
+  function toggleCamposAA() {
+    let tipo = document.getElementById("otTipoTarea").value;
+    let row = document.getElementById("rowCamposAA");
+    if (tipo === "Refrigeracion") row.classList.remove("d-none");
+    else row.classList.add("d-none");
+  }
 
-        function fillRel() { const d = JSON.parse(document.getElementById('r-ubi').value); document.getElementById('ri-inv-a').value = d.inv_a; document.getElementById('ri-eq-a').value = d.eq_a; document.getElementById('ri-tlum').value = d.t_lum; document.getElementById('ri-cart').value = d.c_art; document.getElementById('ri-clam').value = d.c_lam; document.getElementById('ri-em').value = d.em; document.getElementById('ri-vent').value = d.vent; document.getElementById('ri-inv-v').value = d.inv_v; document.getElementById('rel-form').classList.remove('hidden'); }
-        async function guardarRel() { showL(true); const u = JSON.parse(document.getElementById('r-ubi').value); await fetch(URL, {method:'POST', body: JSON.stringify({ action: 'updateRelevamiento', token: PIN, edificio: document.getElementById('r-edif').value, fila: u.fila, inv_a: document.getElementById('ri-inv-a').value, eq_a: document.getElementById('ri-eq-a').value, t_lum: document.getElementById('ri-tlum').value, c_art: document.getElementById('ri-cart').value, c_lam: document.getElementById('ri-clam').value, em: document.getElementById('ri-em').value, vent: document.getElementById('ri-vent').value, inv_v: document.getElementById('ri-inv-v').value })}); alert("Datos de relevamiento actualizados"); showL(false); }
+  function guardarOT(generarPDF) {
+    let datos = {
+      edificio: document.getElementById("otEdificio").value,
+      sector: document.getElementById("otSector").value,
+      ubicacion: document.getElementById("otUbicacion").value,
+      tipoTarea: document.getElementById("otTipoTarea").value,
+      prioridad: document.getElementById("otPrioridad").value,
+      equipoAA: document.getElementById("otEquipoAA").value,
+      inventarioAA: document.getElementById("otInventarioAA").value,
+      reporto: document.getElementById("otReporto").value,
+      via: document.getElementById("otVia").value,
+      personal: document.getElementById("otPersonal").value,
+      descripcion: document.getElementById("otDescripcion").value
+    };
 
-        async function init() {
-            showL(true);
-            const r = await fetch(`${URL}?action=getEdificios&token=${PIN}`);
-            const eds = await r.json();
-            const o = '<option value="">Seleccionar...</option>' + eds.map(e=>`<option value="${e}">${e}</option>`).join("");
-            ['n-edif','r-edif','e-edif'].forEach(id => document.getElementById(id).innerHTML = o);
-            tab('nueva');
-            showL(false);
-        }
-        window.onload = init;
-    </script>
+    google.script.run.withSuccessHandler(res => {
+      alert("OT Creada exitosamente: " + res.ot);
+      document.getElementById("formNuevaOT").reset();
+      if(generarPDF) { /* Lógica para abrir PDF */ }
+    }).guardarNuevaOT(datos);
+  }
+
+  function renderizarExtintores() {
+    let cont = document.getElementById("listaExtintores");
+    cont.innerHTML = "";
+    listaExtintoresData.forEach(e => {
+      cont.innerHTML += `
+        <div class="border rounded p-2 mb-2 d-flex justify-content-between align-items-center">
+          <div>
+            <strong>${e[0]} - ${e[1]}</strong><br>
+            <small>N° UNNE: ${e[2]} | Tipo: ${e[3]} ${e[4]}kg</small>
+          </div>
+          <div class="text-end">
+            <span class="badge badge-vigente">${e[5]}</span>
+          </div>
+        </div>
+      `;
+    });
+  }
+</script>
 </body>
 </html>
