@@ -2,48 +2,67 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>SGM FIUNNE 2026</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body { background-color: #f4f6f9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    .header-panel { background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
-    .nav-tabs .nav-link { color: #555; font-weight: 600; border: none; border-bottom: 3px solid transparent; }
-    .nav-tabs .nav-link.active { color: #d9534f; border-bottom: 3px solid #d9534f; background: transparent; }
-    .card-custom { background: #fff; border-radius: 12px; border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.04); padding: 20px; margin-bottom: 20px; }
-    .btn-primary-custom { background-color: #1a252f; color: #fff; border: none; font-weight: 600; }
-    .btn-primary-custom:hover { background-color: #2c3e50; color: #fff; }
-    .btn-orange { background-color: #e67e22; color: #fff; font-weight: 600; }
-    .btn-orange:hover { background-color: #d35400; color: #fff; }
-    .badge-vencido { background-color: #e74c3c; }
-    .badge-vigente { background-color: #2ecc71; }
-    .badge-proximo { background-color: #f39c12; }
+    body { background-color: #f0f2f5; font-family: 'Segoe UI', -apple-system, Roboto, sans-serif; }
+    .container-tablet { max-width: 900px; margin: 0 auto; padding: 12px; }
+    
+    /* Header estilizado */
+    .header-panel { background: #fff; padding: 16px 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; }
+    
+    /* Navegación adaptada a pantallas táctiles */
+    .nav-tabs { border-bottom: none; gap: 6px; }
+    .nav-tabs .nav-link { 
+      color: #6c757d; font-weight: 700; font-size: 0.85rem; border: none; 
+      padding: 10px 14px; border-radius: 10px; background: #e9ecef; transition: all 0.2s;
+    }
+    .nav-tabs .nav-link.active { color: #fff; background: #1a252f; }
+    .nav-tabs .nav-link.hysl-tab.active { background: #198754; }
+
+    /* Tarjeta principal */
+    .card-custom { background: #fff; border-radius: 16px; border: none; box-shadow: 0 4px 16px rgba(0,0,0,0.04); padding: 20px; }
+    
+    /* Inputs táctiles para tablet */
+    .form-select, .form-control { 
+      height: 48px; border-radius: 10px; border: 1px solid #ced4da; font-weight: 500; font-size: 0.95rem; 
+    }
+    textarea.form-control { height: auto; }
+    .form-select:focus, .form-control:focus { border-color: #1a252f; box-shadow: 0 0 0 0.2rem rgba(26, 37, 47, 0.15); }
+    
+    /* Botones principales */
+    .btn-action { height: 50px; border-radius: 10px; font-weight: 700; letter-spacing: 0.5px; }
+    .btn-dark-custom { background-color: #1a252f; color: #fff; border: none; }
+    .btn-dark-custom:hover { background-color: #2c3e50; color: #fff; }
+    .btn-orange-custom { background-color: #e67e22; color: #fff; border: none; }
+    .btn-orange-custom:hover { background-color: #d35400; color: #fff; }
   </style>
 </head>
 <body>
 
-<div class="container py-3">
+<div class="container-tablet">
   <!-- ENCABEZADO -->
   <div class="header-panel d-flex justify-content-between align-items-center">
     <div>
-      <h3 class="m-0 fw-bold">PANEL SGM</h3>
+      <h4 class="m-0 fw-bold text-dark">PANEL SGM</h4>
       <small class="text-danger fw-bold">FIUNNE 2026</small>
     </div>
-    <div class="text-end">
-      <span class="badge bg-light text-danger p-2 border border-danger">ALERTAS: <strong id="cant-alertas">0</strong></span>
+    <div>
+      <span class="badge bg-light text-danger p-2 border border-danger-subtle rounded-3" style="font-size: 0.85rem;">ALERTAS: <strong id="cant-alertas">0</strong></span>
     </div>
   </div>
 
   <!-- NAVEGACIÓN -->
-  <ul class="nav nav-tabs justify-content-between mb-3" id="sgmTabs" role="tablist">
+  <ul class="nav nav-tabs nav-justified mb-3" id="sgmTabs" role="tablist">
     <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#nueva-ot">NUEVA OT</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#cerrar-ot">CERRAR</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#relevamiento">RELEVAMIENTO</button></li>
-    <li class="nav-item"><button class="nav-link text-success" data-bs-toggle="tab" data-bs-target="#hysl">HYSL</button></li>
+    <li class="nav-item"><button class="nav-link hysl-tab" data-bs-toggle="tab" data-bs-target="#hysl">HYSL</button></li>
     <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#historial">HISTORIAL</button></li>
   </ul>
 
-  <!-- CONTENIDO DE LAS PESTAÑAS -->
+  <!-- CONTENIDO -->
   <div class="tab-content" id="sgmTabsContent">
 
     <!-- 1. NUEVA OT -->
@@ -51,10 +70,11 @@
       <div class="card-custom">
         <form id="formNuevaOT">
           <div class="row g-2 mb-2">
-            <div class="col-md-4"><select class="form-select" id="otEdificio" onchange="cargarSectores()"><option value="">Edificio...</option></select></div>
+            <div class="col-md-4"><select class="form-select" id="otEdificio" onchange="cargarSectores()"><option value="">Cargando edificios...</option></select></div>
             <div class="col-md-4"><select class="form-select" id="otSector" onchange="cargarUbicaciones()"><option value="">Sector...</option></select></div>
             <div class="col-md-4"><select class="form-select" id="otUbicacion"><option value="">Ubicación...</option></select></div>
           </div>
+
           <div class="row g-2 mb-2">
             <div class="col-md-6">
               <select class="form-select" id="otTipoTarea" onchange="toggleCamposAA()">
@@ -71,11 +91,13 @@
               </select>
             </div>
           </div>
-          <!-- Campos dinámicos para Refrigeración -->
+
+          <!-- Campos dinámicos Refrigeración -->
           <div class="row g-2 mb-2 d-none" id="rowCamposAA">
             <div class="col-md-6"><input type="text" class="form-control" id="otEquipoAA" placeholder="Equipo de Aire"></div>
             <div class="col-md-6"><input type="text" class="form-control" id="otInventarioAA" placeholder="N° Inventario AA"></div>
           </div>
+
           <div class="row g-2 mb-2">
             <div class="col-md-6"><input type="text" class="form-control" id="otReporto" placeholder="Reportado por"></div>
             <div class="col-md-6">
@@ -86,161 +108,70 @@
               </select>
             </div>
           </div>
-          <div class="mb-2"><input type="text" class="form-control" id="otPersonal" placeholder="PERSONAL ASIGNADO..."></div>
-          <div class="mb-3"><textarea class="form-control" id="otDescripcion" rows="3" placeholder="Descripción del problema..."></textarea></div>
+
+          <div class="mb-2">
+            <input type="text" class="form-control" id="otPersonal" placeholder="PERSONAL ASIGNADO...">
+          </div>
+
+          <div class="mb-3">
+            <textarea class="form-control" id="otDescripcion" rows="3" placeholder="Descripción del problema..."></textarea>
+          </div>
           
-          <div class="d-flex gap-2">
-            <button type="button" class="btn btn-primary-custom w-50 py-2" onclick="guardarOT(false)">GUARDAR</button>
-            <button type="button" class="btn btn-orange w-50 py-2" onclick="guardarOT(true)">GUARDAR Y PDF</button>
+          <div class="row g-2">
+            <div class="col-6"><button type="button" class="btn btn-dark-custom btn-action w-100" onclick="guardarOT(false)">GUARDAR</button></div>
+            <div class="col-6"><button type="button" class="btn btn-orange-custom btn-action w-100" onclick="guardarOT(true)">GUARDAR Y PDF</button></div>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- 2. CERRAR OT -->
-    <div class="tab-pane fade" id="cerrar-ot">
-      <div class="card-custom">
-        <select class="form-select mb-3" id="selectOTAbiertas"><option value="">Cargando OTs abiertas...</option></select>
-        
-        <h6 class="fw-bold mb-2">Materiales Consumidos</h6>
-        <div id="listaMaterialesConsumidos" class="mb-2"></div>
-        
-        <div class="row g-2 mb-3">
-          <div class="col-md-4"><select class="form-select" id="matRubro" onchange="filtrarMateriales()"><option value="">Rubro...</option></select></div>
-          <div class="col-md-5"><select class="form-select" id="matDescripcion"><option value="">Material...</option></select></div>
-          <div class="col-md-2"><input type="number" class="form-control" id="matCant" value="1" min="1"></div>
-          <div class="col-md-1"><button class="btn btn-dark w-100" onclick="agregarMaterial()">+</button></div>
-        </div>
-
-        <textarea class="form-control mb-3" id="cerrarObs" rows="2" placeholder="Observaciones finales..."></textarea>
-        <button class="btn btn-success w-100 py-2 fw-bold" onclick="ejecutarCierreOT()">FINALIZAR ORDEN</button>
-      </div>
-    </div>
-
-    <!-- 3. RELEVAMIENTO -->
-    <div class="tab-pane fade" id="relevamiento">
-      <div class="card-custom">
-        <div class="row g-2 mb-3">
-          <div class="col-md-4"><select class="form-select" id="relEdificio" onchange="cargarSectoresRel()"><option value="">Edificio...</option></select></div>
-          <div class="col-md-4"><select class="form-select" id="relSector" onchange="cargarUbicacionesRel()"><option value="">Sector...</option></select></div>
-          <div class="col-md-4"><select class="form-select" id="relUbicacion"><option value="">Ubicación...</option></select></div>
-        </div>
-        <hr>
-        <div class="row g-2 mb-2">
-          <div class="col-md-6"><input type="text" class="form-control" id="relEquipoAA" placeholder="Equipo AA"></div>
-          <div class="col-md-6"><input type="text" class="form-control" id="relInvAA" placeholder="Inventario AA"></div>
-        </div>
-        <div class="row g-2 mb-2">
-          <div class="col-md-4"><input type="text" class="form-control" id="relTipoIlum" placeholder="Tipo Lum."></div>
-          <div class="col-md-4"><input type="number" class="form-control" id="relCantArtef" placeholder="Cant. Artefactos"></div>
-          <div class="col-md-4"><input type="number" class="form-control" id="relCantLamp" placeholder="Cant. Lámparas"></div>
-        </div>
-        <div class="row g-2 mb-2">
-          <div class="col-md-4"><input type="text" class="form-control" id="relEmergencia" placeholder="Luces Emergencia"></div>
-          <div class="col-md-4"><input type="text" class="form-control" id="relVentiladores" placeholder="Ventiladores"></div>
-          <div class="col-md-4"><input type="text" class="form-control" id="relInvVent" placeholder="Inv. Ventiladores"></div>
-        </div>
-        <div class="row g-2 mb-3">
-          <div class="col-md-6"><input type="text" class="form-control" id="relOtros" placeholder="Otros Equipos"></div>
-          <div class="col-md-6"><input type="text" class="form-control" id="relInvOtros" placeholder="Inv. Otros"></div>
-        </div>
-        <button class="btn btn-primary w-100 py-2 fw-bold" onclick="guardarRelevamiento()">ACTUALIZAR DATOS</button>
-      </div>
-    </div>
-
-    <!-- 4. HYSL (EXTINTORES Y BOTIQUINES) -->
-    <div class="tab-pane fade" id="hysl">
-      <ul class="nav nav-pills mb-3" id="hyslSubTabs">
-        <li class="nav-item"><button class="nav-link active py-1 px-3" data-bs-toggle="pill" data-bs-target="#tab-extintores">Extintores</button></li>
-        <li class="nav-item"><button class="nav-link py-1 px-3" data-bs-toggle="pill" data-bs-target="#tab-botiquines">Botiquines</button></li>
-      </ul>
-
-      <div class="tab-content">
-        <!-- SUBTAB EXTINTORES -->
-        <div class="tab-pane fade show active" id="tab-extintores">
-          <div class="card-custom">
-            <div class="d-flex justify-content-between mb-3">
-              <select class="form-select w-50" id="filtroEdifExt" onchange="renderizarExtintores()"><option value="">Todos los Edificios</option></select>
-              <button class="btn btn-dark btn-sm" onclick="imprimirReporteExtintores()">GENERAR OC / REPORTE</button>
-            </div>
-            <div id="listaExtintores"></div>
-          </div>
-        </div>
-
-        <!-- SUBTAB BOTIQUINES -->
-        <div class="tab-pane fade" id="tab-botiquines">
-          <div class="card-custom">
-            <h6 class="fw-bold mb-3">Estado de Botiquines de Primeros Auxilios</h6>
-            <div id="listaBotiquines"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 5. HISTORIAL -->
-    <div class="tab-pane fade" id="historial">
-      <div class="d-flex gap-2 mb-3">
-        <button class="btn btn-outline-secondary w-50 active" id="btnFiltroTodas" onclick="filtrarHistorial('TODAS')">TODAS</button>
-        <button class="btn btn-outline-primary w-50" id="btnFiltroAbiertas" onclick="filtrarHistorial('ABIERTAS')">ABIERTAS</button>
-      </div>
-      <div id="contenedorHistorial"></div>
-    </div>
+    <!-- Resto de pestañas estructuradas secuencialmente -->
+    <div class="tab-pane fade" id="cerrar-ot"><div class="card-custom"><p class="text-muted m-0">Pestaña Cerrar OT en preparación...</p></div></div>
+    <div class="tab-pane fade" id="relevamiento"><div class="card-custom"><p class="text-muted m-0">Pestaña Relevamiento en preparación...</p></div></div>
+    <div class="tab-pane fade" id="hysl"><div class="card-custom"><p class="text-muted m-0">Pestaña HySL en preparación...</p></div></div>
+    <div class="tab-pane fade" id="historial"><div class="card-custom"><p class="text-muted m-0">Pestaña Historial en preparación...</p></div></div>
 
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  // Cambiar esta URL por la de tu despliegue de Apps Script cuando corresponda
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwXaQPlVVu8SDtEY_SrtAdtX3iOoNH9TwlqQDs9iIun23rsReBPRdwmGS4zVQK5-kqa/exec"; 
+  // Reemplazá por la URL final de tu Web App desplegada en Apps Script
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyST4jkkrv_3-3wK-RiQX2sKzfDMqViZ6594WBmt4isPRdvgRLqXmYI9Q_4GX1OO9bg/exec"; 
 
   let mapaUbicaciones = {};
-  let listaStock = [];
-  let materialesAgregar = [];
-  let listaExtintoresData = [];
 
   window.onload = function() {
-    cargarDatosIniciales();
+    cargarUbicacionesAPI();
   };
 
-  function cargarDatosIniciales() {
-    // Aquí se realizan los llamados al backend de Apps Script
-    google.script.run.withSuccessHandler(res => {
-      mapaUbicaciones = res;
-      poblarDesplegableEdificios();
-    }).getUbicaciones();
-
-    google.script.run.withSuccessHandler(res => {
-      listaStock = res;
-      poblarRubros();
-    }).getStockMateriales();
-
-    google.script.run.withSuccessHandler(res => {
-      poblarOTsAbiertas(res);
-    }).getOTsAbiertas();
-
-    google.script.run.withSuccessHandler(res => {
-      listaExtintoresData = res;
-      renderizarExtintores();
-    }).getExtintores();
+  function cargarUbicacionesAPI() {
+    fetch(`${SCRIPT_URL}?action=getUbicaciones`)
+      .then(res => res.json())
+      .then(data => {
+        mapaUbicaciones = data;
+        poblarEdificios();
+      })
+      .catch(err => console.error("Error al conectar con locales:", err));
   }
 
-  function poblarDesplegableEdificios() {
+  function poblarEdificios() {
     let select = document.getElementById("otEdificio");
-    let selectRel = document.getElementById("relEdificio");
     select.innerHTML = '<option value="">Edificio...</option>';
-    selectRel.innerHTML = '<option value="">Edificio...</option>';
     
     Object.keys(mapaUbicaciones).forEach(edif => {
       select.innerHTML += `<option value="${edif}">${edif}</option>`;
-      selectRel.innerHTML += `<option value="${edif}">${edif}</option>`;
     });
   }
 
   function cargarSectores() {
     let edif = document.getElementById("otEdificio").value;
     let selectSec = document.getElementById("otSector");
+    let selectUbic = document.getElementById("otUbicacion");
+    
     selectSec.innerHTML = '<option value="">Sector...</option>';
+    selectUbic.innerHTML = '<option value="">Ubicación...</option>';
+    
     if (!edif || !mapaUbicaciones[edif]) return;
 
     Object.keys(mapaUbicaciones[edif]).forEach(sec => {
@@ -252,6 +183,7 @@
     let edif = document.getElementById("otEdificio").value;
     let sec = document.getElementById("otSector").value;
     let selectUbic = document.getElementById("otUbicacion");
+    
     selectUbic.innerHTML = '<option value="">Ubicación...</option>';
     if (!edif || !sec || !mapaUbicaciones[edif][sec]) return;
 
@@ -282,28 +214,16 @@
       descripcion: document.getElementById("otDescripcion").value
     };
 
-    google.script.run.withSuccessHandler(res => {
-      alert("OT Creada exitosamente: " + res.ot);
-      document.getElementById("formNuevaOT").reset();
-      if(generarPDF) { /* Lógica para abrir PDF */ }
-    }).guardarNuevaOT(datos);
-  }
-
-  function renderizarExtintores() {
-    let cont = document.getElementById("listaExtintores");
-    cont.innerHTML = "";
-    listaExtintoresData.forEach(e => {
-      cont.innerHTML += `
-        <div class="border rounded p-2 mb-2 d-flex justify-content-between align-items-center">
-          <div>
-            <strong>${e[0]} - ${e[1]}</strong><br>
-            <small>N° UNNE: ${e[2]} | Tipo: ${e[3]} ${e[4]}kg</small>
-          </div>
-          <div class="text-end">
-            <span class="badge badge-vigente">${e[5]}</span>
-          </div>
-        </div>
-      `;
+    fetch(SCRIPT_URL, {
+      method: "POST",
+      body: JSON.stringify({ action: "guardarOT", datos: datos })
+    })
+    .then(res => res.json())
+    .then(res => {
+      if(res.success) {
+        alert("OT creada exitosamente: " + res.ot);
+        document.getElementById("formNuevaOT").reset();
+      }
     });
   }
 </script>
