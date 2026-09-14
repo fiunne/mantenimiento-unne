@@ -2,230 +2,35 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SGM FIUNNE 2026</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema de Gestión</title>
   <style>
-    body { background-color: #f0f2f5; font-family: 'Segoe UI', -apple-system, Roboto, sans-serif; }
-    .container-tablet { max-width: 900px; margin: 0 auto; padding: 12px; }
-    
-    /* Header estilizado */
-    .header-panel { background: #fff; padding: 16px 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); margin-bottom: 16px; }
-    
-    /* Navegación adaptada a pantallas táctiles */
-    .nav-tabs { border-bottom: none; gap: 6px; }
-    .nav-tabs .nav-link { 
-      color: #6c757d; font-weight: 700; font-size: 0.85rem; border: none; 
-      padding: 10px 14px; border-radius: 10px; background: #e9ecef; transition: all 0.2s;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    .nav-tabs .nav-link.active { color: #fff; background: #1a252f; }
-    .nav-tabs .nav-link.hysl-tab.active { background: #198754; }
-
-    /* Tarjeta principal */
-    .card-custom { background: #fff; border-radius: 16px; border: none; box-shadow: 0 4px 16px rgba(0,0,0,0.04); padding: 20px; }
-    
-    /* Inputs táctiles para tablet */
-    .form-select, .form-control { 
-      height: 48px; border-radius: 10px; border: 1px solid #ced4da; font-weight: 500; font-size: 0.95rem; 
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #ffffff;
     }
-    textarea.form-control { height: auto; }
-    .form-select:focus, .form-control:focus { border-color: #1a252f; box-shadow: 0 0 0 0.2rem rgba(26, 37, 47, 0.15); }
-    
-    /* Botones principales */
-    .btn-action { height: 50px; border-radius: 10px; font-weight: 700; letter-spacing: 0.5px; }
-    .btn-dark-custom { background-color: #1a252f; color: #fff; border: none; }
-    .btn-dark-custom:hover { background-color: #2c3e50; color: #fff; }
-    .btn-orange-custom { background-color: #e67e22; color: #fff; border: none; }
-    .btn-orange-custom:hover { background-color: #d35400; color: #fff; }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
   </style>
 </head>
 <body>
 
-<div class="container-tablet">
-  <!-- ENCABEZADO -->
-  <div class="header-panel d-flex justify-content-between align-items-center">
-    <div>
-      <h4 class="m-0 fw-bold text-dark">PANEL SGM</h4>
-      <small class="text-danger fw-bold">FIUNNE 2026</small>
-    </div>
-    <div>
-      <span class="badge bg-light text-danger p-2 border border-danger-subtle rounded-3" style="font-size: 0.85rem;">ALERTAS: <strong id="cant-alertas">0</strong></span>
-    </div>
-  </div>
+  <iframe 
+    src="https://script.google.com/macros/s/AKfycbxJU3H9eCRziUaZXr6D1DooMEUozn94Po07ytLHm_fdlpKz2TCVnd-WGcIF4Jp4lH3r/exec"
+    allow="geolocation; microphone; camera"
+    sandbox="allow-forms allow-scripts allow-same-origin allow-popups allow-top-navigation">
+  </iframe>
 
-  <!-- NAVEGACIÓN -->
-  <ul class="nav nav-tabs nav-justified mb-3" id="sgmTabs" role="tablist">
-    <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#nueva-ot">NUEVA OT</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#cerrar-ot">CERRAR</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#relevamiento">RELEVAMIENTO</button></li>
-    <li class="nav-item"><button class="nav-link hysl-tab" data-bs-toggle="tab" data-bs-target="#hysl">HYSL</button></li>
-    <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#historial">HISTORIAL</button></li>
-  </ul>
-
-  <!-- CONTENIDO -->
-  <div class="tab-content" id="sgmTabsContent">
-
-    <!-- 1. NUEVA OT -->
-    <div class="tab-pane fade show active" id="nueva-ot">
-      <div class="card-custom">
-        <form id="formNuevaOT">
-          <div class="row g-2 mb-2">
-            <div class="col-md-4"><select class="form-select" id="otEdificio" onchange="cargarSectores()"><option value="">Cargando edificios...</option></select></div>
-            <div class="col-md-4"><select class="form-select" id="otSector" onchange="cargarUbicaciones()"><option value="">Sector...</option></select></div>
-            <div class="col-md-4"><select class="form-select" id="otUbicacion"><option value="">Ubicación...</option></select></div>
-          </div>
-
-          <div class="row g-2 mb-2">
-            <div class="col-md-6">
-              <select class="form-select" id="otTipoTarea" onchange="toggleCamposAA()">
-                <option value="General">General</option>
-                <option value="Electricidad">Electricidad</option>
-                <option value="Refrigeracion">Refrigeración</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <select class="form-select text-danger fw-bold" id="otPrioridad">
-                <option value="Media">Prioridad: Media</option>
-                <option value="Alta">Prioridad: Alta</option>
-                <option value="Baja">Prioridad: Baja</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Campos dinámicos Refrigeración -->
-          <div class="row g-2 mb-2 d-none" id="rowCamposAA">
-            <div class="col-md-6"><input type="text" class="form-control" id="otEquipoAA" placeholder="Equipo de Aire"></div>
-            <div class="col-md-6"><input type="text" class="form-control" id="otInventarioAA" placeholder="N° Inventario AA"></div>
-          </div>
-
-          <div class="row g-2 mb-2">
-            <div class="col-md-6"><input type="text" class="form-control" id="otReporto" placeholder="Reportado por"></div>
-            <div class="col-md-6">
-              <select class="form-select" id="otVia">
-                <option value="WhatsApp">WhatsApp</option>
-                <option value="Personal">Personal</option>
-                <option value="Telefonica">Telefónica</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="mb-2">
-            <input type="text" class="form-control" id="otPersonal" placeholder="PERSONAL ASIGNADO...">
-          </div>
-
-          <div class="mb-3">
-            <textarea class="form-control" id="otDescripcion" rows="3" placeholder="Descripción del problema..."></textarea>
-          </div>
-          
-          <div class="row g-2">
-            <div class="col-6"><button type="button" class="btn btn-dark-custom btn-action w-100" onclick="guardarOT(false)">GUARDAR</button></div>
-            <div class="col-6"><button type="button" class="btn btn-orange-custom btn-action w-100" onclick="guardarOT(true)">GUARDAR Y PDF</button></div>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Resto de pestañas estructuradas secuencialmente -->
-    <div class="tab-pane fade" id="cerrar-ot"><div class="card-custom"><p class="text-muted m-0">Pestaña Cerrar OT en preparación...</p></div></div>
-    <div class="tab-pane fade" id="relevamiento"><div class="card-custom"><p class="text-muted m-0">Pestaña Relevamiento en preparación...</p></div></div>
-    <div class="tab-pane fade" id="hysl"><div class="card-custom"><p class="text-muted m-0">Pestaña HySL en preparación...</p></div></div>
-    <div class="tab-pane fade" id="historial"><div class="card-custom"><p class="text-muted m-0">Pestaña Historial en preparación...</p></div></div>
-
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<script>
-  // Reemplazá por la URL final de tu Web App desplegada en Apps Script
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyST4jkkrv_3-3wK-RiQX2sKzfDMqViZ6594WBmt4isPRdvgRLqXmYI9Q_4GX1OO9bg/exec"; 
-
-  let mapaUbicaciones = {};
-
-  window.onload = function() {
-    cargarUbicacionesAPI();
-  };
-
-  function cargarUbicacionesAPI() {
-    fetch(`${SCRIPT_URL}?action=getUbicaciones`)
-      .then(res => res.json())
-      .then(data => {
-        mapaUbicaciones = data;
-        poblarEdificios();
-      })
-      .catch(err => console.error("Error al conectar con locales:", err));
-  }
-
-  function poblarEdificios() {
-    let select = document.getElementById("otEdificio");
-    select.innerHTML = '<option value="">Edificio...</option>';
-    
-    Object.keys(mapaUbicaciones).forEach(edif => {
-      select.innerHTML += `<option value="${edif}">${edif}</option>`;
-    });
-  }
-
-  function cargarSectores() {
-    let edif = document.getElementById("otEdificio").value;
-    let selectSec = document.getElementById("otSector");
-    let selectUbic = document.getElementById("otUbicacion");
-    
-    selectSec.innerHTML = '<option value="">Sector...</option>';
-    selectUbic.innerHTML = '<option value="">Ubicación...</option>';
-    
-    if (!edif || !mapaUbicaciones[edif]) return;
-
-    Object.keys(mapaUbicaciones[edif]).forEach(sec => {
-      selectSec.innerHTML += `<option value="${sec}">${sec}</option>`;
-    });
-  }
-
-  function cargarUbicaciones() {
-    let edif = document.getElementById("otEdificio").value;
-    let sec = document.getElementById("otSector").value;
-    let selectUbic = document.getElementById("otUbicacion");
-    
-    selectUbic.innerHTML = '<option value="">Ubicación...</option>';
-    if (!edif || !sec || !mapaUbicaciones[edif][sec]) return;
-
-    mapaUbicaciones[edif][sec].forEach(u => {
-      selectUbic.innerHTML += `<option value="${u}">${u}</option>`;
-    });
-  }
-
-  function toggleCamposAA() {
-    let tipo = document.getElementById("otTipoTarea").value;
-    let row = document.getElementById("rowCamposAA");
-    if (tipo === "Refrigeracion") row.classList.remove("d-none");
-    else row.classList.add("d-none");
-  }
-
-  function guardarOT(generarPDF) {
-    let datos = {
-      edificio: document.getElementById("otEdificio").value,
-      sector: document.getElementById("otSector").value,
-      ubicacion: document.getElementById("otUbicacion").value,
-      tipoTarea: document.getElementById("otTipoTarea").value,
-      prioridad: document.getElementById("otPrioridad").value,
-      equipoAA: document.getElementById("otEquipoAA").value,
-      inventarioAA: document.getElementById("otInventarioAA").value,
-      reporto: document.getElementById("otReporto").value,
-      via: document.getElementById("otVia").value,
-      personal: document.getElementById("otPersonal").value,
-      descripcion: document.getElementById("otDescripcion").value
-    };
-
-    fetch(SCRIPT_URL, {
-      method: "POST",
-      body: JSON.stringify({ action: "guardarOT", datos: datos })
-    })
-    .then(res => res.json())
-    .then(res => {
-      if(res.success) {
-        alert("OT creada exitosamente: " + res.ot);
-        document.getElementById("formNuevaOT").reset();
-      }
-    });
-  }
-</script>
 </body>
 </html>
